@@ -128,17 +128,25 @@ public:
         }
         DoBirth(child, org.second);
       } else {
+        bool had_host = org.first->GetHost().IsNull();
         emp::WorldPosition new_pos = SymDoBirth(child, org.second);
         // Because we're not calling HorizontalTransmission, we need to adjust
         // these data nodes here
-        emp::DataMonitor<int> &data_node_attempts_horiztrans =
-            GetHorizontalTransmissionAttemptCount();
-        data_node_attempts_horiztrans.AddDatum(1);
 
-        emp::DataMonitor<int> &data_node_successes_horiztrans =
-            GetHorizontalTransmissionSuccessCount();
-        if (new_pos.IsValid()) {
-          data_node_successes_horiztrans.AddDatum(1);
+        if (my_config->FREE_LIVING_SYMS() && had_host) {
+          //free living symbiont birth data nodes. should almost always be successful
+          emp::DataMonitor<int>& data_node_attempts_flsrepro = GetFreeLivingSymReproAttemptCount();
+          data_node_attempts_flsrepro.AddDatum(1);
+        }
+        else {
+          //horizontal transmission data nodes
+          emp::DataMonitor<int>& data_node_attempts_horiztrans = GetHorizontalTransmissionAttemptCount();
+          data_node_attempts_horiztrans.AddDatum(1);
+
+          emp::DataMonitor<int>& data_node_successes_horiztrans = GetHorizontalTransmissionSuccessCount();
+          if (new_pos.IsValid()) {
+            data_node_successes_horiztrans.AddDatum(1);
+          }
         }
       }
     }

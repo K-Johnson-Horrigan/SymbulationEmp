@@ -171,6 +171,12 @@ emp::DataFile &SGPWorld::SetupSymDonatedFile(const std::string &filename) {
       "free_sym_steal_calls", "Number of steal calls by free living symbionts");
     file.AddTotal(data_node_free_sym_stolen->UnsynchronizedGetMonitor(),
       "free_sym_points_stolen", "Points stolen by free living symbionts", true);
+
+    //infection rate
+    auto& attempt_node = GetInfectionAttemptCount();
+    auto& success_node = GetInfectionSuccessCount();
+    file.AddTotal(attempt_node, "attempted_infections", "Number of attempted infections of a host by a symbiont since last recorded", true);
+    file.AddTotal(success_node, "successful_infections", "Number of successful infections of a host by a symbiont since last recorded", true);
   }
 
 

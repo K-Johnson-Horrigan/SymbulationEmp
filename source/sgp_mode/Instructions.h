@@ -309,6 +309,7 @@ INST(Infect, {
     int pop_index = state.location.GetPopID();
     // check that there's an available host
     if (state.world->IsOccupied(pop_index)) {
+      state.world->GetInfectionAttemptCount().AddDatum(1);
       //check that there's enough space for infection
       int syms_size = state.world->GetPop()[pop_index]->GetSymbionts().size();
       if (syms_size < state.world->GetConfig()->SYM_LIMIT()) {
@@ -317,6 +318,7 @@ INST(Infect, {
         state.world->GetPop()[pop_index]->AddSymbiont(state.world->ExtractSym(pop_index));
         // change the location 
         state.location = emp::WorldPosition(pop_index, syms_size);
+        state.world->GetInfectionSuccessCount().AddDatum(1);
       }
       else {
         state.organism->SetDead(); // infection failed, set it dead and do deletion next update 
