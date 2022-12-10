@@ -74,6 +74,7 @@ protected:
   emp::Ptr<emp::DataMonitor<int>> data_node_successes_horiztrans;
   emp::Ptr<emp::DataMonitor<int>> data_node_attempts_flsrepro;
   emp::Ptr<emp::DataMonitor<int>> data_node_attempts_verttrans;
+  emp::Ptr<emp::DataMonitor<int>> data_node_successes_verttrans;
   emp::Ptr<emp::DataMonitor<int>> data_node_attempts_infection;
   emp::Ptr<emp::DataMonitor<int>> data_node_successes_infection;
 
@@ -131,6 +132,7 @@ public:
     if (data_node_successes_horiztrans) data_node_successes_horiztrans.Delete();
     if (data_node_attempts_flsrepro) data_node_attempts_flsrepro.Delete();
     if (data_node_attempts_verttrans) data_node_attempts_verttrans.Delete();
+    if (data_node_successes_verttrans) data_node_successes_verttrans.Delete();
     if (data_node_attempts_infection) data_node_attempts_infection.Delete();
     if (data_node_successes_infection) data_node_successes_infection.Delete();
 
@@ -479,6 +481,7 @@ public:
   emp::DataMonitor<int>& GetHorizontalTransmissionAttemptCount();
   emp::DataMonitor<int>& GetHorizontalTransmissionSuccessCount();
   emp::DataMonitor<int>& GetVerticalTransmissionAttemptCount();
+  emp::DataMonitor<int>& GetVerticalTransmissionSuccessCount();
   emp::DataMonitor<int>& GetFreeLivingSymReproAttemptCount();
   emp::DataMonitor<int>& GetInfectionAttemptCount();
   emp::DataMonitor<int>& GetInfectionSuccessCount();
