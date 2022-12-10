@@ -72,8 +72,10 @@ protected:
   emp::Ptr<emp::DataMonitor<int>> data_node_uninf_hosts;
   emp::Ptr<emp::DataMonitor<int>> data_node_attempts_horiztrans;
   emp::Ptr<emp::DataMonitor<int>> data_node_successes_horiztrans;
+  emp::Ptr<emp::DataMonitor<int>> data_node_attempts_flsrepro;
   emp::Ptr<emp::DataMonitor<int>> data_node_attempts_verttrans;
-  emp::Ptr<emp::DataMonitor<int>> data_node_successes_verttrans;
+  emp::Ptr<emp::DataMonitor<int>> data_node_attempts_infection;
+  emp::Ptr<emp::DataMonitor<int>> data_node_successes_infection;
 
   emp::Signal<void()> on_analyze_population_sig;
 
@@ -126,9 +128,11 @@ public:
     if (data_node_hostedsymcount) data_node_hostedsymcount.Delete();
     if (data_node_uninf_hosts) data_node_uninf_hosts.Delete();
     if (data_node_attempts_horiztrans) data_node_attempts_horiztrans.Delete();
-    if (data_node_attempts_horiztrans) data_node_successes_horiztrans.Delete();
+    if (data_node_successes_horiztrans) data_node_successes_horiztrans.Delete();
+    if (data_node_attempts_flsrepro) data_node_attempts_flsrepro.Delete();
     if (data_node_attempts_verttrans) data_node_attempts_verttrans.Delete();
-    if (data_node_successes_verttrans) data_node_successes_verttrans.Delete();
+    if (data_node_attempts_infection) data_node_attempts_infection.Delete();
+    if (data_node_successes_infection) data_node_successes_infection.Delete();
 
     for(size_t i = 0; i < sym_pop.size(); i++){ //host population deletion is handled by empirical world destructor
       if(sym_pop[i]) {
@@ -475,7 +479,9 @@ public:
   emp::DataMonitor<int>& GetHorizontalTransmissionAttemptCount();
   emp::DataMonitor<int>& GetHorizontalTransmissionSuccessCount();
   emp::DataMonitor<int>& GetVerticalTransmissionAttemptCount();
-  emp::DataMonitor<int>& GetVerticalTransmissionSuccessCount();
+  emp::DataMonitor<int>& GetFreeLivingSymReproAttemptCount();
+  emp::DataMonitor<int>& GetInfectionAttemptCount();
+  emp::DataMonitor<int>& GetInfectionSuccessCount();
   emp::DataMonitor<double,emp::data::Histogram>& GetHostIntValDataNode();
   emp::DataMonitor<double,emp::data::Histogram>& GetSymIntValDataNode();
   emp::DataMonitor<double,emp::data::Histogram>& GetFreeSymIntValDataNode();
@@ -579,9 +585,13 @@ public:
     size_t i = pos.GetPopID();
     //the sym can either move into a parallel sym or to some random position
     if(IsOccupied(i) && sym_pop[i]->WantsToInfect()) {
+      GetInfectionAttemptCount().AddDatum(1);
       emp::Ptr<Organism> sym = ExtractSym(i);
       if(sym->InfectionFails()) sym.Delete(); //if the sym tries to infect and fails it dies
-      else pop[i]->AddSymbiont(sym);
+      else {
+        bool infected = pop[i]->AddSymbiont(sym);
+        if(infected) GetInfectionSuccessCount().AddDatum(1);
+      }
     }
     else if(my_config->MOVE_FREE_SYMS()) {
       MoveIntoNewFreeWorldPos(ExtractSym(i), pos);

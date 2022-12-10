@@ -155,6 +155,8 @@ emp::DataFile & SymWorld::SetUpFreeLivingSymFile(const std::string & filename){
   auto & node7 = GetSymInfectChanceDataNode(); //infect chance
   auto & node8 = GetFreeSymInfectChanceDataNode();
   auto & node9 = GetHostedSymInfectChanceDataNode();
+  auto & node10 = GetInfectionAttemptCount(); //infection rate
+  auto & node11 = GetInfectionSuccessCount();
 
   file.AddVar(update, "update", "Update");
 
@@ -173,6 +175,10 @@ emp::DataFile & SymWorld::SetUpFreeLivingSymFile(const std::string & filename){
   file.AddMean(node7, "mean_infectchance", "Average symbiont infection chance");
   file.AddMean(node8, "mean_freeinfectchance", "Average free symbiont infection chance");
   file.AddMean(node9, "mean_hostedinfectchance", "Average hosted symbiont infection chance");
+
+  //infection rate
+  file.AddTotal(node10, "attempted_infections", "Number of attempted infections of a host by a symbiont since last recorded", true);
+  file.AddTotal(node11, "successful_infections", "Number of successful infections of a host by a symbiont since last recorded", true);
 
   file.PrintHeaderKeys();
 
@@ -208,7 +214,7 @@ emp::DataFile & SymWorld::SetUpTransmissionFile(const std::string & filename){
   auto & node1 = GetHorizontalTransmissionAttemptCount();
   auto & node2 = GetHorizontalTransmissionSuccessCount();
   auto & node3 = GetVerticalTransmissionAttemptCount();
-  auto & node4 = GetVerticalTransmissionSuccessCount();
+  auto & node4 = GetFreeLivingSymReproAttemptCount();
 
   file.AddVar(update, "update", "Update");
 
@@ -219,6 +225,11 @@ emp::DataFile & SymWorld::SetUpTransmissionFile(const std::string & filename){
   //vertical transmission
   file.AddTotal(node3, "attempts_verttrans", "Total number of vertical transmission attempts", true);
   file.AddTotal(node4, "successes_verttrans", "Total number of vertical transmission successes", true);
+
+  //free living symbiont transmission
+  if (my_config->FREE_LIVING_SYMS() == 1) {
+    file.AddTotal(node4, "attempts_freesymrepro", "Total number of attempted free living symbiont births", true);
+  }
 
   file.PrintHeaderKeys();
 
@@ -602,6 +613,23 @@ emp::DataMonitor<int>& SymWorld::GetHorizontalTransmissionSuccessCount() {
  * Input: None
  *
  * Output: The DataMonitor<int>& that has the information representing
+ * how many attempts were made by free living symbionts to reproduce.
+ *
+ * Purpose: To retrieve the data nodes that is tracking the
+ * number of attempted free living symbiont reproductions.
+ */
+emp::DataMonitor<int>& SymWorld::GetFreeLivingSymReproAttemptCount() {
+  if (!data_node_attempts_flsrepro) {
+    data_node_attempts_flsrepro.New();
+  }
+  return *data_node_attempts_flsrepro;
+}
+
+
+/**
+ * Input: None
+ *
+ * Output: The DataMonitor<int>& that has the information representing
  * how many attempts were made to vertically transmit.
  *
  * Purpose: To retrieve the data nodes that is tracking the
@@ -618,16 +646,32 @@ emp::DataMonitor<int>& SymWorld::GetVerticalTransmissionAttemptCount() {
  * Input: None
  *
  * Output: The DataMonitor<int>& that has the information representing
- * how many attempts to vertically transmit were successful.
+ * how many attempts were made by a symbiont to infect a host.
  *
- * Purpose: To retrieve the data nodes that is tracking the
- * number of successful vertical transmissions.
+ * Purpose: To retrieve the data node that is tracking the
+ * number of attempted symbiont infections of a host.
  */
-emp::DataMonitor<int>& SymWorld::GetVerticalTransmissionSuccessCount() {
-  if (!data_node_successes_verttrans) {
-    data_node_successes_verttrans.New();
+emp::DataMonitor<int>& SymWorld::GetInfectionAttemptCount() {
+  if (!data_node_attempts_infection) {
+    data_node_attempts_infection.New();
   }
-  return *data_node_successes_verttrans;
+  return *data_node_attempts_infection;
+}
+
+/**
+ * Input: None
+ *
+ * Output: The DataMonitor<int>& that has the information representing
+ * how many successful attempts were made by a symbiont to infect a host.
+ *
+ * Purpose: To retrieve the data node that is tracking the
+ * number of successful symbiont infections of a host.
+ */
+emp::DataMonitor<int>& SymWorld::GetInfectionSuccessCount() {
+  if (!data_node_successes_infection) {
+    data_node_successes_infection.New();
+  }
+  return *data_node_successes_infection;
 }
 
 #endif
