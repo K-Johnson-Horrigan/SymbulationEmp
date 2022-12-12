@@ -150,6 +150,9 @@ emp::DataFile &SGPWorld::SetupSymDonatedFile(const std::string &filename) {
       (prefix + "sym_steal_calls"), ("Number of steal calls " + suffix));
   file.AddTotal(data_node_hosted_sym_stolen->UnsynchronizedGetMonitor(),
                 (prefix + "sym_points_stolen"), ("Points stolen " + suffix), true);
+  auto & node1 = GetHostedSymBehaviorDataNode();
+  file.AddMean(node1,
+    (prefix + "sym_behavior"), ("Points stolen - points donated, " + suffix));
 
   if (my_config->FREE_LIVING_SYMS() == 1) {
     GetFreeSymEarnedDataNode();
@@ -171,6 +174,10 @@ emp::DataFile &SGPWorld::SetupSymDonatedFile(const std::string &filename) {
       "free_sym_steal_calls", "Number of steal calls by free living symbionts");
     file.AddTotal(data_node_free_sym_stolen->UnsynchronizedGetMonitor(),
       "free_sym_points_stolen", "Points stolen by free living symbionts", true);
+
+    auto& node2 = GetFreeSymBehaviorDataNode();
+    file.AddMean(node2,
+      "free_sym_behavior", "Points stolen - points donated, by free living symbionts ");
   }
 
 
@@ -241,6 +248,57 @@ SyncDataMonitor<double>& SGPWorld::GetFreeSymStolenDataNode() {
     data_node_free_sym_stolen.New();
   }
   return *data_node_free_sym_stolen;
+}
+
+
+/**
+ * Input: None
+ *
+ * Output: The DataMonitor<double>& that has the information representing
+ * individual hosted symbiont behavior.
+ *
+ * Purpose: To collect data on individual hosted symbiont behavior (stealing/donating).
+ */
+emp::DataMonitor<double>& SGPWorld::GetHostedSymBehaviorDataNode() {
+  if (!data_node_hosted_symbehavior) {
+    data_node_hosted_symbehavior.New();
+    OnUpdate([this](size_t) {
+      data_node_hosted_symbehavior->Reset();
+      for (size_t i = 0; i < pop.size(); i++) {
+        if (IsOccupied(i) && pop[i]->HasSym()) {
+          emp::vector<emp::Ptr<Organism>>& syms = pop[i]->GetSymbionts();
+          size_t sym_size = syms.size();
+          for (size_t j = 0; j < sym_size; j++) {
+            data_node_hosted_symbehavior->AddDatum(syms[j]->GetBehaviorVal());
+          }//close for
+        }//close if
+      }
+    });
+  }
+  return *data_node_hosted_symbehavior;
+}
+
+/**
+ * Input: None
+ *
+ * Output: The DataMonitor<double>& that has the information representing
+ * individual free symbiont behavior.
+ *
+ * Purpose: To collect data on individual free symbiont behavior (stealing/donating).
+ */
+emp::DataMonitor<double>& SGPWorld::GetFreeSymBehaviorDataNode() {
+  if (!data_node_free_symbehavior) {
+    data_node_free_symbehavior.New();
+    OnUpdate([this](size_t) {
+      data_node_free_symbehavior->Reset();
+      for (size_t i = 0; i < pop.size(); i++) {
+        if (sym_pop[i]) {
+          data_node_free_symbehavior->AddDatum(sym_pop[i]->GetBehaviorVal());
+        }
+      }
+    });
+  }
+  return *data_node_free_symbehavior;
 }
 
 #endif

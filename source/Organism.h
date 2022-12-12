@@ -244,5 +244,11 @@ class Organism {
   virtual void LinkEctoHost(int pos) {
     std::cout << "LinkEctoHost called from Organism" << std::endl;
     throw "Organism method called!";}
+  virtual void TrackBehaviorPoints(double _in) {
+    std::cout << "TrackBehaviorPoints called from Organism" << std::endl;
+    throw "Organism method called!";}
+  virtual double GetBehaviorVal() {
+    std::cout << "GetBehaviorVal called from Organism" << std::endl;
+    throw "Organism method called!";}
 };
 #endif
