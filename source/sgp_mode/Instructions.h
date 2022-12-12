@@ -77,6 +77,11 @@ INST(Reproduce, {
   // Only one reproduction is allowed per update
   if (state.in_progress_repro != -1 || !state.location.IsValid())
     return;
+  // a hosted symbiont cannot horizontally transmit if the config option is off
+  if (!state.organism->IsHost() && !state.organism->GetHost().IsNull() && !state.world->GetConfig()->HORIZ_TRANS()) {
+    return;
+  }
+
   double points; 
   if (state.organism->IsHost()) {
     points = state.world->GetConfig()->HOST_REPRO_RES();

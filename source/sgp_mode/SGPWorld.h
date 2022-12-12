@@ -133,8 +133,9 @@ public:
         // Because we're not calling HorizontalTransmission, we need to adjust
         // these data nodes here
 
-        if (my_config->FREE_LIVING_SYMS() && had_host) {
-          //free living symbiont birth data nodes. should almost always be successful
+        if (my_config->FREE_LIVING_SYMS() && (had_host || !my_config->HORIZ_TRANS())) {
+          //free living symbiont birth data nodes, either the symbiont's parent doesn't have a host
+          //or horizontal transmission is off (and thus the parent was free living, but has infected a host)
           emp::DataMonitor<int>& data_node_attempts_flsrepro = GetFreeLivingSymReproAttemptCount();
           data_node_attempts_flsrepro.AddDatum(1);
         }
