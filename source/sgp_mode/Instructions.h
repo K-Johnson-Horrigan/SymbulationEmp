@@ -213,6 +213,7 @@ INST(Donate, {
       host->AddPoints(to_donate *
                       (1.0 - state.world->GetConfig()->DONATE_PENALTY()));
       state.organism->AddPoints(-to_donate);
+      state.organism->TrackBehaviorPoints(to_donate);
     }
 
     // ecto unlink 
@@ -277,6 +278,7 @@ INST(Steal, {
       // 10% of the stolen resources are lost
       state.organism->AddPoints(
           to_steal * (1.0 - state.world->GetConfig()->STEAL_PENALTY()));
+      state.organism->TrackBehaviorPoints(-to_steal);
     }
 
     // ecto unlink 

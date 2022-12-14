@@ -48,6 +48,8 @@ private:
   emp::Ptr<SyncDataMonitor<double>> data_node_free_sym_stolen;
   emp::Ptr<SyncDataMonitor<double>> data_node_free_sym_earned;
   emp::Ptr<SyncDataMonitor<double>> data_node_host_earned;
+  emp::Ptr<emp::DataMonitor<double>> data_node_hosted_symbehavior;
+  emp::Ptr<emp::DataMonitor<double>> data_node_free_symbehavior;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
 
@@ -70,6 +72,8 @@ public:
     data_node_free_sym_stolen.Delete();
     data_node_free_sym_earned.Delete();
     data_node_host_earned.Delete();
+    data_node_free_symbehavior.Delete();
+    data_node_hosted_symbehavior.Delete();
     // The vectors will delete themselves automatically
   }
 
@@ -166,6 +170,8 @@ public:
   SyncDataMonitor<double> &GetFreeSymStolenDataNode();
   SyncDataMonitor<double> &GetFreeSymEarnedDataNode();
   SyncDataMonitor<double> &GetHostEarnedDataNode();
+  emp::DataMonitor<double>& GetHostedSymBehaviorDataNode();
+  emp::DataMonitor<double>& GetFreeSymBehaviorDataNode();
   void SetupTasksNodes();
 
   emp::DataFile &SetUpOrgCountFile(const std::string &filename);

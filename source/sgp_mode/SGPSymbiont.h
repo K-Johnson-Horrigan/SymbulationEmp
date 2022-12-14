@@ -12,6 +12,12 @@ private:
   CPU cpu;
   const emp::Ptr<SGPWorld> my_world;
 
+  /**
+    * Purpose: to store records of this particular symbiont's behavior 
+    * towards hosts (donation & stealing)
+  */
+  double behavior_points = 0;
+
 public:
   /**
    * Constructs a new SGPSymbiont as an ancestor organism, with either a random
@@ -109,6 +115,26 @@ public:
   CPU &GetCPU() { return cpu; }
 
   /**
+   * Input: The number of points donated or stolen by the symbiont.
+   *
+   * Output: None.
+   *
+   * Purpose: To track the number of points donated or stolen by the symbiont; 
+   * stolen points decrement the total, and donated points increment it.
+   */
+  void TrackBehaviorPoints(double _in) { behavior_points += _in; }
+  
+  /**
+   * Input: None.
+   *
+   * Output: The number of points donated or stolen by the symbiont.
+   *
+   * Purpose: To get the number of points donated or stolen by the symbiont;
+   * stolen points decrement the total, and donated points increment it.
+   */
+  double GetBehaviorVal() { return behavior_points; }
+
+  /**
    * Input: The index of the ecto host to be linked with.
    *
    * Output: None.
@@ -137,6 +163,7 @@ public:
    * movement
    */
   void Process(emp::WorldPosition pos) {
+    behavior_points = 0;
     if (my_host == nullptr && my_world->GetUpdate() % my_config->LIMITED_TASK_RESET_INTERVAL() == 0)
       cpu.state.used_resources->reset();
     // Instead of calling Host::Process, do the important stuff here
@@ -144,7 +171,7 @@ public:
     if (GetDead()) {
       return;
     }
-    
+
     cpu.RunCPUStep(pos, my_config->CYCLES_PER_UPDATE());
     // The parts of Symbiont::Process that don't use resources or reproduction
 
