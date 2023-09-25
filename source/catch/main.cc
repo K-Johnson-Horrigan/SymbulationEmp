@@ -39,6 +39,8 @@
 #include "../test/sgp_mode_test/SGPWorld.test.cc"
 #include "../test/sgp_mode_test/SGPHost.test.cc"
 
+#include "../test/metapop_mode_test/MetapopWorld.test.cc"
+
 #include "../test/integration_test/spatial_structure/vt.test.cc"
 #include "../test/integration_test/lysogeny/plr.test.cc"
 #include "../test/integration_test/endosymbiosis/res_distribute.test.cc"

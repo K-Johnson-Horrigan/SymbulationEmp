@@ -58,7 +58,7 @@ public:
       : SymWorld(r, _config), scheduler(*this, _config->THREAD_COUNT()),
         task_set(task_set) {}
 
-  ~SGPWorld() {
+  virtual ~SGPWorld() {
     data_node_sym_donated.Delete();
     data_node_sym_stolen.Delete();
     data_node_sym_earned.Delete();
