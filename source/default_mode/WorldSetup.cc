@@ -44,7 +44,7 @@ void SymWorld::SetupSymbionts(long unsigned int *total_syms) {
  * Purpose: Prepare the world for an experiment by applying the configuration settings 
  * and populating the world with hosts and symbionts.
  */
-void SymWorld::Setup() {
+void SymWorld::Populate() {
   double start_moi = my_config->START_MOI();
   long unsigned int POP_SIZE;
   if (my_config->POP_SIZE() == -1) {

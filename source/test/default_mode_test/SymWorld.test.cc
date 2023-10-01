@@ -1520,7 +1520,7 @@ TEST_CASE("Setup", "[default]") {
 
     WHEN("Grid is on") {
       config.GRID(1);
-      world.Setup();
+      world.Populate();
       THEN("World size, width, and height are set correctly") {
         REQUIRE(world.GetWidth() == width);
         REQUIRE(world.GetHeight() == height);
@@ -1530,7 +1530,7 @@ TEST_CASE("Setup", "[default]") {
 
     WHEN("Config option POP_SIZE is -1") {
       config.POP_SIZE(-1);
-      world.Setup();
+      world.Populate();
       THEN("The world has full starting population") {
         REQUIRE(world.GetNumOrgs() == width * height);
       }
@@ -1539,7 +1539,7 @@ TEST_CASE("Setup", "[default]") {
     WHEN("Config option POP_SIZE is greater than -1") {
       size_t pop_size = (width * height) / 2;
       config.POP_SIZE(pop_size);
-      world.Setup();
+      world.Populate();
       THEN("The world has a partial starting population") {
         REQUIRE(world.GetNumOrgs() == pop_size);
       }
@@ -1551,7 +1551,7 @@ TEST_CASE("Setup", "[default]") {
       config.SYM_LIMIT(10);
       config.POP_SIZE(-1);
       emp::DataMonitor<int>& hosted_sym_count_node = world.GetCountHostedSymsDataNode();
-      world.Setup();
+      world.Populate();
       world.Update();
 
       size_t num_syms = hosted_sym_count_node.GetTotal();

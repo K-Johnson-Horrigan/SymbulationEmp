@@ -68,7 +68,7 @@ TEST_CASE("Efficient Setup", "[efficient]") {
     WHEN("The config option for the efficiency mutation rate is -1") {
       eff_mut_rate = -1;
       config.EFFICIENCY_MUT_RATE(eff_mut_rate);
-      world.Setup();
+      world.Populate();
       THEN("The horizontal mutation rate is used") {
         REQUIRE(config.EFFICIENCY_MUT_RATE() == horiz_mut_rate);
       }
@@ -76,7 +76,7 @@ TEST_CASE("Efficient Setup", "[efficient]") {
     WHEN("The config option for the efficiency mutation rate is not -1") {
       eff_mut_rate = 0.2;
       config.EFFICIENCY_MUT_RATE(eff_mut_rate);
-      world.Setup();
+      world.Populate();
       THEN("The efficiency mutation rate is used") {
         REQUIRE(config.EFFICIENCY_MUT_RATE() == eff_mut_rate);
       }

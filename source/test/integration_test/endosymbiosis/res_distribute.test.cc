@@ -23,7 +23,7 @@ TEST_CASE("Resource Distribution Results", "[integration]") {
   config.UPDATES(1000); //shorter than standard experiments
   config.RES_DISTRIBUTE(500); //intermediary host res amount
 
-  world.Setup();
+  world.Populate();
 
   emp::DataMonitor<double, emp::data::Histogram>& host_val_node = world.GetHostIntValDataNode();
   emp::DataMonitor<double, emp::data::Histogram>& free_sym_val_node = world.GetFreeSymIntValDataNode();

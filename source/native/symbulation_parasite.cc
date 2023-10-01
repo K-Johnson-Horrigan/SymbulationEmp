@@ -42,7 +42,7 @@ int symbulation_main(int argc, char *argv[]) {
 
   SGPWorld world(random, &config, task_set);
 
-  world.Setup();
+  world.Populate();
   world.CreateDataFiles();
 
   // Print some debug info for testing purposes

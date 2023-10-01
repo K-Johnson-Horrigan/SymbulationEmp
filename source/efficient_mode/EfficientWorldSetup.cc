@@ -42,8 +42,8 @@ void EfficientWorld::SetupSymbionts(long unsigned int* total_syms) {
  * Purpose: Prepare the world for a simulation by applying the configuration settings
  * and populating the world with efficient hosts and efficient symbionts.
  */
-void EfficientWorld::Setup() {
+void EfficientWorld::Populate() {
   if (my_config->EFFICIENCY_MUT_RATE() == -1) my_config->EFFICIENCY_MUT_RATE(my_config->HORIZ_MUTATION_RATE());
-  SymWorld::Setup();
+  SymWorld::Populate();
 }
 #endif

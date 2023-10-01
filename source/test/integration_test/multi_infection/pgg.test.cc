@@ -10,7 +10,7 @@ TEST_CASE("Multi-infection results", "[integration]") {
   config.PGG(1);
   config.MUTATION_SIZE(0.05);
   config.UPDATES(2000);
-  world.Setup();
+  world.Populate();
 
   config.GRID_X(5);
   config.GRID_Y(5);

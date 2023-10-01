@@ -487,7 +487,7 @@ public:
   /**
    * Definitions of setup functions, expanded in WorldSetup.cc
    */
-  virtual void Setup();
+  virtual void Populate();
   virtual void SetupHosts(long unsigned int* POP_SIZE);
   virtual void SetupSymbionts(long unsigned int* total_syms);
 

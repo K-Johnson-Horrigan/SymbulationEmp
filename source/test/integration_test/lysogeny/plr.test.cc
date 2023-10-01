@@ -33,7 +33,7 @@ TEST_CASE("Prophage Loss Rate Results", "[integration]"){
 
         auto & node = world->GetLysisChanceDataNode();
 
-        world->Setup();
+        world->Populate();
 
         world->RunExperiment(false);
 
@@ -51,7 +51,7 @@ TEST_CASE("Prophage Loss Rate Results", "[integration]"){
 
         auto & node = world->GetLysisChanceDataNode();
 
-        world->Setup();
+        world->Populate();
 
         world->RunExperiment(false);
 
@@ -70,7 +70,7 @@ TEST_CASE("Prophage Loss Rate Results", "[integration]"){
 
         auto & node = world->GetLysisChanceDataNode();
 
-        world->Setup();
+        world->Populate();
 
         world->RunExperiment(false);
 

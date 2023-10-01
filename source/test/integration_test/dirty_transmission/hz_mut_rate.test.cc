@@ -22,7 +22,7 @@ TEST_CASE("Horizontal Mutation Rate Results", "[integration]"){
 
   WHEN("Vertical transmission rate is low"){
 	config.VERTICAL_TRANSMISSION(0.1);
-	world.Setup();
+	world.Populate();
 	WHEN("Horizontal transmission mutation rate is low") {
 	  config.HORIZ_MUTATION_RATE(0.1);
 	  world.RunExperiment(false);
@@ -55,7 +55,7 @@ TEST_CASE("Horizontal Mutation Rate Results", "[integration]"){
 	config.GRID_X(100);
 	config.GRID_Y(100);
 	config.VERTICAL_TRANSMISSION(0.3);
-	world.Setup();
+	world.Populate();
 	WHEN("Horizontal transmission mutation rate is low") {
 	  config.HORIZ_MUTATION_RATE(0.1);
 	  world.RunExperiment(false);
@@ -89,7 +89,7 @@ TEST_CASE("Horizontal Mutation Rate Results", "[integration]"){
   }
   WHEN("Vertical transmission rate is high") {
 	config.VERTICAL_TRANSMISSION(0.9);
-	world.Setup();
+	world.Populate();
 	WHEN("Horizontal transmission mutation rate is low") {
 	  config.HORIZ_MUTATION_RATE(0.1);
 	  world.RunExperiment(false);

@@ -16,7 +16,7 @@ TEST_CASE("Vertical Transmission Results", "[integration]"){
   WHEN("Mutualists are already present in the population (mixed population)") {
     config.HOST_INT(-2);
     config.SYM_INT(-2);
-    world.Setup();
+    world.Populate();
 
     WHEN("Vertical transmission rate is 0") {
       config.VERTICAL_TRANSMISSION(0);
@@ -55,7 +55,7 @@ TEST_CASE("Vertical Transmission Results", "[integration]"){
 
     WHEN("Vertical transmission rate is 1") {
       config.VERTICAL_TRANSMISSION(1);
-      world.Setup();
+      world.Populate();
       world.RunExperiment(false);
       THEN("Mutualists evolve"){
         REQUIRE(sym_val_node.GetMean() > 0.5);
@@ -65,7 +65,7 @@ TEST_CASE("Vertical Transmission Results", "[integration]"){
       config.VERTICAL_TRANSMISSION(0.2);
       config.MUTATION_SIZE(0.01);
       config.START_MOI(0.5);
-      world.Setup();
+      world.Populate();
       world.RunExperiment(false);
       THEN("Symbionts go extinct"){
         REQUIRE(sym_count_node.GetTotal() == 0);
@@ -76,7 +76,7 @@ TEST_CASE("Vertical Transmission Results", "[integration]"){
     config.HOST_INT(0);
     // not using random parasite values, which the paper used
     config.SYM_INT(-0.5); 
-    world.Setup();
+    world.Populate();
 
     WHEN("Vertical transmission rate is 0") {
       config.VERTICAL_TRANSMISSION(0);
@@ -109,7 +109,7 @@ TEST_CASE("Vertical Transmission Results", "[integration]"){
     config.HOST_INT(0);
     // not using random parasite values, which the paper used
     config.SYM_INT(0.5);
-    world.Setup();
+    world.Populate();
 
     WHEN("Vertical transmission rate is 0") {
       config.VERTICAL_TRANSMISSION(0);
@@ -142,14 +142,14 @@ TEST_CASE("Vertical Transmission Results", "[integration]"){
     config.HOST_INT(0);
     config.SYM_INT(0);
     config.GRID(1);
-    world.Setup();
+    world.Populate();
 
     WHEN("Vertical transmission rate is high-intermediate (0.7)"){
       config.VERTICAL_TRANSMISSION(0.7);
       world.RunExperiment(false);
       
       config.GRID(0);
-      off_world.Setup(); 
+      off_world.Populate(); 
       off_world.RunExperiment(false);
 
       double grid_on_sym_val = sym_val_node.GetMean();
@@ -167,7 +167,7 @@ TEST_CASE("Vertical Transmission Results", "[integration]"){
       world.RunExperiment(false);
 
       config.GRID(0);
-      off_world.Setup();
+      off_world.Populate();
       off_world.RunExperiment(false);
 
       double grid_on_sym_val = sym_val_node.GetMean();

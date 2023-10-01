@@ -30,7 +30,7 @@ int symbulation_main(int argc, char * argv[])
 
   LysisWorld world(random, &config);
 
-  world.Setup();
+  world.Populate();
   world.CreateDataFiles();
   
   world.RunExperiment();
