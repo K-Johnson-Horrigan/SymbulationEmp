@@ -22,7 +22,7 @@ TEST_CASE("Populate", "[metapop]") {
 
   MetapopWorld world(random, &config);
 
-  int num_worlds = 1;
+  size_t num_worlds = 1;
   REQUIRE(world.GetNumOrgs() == 0);
 
   world.Populate(num_worlds);

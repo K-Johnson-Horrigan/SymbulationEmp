@@ -59,9 +59,9 @@ public:
         task_set(task_set) {}
 
   virtual ~SGPWorld() {
-    data_node_sym_donated.Delete();
-    data_node_sym_stolen.Delete();
-    data_node_sym_earned.Delete();
+    if(data_node_sym_donated) data_node_sym_donated.Delete();
+    if(data_node_sym_stolen) data_node_sym_stolen.Delete();
+    if(data_node_sym_earned) data_node_sym_earned.Delete();
     // The vectors will delete themselves automatically
   }
 
@@ -82,7 +82,7 @@ public:
    * Purpose: To simulate a timestep in the world, which includes calling the
    * process functions for hosts and symbionts and updating the data nodes.
    */
-  void Update() override {
+  void Update() {
     // These must be done here because we don't call SymWorld::Update()
     // That may change in the future
     emp::World<Organism>::Update();

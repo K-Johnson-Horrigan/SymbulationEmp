@@ -25,13 +25,16 @@ int symbulation_main(int argc, char* argv[]) {
   MetapopWorld world(random, &config);
 
   int num_worlds = 1;
-  world.Setup(num_worlds);
+  world.Populate(num_worlds);
 
   // the number of times that subworlds are allowed to propogate
   // before being sampled
   int metapop_generations = 1;
 
   for (int i = 0; i < metapop_generations; i++) {
+    if (i % config.DATA_INT() == 0) {
+      std::cout << "Update: " << i << std::endl;
+    }
     world.Update();
   }
   return 0;
