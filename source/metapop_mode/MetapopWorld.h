@@ -3,7 +3,7 @@
 
 #include "../sgp_mode/SGPWorld.h"
 #include "../sgp_mode/SGPWorldSetup.cc"
-
+//TODO data node tests
 class MetapopWorld : public emp::World<SGPWorld> {
  protected:
   /**
@@ -13,6 +13,15 @@ class MetapopWorld : public emp::World<SGPWorld> {
    */
   emp::Ptr<SymConfigBase> my_config = NULL;
 
+  /**
+   *
+   * Purpose: Data nodes which collect information pertaining to this
+   * experiment.
+   *
+   */
+  emp::Ptr<emp::DataMonitor<int>> data_node_symcount;
+  emp::Ptr<emp::DataMonitor<int>> data_node_hostcount;
+
  public:
   /**
    * Input: The world's random seed
@@ -21,7 +30,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
    *
    * Purpose: To construct an instance of MetapopWorld
    */
-  MetapopWorld(emp::Random &_random, emp::Ptr<SymConfigBase> _config)
+  MetapopWorld(emp::Random& _random, emp::Ptr<SymConfigBase> _config)
       : emp::World<SGPWorld>(_random) {
     my_config = _config;
   }
@@ -34,12 +43,15 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * Purpose: To destruct the objects belonging to MetapopWorld to conserve
    * memory.
    */
-  ~MetapopWorld() {}
+  ~MetapopWorld() {
+    if (data_node_symcount) data_node_symcount.Delete();
+    if (data_node_hostcount) data_node_hostcount.Delete();
+  }
 
   /**
    * Definition of a setup functions, expanded in MetapopWorldSetup.cc
    */
-  void Populate(int num_worlds);
+  void Populate();
 
   /**
    * Input: None
@@ -49,15 +61,43 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * Purpose: To simulate a generation in the world, which includes letting
    * all of the subworld develop, then sampling the highest-performing to
    * produce the next generation.
-   */  
+   */
   void Update() {
+    // fully evolve each world
     emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
     for (size_t i : schedule) {
       if (IsOccupied(i)) {
-        pop[i]->Update();
+        pop[i]->RunExperiment(false);
+      }
+    }
+
+    // run emp world update to get all the data file stuff
+    // do this AFTER the experiments in order to get the result of the
+    // updateth set of world evolutions before we sample for
+    // the next generation of worlds
+    emp::World<SGPWorld>::Update();
+
+    // select next generation of worlds
+    // can use SerialTransfer() method from emp for rand select but want to be
+    // sure to resize it the way I want (fixed pop size)
+    // serial transfer asks for proportion, elite etc in world_select
+    // asks for counts (?)
+    schedule = emp::GetPermutation(GetRandom(), GetSize());
+    for (size_t i : schedule) {
+      if (IsOccupied(i)) {
+        // TODO CHANGE THIS TO A VARIABLE (cur 0.01 of 10k = 100)
+        pop[i]->SerialTransfer(0.01);
+        pop[i]->Resize(my_config->GRID_X(), my_config->GRID_Y());
       }
     }
   }
+
+  /**
+   * Data node methods expanded in MetapopDataNodes.h
+   */
+  emp::DataFile& CreateDataFiles();
+  emp::DataMonitor<int>& GetSymCountDataNode();
+  emp::DataMonitor<int>& GetHostCountDataNode();
 
 };  // MetapopWorld class
 #endif

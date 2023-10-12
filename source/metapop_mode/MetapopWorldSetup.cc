@@ -12,8 +12,8 @@
  *
  * Purpose: To set up the populations that will be sampled.
  */
-void MetapopWorld::Populate(int num_worlds) {
-  for (int i = 0; i < num_worlds; i++) {
+void MetapopWorld::Populate() {
+  for (size_t i = 0; i < my_config->NUM_POPULATIONS(); i++) {
     TaskSet task_set = LogicTasks;
     if (my_config->TASK_TYPE() == 0) {
       task_set = SquareTasks;

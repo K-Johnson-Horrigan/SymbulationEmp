@@ -96,5 +96,13 @@ EMP_BUILD_CONFIG(SymConfigBase,
     VALUE(LIMITED_TASK_RESET_INTERVAL, size_t, 8, "Number of updates before an org is allowed to complete a non-unlimited task again"),
     VALUE(STEAL_PENALTY, double, 0.10, "Proportion of resources that are lost when stealing from a host"),
     VALUE(DONATE_PENALTY, double, 0.10, "Proportion of resources that are lost when donating to a host"),
+
+    GROUP(METAPOP, "Metapopulation of SGPWorlds Settings"),
+    VALUE(NUM_POPULATIONS, size_t, 5, "Number of populations to evolve and sample"),
+    VALUE(METAPOP_DATA_INT, size_t, 1, "How many sampling events occur between data collection events"),
+    VALUE(SIZE_SAMPLE, size_t, 10, "How many organisms are sampled from each subpopulation"),
+    VALUE(GENERATIONS, size_t, 10, "How many times should populations be sampled and evolved?"),
+    
+
 )
 #endif
