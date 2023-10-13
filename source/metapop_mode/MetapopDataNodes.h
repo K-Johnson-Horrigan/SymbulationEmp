@@ -12,17 +12,13 @@
  * experiment.
  */
 emp::DataFile& MetapopWorld::CreateDataFiles() {
-  std::string file_ending =
-      "_SEED" + std::to_string(my_config->SEED()) + ".data";
+  std::string file_ending = "_SEED" + std::to_string(my_config->SEED()) + ".data";
   auto& file = SetupFile("MetapopFile" + file_ending);
-  // What I want to track for now:
-  // some stats for each of the...lets say 5 worlds that exist:
-  // av num orgs
-  // num of not, nor, xor
   // TODO task counts & world-spec columns (cur pooled)
 
   auto& av_sym_count = GetSymCountDataNode();
   auto& av_host_count = GetHostCountDataNode();
+  SetupTasksNodes();
 
   // trigger something about the data nodes?
   // makes them work correctly for the first generatione
@@ -32,6 +28,18 @@ emp::DataFile& MetapopWorld::CreateDataFiles() {
   file.AddVar(update, "update", "Update");
   file.AddMean(av_sym_count, "av_sym_count", "Average symbiont count");
   file.AddMean(av_host_count, "av_host_count", "Average host count");
+  
+  TaskSet task_set = pop[GetRandomOrgID()]->GetTaskSet();
+  // each position in the data_node_host_tasks (and sym) vectors holds the
+  // total counts for all the subwolrds; so take the mean
+  int j = 0;
+  for (auto data : task_set) {
+    file.AddMean(data_node_host_tasks[j], "host_task_" + data.task.name,
+                  "Host completions of " + data.task.name, true);
+    file.AddMean(data_node_sym_tasks[j], "sym_task_" + data.task.name,
+                  "Symbiont completions of " + data.task.name, true);
+    j++;
+  }
 
   file.PrintHeaderKeys();
   return file;
@@ -86,6 +94,39 @@ emp::DataMonitor<int>& MetapopWorld::GetHostCountDataNode() {
     });
   }
   return *data_node_hostcount;
+}
+
+/**
+ * Input: None
+ *
+ * Output: None
+ *
+ * Purpose: To collect data on the count of the tasks executed by 
+ * both symbionts and hosts across all the subworlds to be saved 
+ * to the data file that is tracking metapopulation data.
+ */
+void MetapopWorld::SetupTasksNodes(){
+  int num_tasks = 0;
+  for (size_t i = 0; i < size(); i++) {
+    if (IsOccupied(i)) {
+      pop[i]->SetupTasksNodes();
+      if (!num_tasks) num_tasks = pop[i]->GetTaskSet().NumTasks();
+    }
+  }
+
+  if (!data_node_host_tasks.size()) {
+    data_node_host_tasks.resize(num_tasks);
+    data_node_sym_tasks.resize(num_tasks);
+    OnUpdate([&](auto) {
+      for (size_t i = 0; i < size(); i++) {
+        for (int j = 0; j < num_tasks; j++) {
+          data_node_host_tasks[j].AddDatum(pop[i]->GetHostTasksDataNodeVector()[j].GetTotal());
+          data_node_sym_tasks[j].AddDatum(pop[i]->GetSymTasksDataNodeVector()[j].GetTotal());
+        }
+        pop[i]->GetTaskSet().ResetTaskData();
+      }
+    });
+  }
 }
 
 #endif

@@ -21,6 +21,8 @@ class MetapopWorld : public emp::World<SGPWorld> {
    */
   emp::Ptr<emp::DataMonitor<int>> data_node_symcount;
   emp::Ptr<emp::DataMonitor<int>> data_node_hostcount;
+  emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
+  emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
 
  public:
   /**
@@ -98,6 +100,6 @@ class MetapopWorld : public emp::World<SGPWorld> {
   emp::DataFile& CreateDataFiles();
   emp::DataMonitor<int>& GetSymCountDataNode();
   emp::DataMonitor<int>& GetHostCountDataNode();
-
+  void SetupTasksNodes();
 };  // MetapopWorld class
 #endif
