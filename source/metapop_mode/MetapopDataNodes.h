@@ -106,24 +106,28 @@ emp::DataMonitor<int>& MetapopWorld::GetHostCountDataNode() {
  * to the data file that is tracking metapopulation data.
  */
 void MetapopWorld::SetupTasksNodes(){
-  int num_tasks = 0;
   for (size_t i = 0; i < size(); i++) {
     if (IsOccupied(i)) {
       pop[i]->SetupTasksNodes();
-      if (!num_tasks) num_tasks = pop[i]->GetTaskSet().NumTasks();
     }
   }
 
+  size_t new_size =  pop[GetRandomOrgID()]->GetTaskSet().NumTasks();
   if (!data_node_host_tasks.size()) {
-    data_node_host_tasks.resize(num_tasks);
-    data_node_sym_tasks.resize(num_tasks);
+    data_node_host_tasks.resize(new_size);
+    data_node_sym_tasks.resize(new_size);
     OnUpdate([&](auto) {
       for (size_t i = 0; i < size(); i++) {
+        if(!IsOccupied(i)){ continue;}
+        TaskSet task_set = pop[i]->GetTaskSet();
+        int num_tasks = task_set.NumTasks();
+        auto& pop_host_tasks = pop[i]->GetHostTasksDataNodeVector();
+        auto& pop_sym_tasks = pop[i]->GetSymTasksDataNodeVector();
         for (int j = 0; j < num_tasks; j++) {
-          data_node_host_tasks[j].AddDatum(pop[i]->GetHostTasksDataNodeVector()[j].GetTotal());
-          data_node_sym_tasks[j].AddDatum(pop[i]->GetSymTasksDataNodeVector()[j].GetTotal());
+          data_node_host_tasks[j].AddDatum(pop_host_tasks[j].GetTotal());
+          data_node_sym_tasks[j].AddDatum(pop_sym_tasks[j].GetTotal());
         }
-        pop[i]->GetTaskSet().ResetTaskData();
+        task_set.ResetTaskData();
       }
     });
   }
