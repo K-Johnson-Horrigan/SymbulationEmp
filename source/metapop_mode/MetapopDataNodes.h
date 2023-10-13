@@ -126,6 +126,9 @@ void MetapopWorld::SetupTasksNodes(){
         for (int j = 0; j < num_tasks; j++) {
           data_node_host_tasks[j].AddDatum(pop_host_tasks[j].GetTotal());
           data_node_sym_tasks[j].AddDatum(pop_sym_tasks[j].GetTotal());
+
+          pop_host_tasks[j].Reset(); // clear for next pop gen
+          pop_sym_tasks[j].Reset();
         }
         task_set.ResetTaskData();
       }

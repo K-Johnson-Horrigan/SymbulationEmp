@@ -23,9 +23,6 @@ int symbulation_main(int argc, char* argv[]) {
   config.Write(std::cout);
   emp::Random random(config.SEED());
 
-  config.GENERATIONS(2);
-  config.NUM_POPULATIONS(3);
-
   MetapopWorld world(random, &config);
   world.Populate();
   world.CreateDataFiles();

@@ -80,15 +80,13 @@ class MetapopWorld : public emp::World<SGPWorld> {
     emp::World<SGPWorld>::Update();
 
     // select next generation of worlds
-    // can use SerialTransfer() method from emp for rand select but want to be
-    // sure to resize it the way I want (fixed pop size)
-    // serial transfer asks for proportion, elite etc in world_select
-    // asks for counts (?)
+    // using SerialTransfer() method from emp for rand select 
     schedule = emp::GetPermutation(GetRandom(), GetSize());
     for (size_t i : schedule) {
       if (IsOccupied(i)) {
-        // TODO CHANGE THIS TO A VARIABLE (cur 0.01 of 10k = 100)
-        pop[i]->SerialTransfer(0.01);
+        double proportion = my_config->SIZE_SAMPLE() / (my_config->GRID_X() * my_config->GRID_X());
+        if(proportion > 1) proportion = 1;
+        pop[i]->SerialTransfer(proportion);
         pop[i]->Resize(my_config->GRID_X(), my_config->GRID_Y());
       }
     }
