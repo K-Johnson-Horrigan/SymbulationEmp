@@ -46,6 +46,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * memory.
    */
   ~MetapopWorld() {
+    //std::cout << "okay hey ho" << s
     if (data_node_symcount) data_node_symcount.Delete();
     if (data_node_hostcount) data_node_hostcount.Delete();
   }
@@ -84,8 +85,9 @@ class MetapopWorld : public emp::World<SGPWorld> {
     schedule = emp::GetPermutation(GetRandom(), GetSize());
     for (size_t i : schedule) {
       if (IsOccupied(i)) {
-        double proportion = my_config->SIZE_SAMPLE() / (my_config->GRID_X() * my_config->GRID_X());
-        if(proportion > 1) proportion = 1;
+        double proportion = my_config->SAMPLE_PROPORTION();
+        if (proportion > 1) proportion = 1;
+        if(proportion < 0) proportion = 0;
         pop[i]->SerialTransfer(proportion);
         pop[i]->Resize(my_config->GRID_X(), my_config->GRID_Y());
       }

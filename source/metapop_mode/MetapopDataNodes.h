@@ -25,7 +25,7 @@ emp::DataFile& MetapopWorld::CreateDataFiles() {
   on_update_sig.Trigger(update);
 
   // set up variables
-  file.AddVar(update, "update", "Update");
+  file.AddVar(update, "generation", "Generation (number of times populations get sampled)");
   file.AddMean(av_sym_count, "av_sym_count", "Average symbiont count");
   file.AddMean(av_host_count, "av_host_count", "Average host count");
   

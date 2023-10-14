@@ -100,9 +100,9 @@ EMP_BUILD_CONFIG(SymConfigBase,
     GROUP(METAPOP, "Metapopulation of SGPWorlds Settings"),
     VALUE(NUM_POPULATIONS, size_t, 5, "Number of populations to evolve and sample"),
     VALUE(METAPOP_DATA_INT, size_t, 1, "How many sampling events occur between data collection events"),
-    VALUE(SIZE_SAMPLE, size_t, 10, "How many organisms are sampled from each subpopulation"),
+    VALUE(SAMPLE_PROPORTION, double, 0.1, "What proportion of organisms in a population should be sampled to seed the next population"),
     VALUE(GENERATIONS, size_t, 10, "How many times should populations be sampled and evolved?"),
-    
-
+   
+   
 )
 #endif
