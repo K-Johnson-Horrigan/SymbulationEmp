@@ -23,6 +23,11 @@ int symbulation_main(int argc, char* argv[]) {
   config.Write(std::cout);
   emp::Random random(config.SEED());
 
+  if(config.SAMPLE_PROPORTION() < 0 || config.SAMPLE_PROPORTION() > 1){
+    std::cout << "Please use a sample proportion value between 0 and 1." << std::endl;
+    return 0;
+  }
+
   MetapopWorld world(random, &config);
   world.Populate();
   world.CreateDataFiles();

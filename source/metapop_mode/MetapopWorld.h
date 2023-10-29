@@ -3,7 +3,7 @@
 
 #include "../sgp_mode/SGPWorld.h"
 #include "../sgp_mode/SGPWorldSetup.cc"
-//TODO data node tests
+// TODO data node tests
 class MetapopWorld : public emp::World<SGPWorld> {
  protected:
   /**
@@ -35,6 +35,14 @@ class MetapopWorld : public emp::World<SGPWorld> {
   MetapopWorld(emp::Random& _random, emp::Ptr<SymConfigBase> _config)
       : emp::World<SGPWorld>(_random) {
     my_config = _config;
+
+    // define what is "fit"
+    fun_calc_fitness_t fit_fun = [&](SGPWorld& population) {
+      // reference to an organism and return a fitness value of type double.
+      double fitness_val = population.GetNumOrgs();
+      return fitness_val;
+    };
+    SetFitFun(fit_fun);
   }
 
   /**
@@ -46,7 +54,6 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * memory.
    */
   ~MetapopWorld() {
-    //std::cout << "okay hey ho" << s
     if (data_node_symcount) data_node_symcount.Delete();
     if (data_node_hostcount) data_node_hostcount.Delete();
   }
@@ -56,6 +63,107 @@ class MetapopWorld : public emp::World<SGPWorld> {
    */
   void Populate();
 
+  /**
+   * Input: None
+   *
+   * Output: None
+   *
+   * Purpose: To randomly select the next generation of organisms for each
+   * population.
+   */
+  void SampleRandom() {
+    // using SerialTransfer() method from emp for rand select
+    emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
+    for (size_t i : schedule) {
+      if (IsOccupied(i)) {
+        pop[i]->to_reproduce.clear();
+        pop[i]->SerialTransfer(my_config->SAMPLE_PROPORTION());
+        pop[i]->Resize(my_config->GRID_X(), my_config->GRID_Y());
+      }
+    }
+  }
+
+  /**
+   * Input: None
+   *
+   * Output: None
+   *
+   * Purpose: To truncate select the next generation of organisms for each
+   * population.
+   */
+  void SampleTruncate() {
+    // NOTE: use the fitness map in world_select to get multiple best worlds
+    // pair: fitness, index
+    std::pair<double, size_t> best_pop(-1, -1);
+    emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
+    for (size_t i : schedule) {
+      emp_assert(IsOccupied(i));  // there should be no empty cells in metapop world
+      double fitness = CalcFitnessID(i);
+      if (fitness > best_pop.first) {
+        best_pop = std::make_pair(fitness, i);
+      }
+    }
+    size_t best_i = best_pop.second;
+
+    // empty all not-best worlds & inject best orgs into them
+    int sample_size =
+        pop[best_i]->GetNumOrgs() * my_config->SAMPLE_PROPORTION();
+    for (size_t i = 0; i < size(); i++) {
+      emp_assert(IsOccupied(i));
+      if (i == best_i) continue;  // skip the best world
+
+      // empty the world
+      WipePop(i);
+
+      // copy in new orgs
+      for (int j = 0; j < sample_size; j++) {
+        pop[i]->AddOrgAt(CopyRandHost(best_i), pop[i]->GetNumOrgs());
+      }
+    }
+
+    // sample best world
+    emp::vector<emp::Ptr<Organism>> best_orgs;
+    for (int j = 0; j < sample_size; j++) {
+      best_orgs.push_back(CopyRandHost(best_i));
+    }
+    WipePop(best_i);
+    for (int j = 0; j < sample_size; j++) {
+      pop[best_i]->AddOrgAt(best_orgs[j], pop[best_i]->GetNumOrgs());
+    }
+  }
+
+  /**
+   * Input: The position of the population from which to copy a random host
+   *
+   * Output: A copied random host
+   *
+   * Purpose: To get a copy of a random host from a particular population
+   */
+  emp::Ptr<Organism> CopyRandHost(size_t pop_pos) {
+    Organism& old_host = pop[pop_pos]->GetRandomOrg();
+    emp::Ptr<Organism> new_host = old_host.MakeNew();
+    emp::vector<emp::Ptr<Organism>> syms = old_host.GetSymbionts();
+    for (size_t k = 0; k < syms.size(); k++) {
+      new_host->AddSymbiont(syms[k]->MakeNew());
+    }
+    return new_host;
+  }
+
+  /**
+   * Input: The position of the population to clean up
+   *
+   * Output: None
+   *
+   * Purpose: To clear, resize, and halt reproduction in a population
+   */
+  void WipePop(size_t pop_pos) {
+    pop[pop_pos]->to_reproduce.clear();
+    pop[pop_pos]->Clear();
+    pop[pop_pos]->Resize(my_config->GRID_X(), my_config->GRID_Y());
+  }
+
+  // TODO fix the seg fault that happens when there are living orgs at the end
+  // of the run
   /**
    * Input: None
    *
@@ -81,16 +189,13 @@ class MetapopWorld : public emp::World<SGPWorld> {
     emp::World<SGPWorld>::Update();
 
     // select next generation of worlds
-    // using SerialTransfer() method from emp for rand select 
-    schedule = emp::GetPermutation(GetRandom(), GetSize());
-    for (size_t i : schedule) {
-      if (IsOccupied(i)) {
-        double proportion = my_config->SAMPLE_PROPORTION();
-        if (proportion > 1) proportion = 1;
-        if(proportion < 0) proportion = 0;
-        pop[i]->SerialTransfer(proportion);
-        pop[i]->Resize(my_config->GRID_X(), my_config->GRID_Y());
-      }
+    // make selection scheme a func or something that gets
+    // defined on initialization--this if always has the same result for
+    // each exp.
+    if (my_config->SELECTION_SCHEME() == 0) {
+      SampleRandom();
+    } else if (my_config->SELECTION_SCHEME() == 1) {
+      SampleTruncate();
     }
   }
 

@@ -87,6 +87,10 @@ debug-sgp: CFLAGS_nat := $(CFLAGS_nat_debug)
 debug-sgp: sgp-mode 
 sgp-debug: debug-sgp
 
+debug-metapop: CFLAGS_nat := -g -pthread $(CFLAGS_all)
+debug-metapop: metapop-mode 
+metapop-debug: debug-metapop
+
 debug-web:	CFLAGS_web := $(CFLAGS_web_debug)
 debug-web:	symbulation.js
 web-debug:	debug-web

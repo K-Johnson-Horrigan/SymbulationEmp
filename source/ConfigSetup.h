@@ -102,7 +102,8 @@ EMP_BUILD_CONFIG(SymConfigBase,
     VALUE(METAPOP_DATA_INT, size_t, 1, "How many sampling events occur between data collection events"),
     VALUE(SAMPLE_PROPORTION, double, 0.1, "What proportion of organisms in a population should be sampled to seed the next population"),
     VALUE(GENERATIONS, size_t, 10, "How many times should populations be sampled and evolved?"),
+    VALUE(SELECTION_SCHEME, size_t, 0, "Which selection scheme should be used to establish new generations (0-random, 1-truncated)?"),
    
-   
+
 )
 #endif
