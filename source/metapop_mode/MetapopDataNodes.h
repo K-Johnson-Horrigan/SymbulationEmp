@@ -11,9 +11,25 @@
  * Purpose: To create and set up the data files that contain data for the
  * experiment.
  */
-emp::DataFile& MetapopWorld::CreateDataFiles() {
-  std::string file_ending = "_SEED" + std::to_string(my_config->SEED()) + ".data";
-  auto& file = SetupFile("MetapopFile" + file_ending);
+void MetapopWorld::CreateDataFiles() {
+  std::string file_ending =
+      "_SEED" + std::to_string(my_config->SEED()) + ".data";
+
+  CreateMeansDataFile(file_ending);
+  CreateOrgCountsDataFile(file_ending);
+}
+
+/**
+ * Input: The file name ending.
+ *
+ * Output: None.
+ *
+ * Purpose: To create and set up the data file which records the mean org
+ * counts and task counts accross all of the populations
+ */
+emp::DataFile& MetapopWorld::CreateMeansDataFile(
+    const std::string& file_ending) {
+  auto& file = SetupFile("Means_MetapopFile" + file_ending);
   // TODO task counts & world-spec columns (cur pooled)
 
   auto& av_sym_count = GetSymCountDataNode();
@@ -21,24 +37,56 @@ emp::DataFile& MetapopWorld::CreateDataFiles() {
   SetupTasksNodes();
 
   // trigger something about the data nodes?
-  // makes them work correctly for the first generatione
+  // makes them work correctly for the first generation
   on_update_sig.Trigger(update);
 
   // set up variables
-  file.AddVar(update, "generation", "Generation (number of times populations get sampled)");
+  file.AddVar(update, "generation",
+              "Generation (number of times populations get sampled)");
   file.AddMean(av_sym_count, "av_sym_count", "Average symbiont count");
   file.AddMean(av_host_count, "av_host_count", "Average host count");
-  
+
   TaskSet task_set = pop[GetRandomOrgID()]->GetTaskSet();
   // each position in the data_node_host_tasks (and sym) vectors holds the
-  // total counts for all the subwolrds; so take the mean
+  // total counts for all the subworlds; so take the mean
   int j = 0;
   for (auto data : task_set) {
     file.AddMean(data_node_host_tasks[j], "host_task_" + data.task.name,
-                  "Host completions of " + data.task.name, true);
+                 "Host completions of " + data.task.name, true);
     file.AddMean(data_node_sym_tasks[j], "sym_task_" + data.task.name,
-                  "Symbiont completions of " + data.task.name, true);
+                 "Symbiont completions of " + data.task.name, true);
     j++;
+  }
+
+  file.PrintHeaderKeys();
+  return file;
+}
+
+/**
+ * Input: The file name ending.
+ *
+ * Output: None.
+ *
+ * Purpose: To create and set up the data file which records the organism
+ * counts for all of the populations per end of each generation
+ */
+emp::DataFile& MetapopWorld::CreateOrgCountsDataFile(
+    const std::string& file_ending) {
+  auto& file = SetupFile("OrgCounts_MetapopFile" + file_ending);
+  // NOTE: task counts & world-spec columns (cur pooled)
+
+  // trigger something about the data nodes?
+  // makes them work correctly for the first generation
+  on_update_sig.Trigger(update);
+
+  file.AddVar(update, "generation",
+              "Generation (number of times populations get sampled)");
+  for (size_t i = 0; i < GetSize(); i++) {
+    std::string world_name = "world" + std::to_string(i);
+    file.AddTotal(pop[i]->GetHostCountDataNode(), world_name + "_host_count",
+                  "Average host count in " + world_name);
+    file.AddTotal(pop[i]->GetSymCountDataNode(), world_name + "_sym_count",
+                  "Average symbiont count in " + world_name);
   }
 
   file.PrintHeaderKeys();
@@ -101,24 +149,26 @@ emp::DataMonitor<int>& MetapopWorld::GetHostCountDataNode() {
  *
  * Output: None
  *
- * Purpose: To collect data on the count of the tasks executed by 
- * both symbionts and hosts across all the subworlds to be saved 
+ * Purpose: To collect data on the count of the tasks executed by
+ * both symbionts and hosts across all the subworlds to be saved
  * to the data file that is tracking metapopulation data.
  */
-void MetapopWorld::SetupTasksNodes(){
+void MetapopWorld::SetupTasksNodes() {
   for (size_t i = 0; i < size(); i++) {
     if (IsOccupied(i)) {
       pop[i]->SetupTasksNodes();
     }
   }
 
-  size_t new_size =  pop[GetRandomOrgID()]->GetTaskSet().NumTasks();
+  size_t new_size = pop[GetRandomOrgID()]->GetTaskSet().NumTasks();
   if (!data_node_host_tasks.size()) {
     data_node_host_tasks.resize(new_size);
     data_node_sym_tasks.resize(new_size);
     OnUpdate([&](auto) {
       for (size_t i = 0; i < size(); i++) {
-        if(!IsOccupied(i)){ continue;}
+        if (!IsOccupied(i)) {
+          continue;
+        }
         TaskSet task_set = pop[i]->GetTaskSet();
         int num_tasks = task_set.NumTasks();
         auto& pop_host_tasks = pop[i]->GetHostTasksDataNodeVector();
@@ -127,7 +177,7 @@ void MetapopWorld::SetupTasksNodes(){
           data_node_host_tasks[j].AddDatum(pop_host_tasks[j].GetTotal());
           data_node_sym_tasks[j].AddDatum(pop_sym_tasks[j].GetTotal());
 
-          pop_host_tasks[j].Reset(); // clear for next pop gen
+          pop_host_tasks[j].Reset();  // clear for next pop gen
           pop_sym_tasks[j].Reset();
         }
         task_set.ResetTaskData();

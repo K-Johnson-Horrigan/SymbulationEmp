@@ -246,7 +246,9 @@ class MetapopWorld : public emp::World<SGPWorld> {
   /**
    * Data node methods expanded in MetapopDataNodes.h
    */
-  emp::DataFile& CreateDataFiles();
+  void CreateDataFiles();
+  emp::DataFile& CreateMeansDataFile(const std::string &file_ending);
+  emp::DataFile& CreateOrgCountsDataFile(const std::string &file_ending);
   emp::DataMonitor<int>& GetSymCountDataNode();
   emp::DataMonitor<int>& GetHostCountDataNode();
   void SetupTasksNodes();
