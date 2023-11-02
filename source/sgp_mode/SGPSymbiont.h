@@ -55,10 +55,8 @@ public:
     }
     // Invalidate any in-progress reproduction
     if (cpu.state.in_progress_repro != -1) {
-      if(my_world->to_reproduce.size() < static_cast<size_t>(cpu.state.in_progress_repro)) {
-        my_world->to_reproduce[cpu.state.in_progress_repro].second =
+      my_world->to_reproduce[cpu.state.in_progress_repro].second =
           emp::WorldPosition::invalid_id;
-      }
     }
   }
 
