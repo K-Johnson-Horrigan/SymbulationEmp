@@ -172,6 +172,21 @@ public:
     return sym_baby;
   }
 
+/**
+   * Input: A pointer to the world that then new host should point to.
+   *
+   * Output: The pointer to the newly created organism
+   *
+   * Purpose: To produce a new symbiont, identical to the original except
+   * pointing to a different world
+   */
+  emp::Ptr<Organism> MakeNew(emp::Ptr<SGPWorld> sym_copy_world) {
+    emp::Ptr<SGPSymbiont> sym_baby = emp::NewPtr<SGPSymbiont>(
+        random, sym_copy_world, my_config, cpu.GetProgram(), GetIntVal());
+    cpu.state.in_progress_repro = -1;
+    return sym_baby;
+  }
+
   /**
    * Input: None
    *

@@ -158,6 +158,21 @@ public:
     return host_baby;
   }
 
+ /**
+   * Input: A pointer to the world that then new host should point to.
+   *
+   * Output: A new host with same properties as this host but pointing
+   * to the passed world.
+   *
+   * Purpose: To avoid creating an organism via constructor in other methods.
+   */
+  emp::Ptr<Organism> MakeNew(emp::Ptr<SGPWorld> host_copy_world) {
+    emp::Ptr<SGPHost> host_baby = emp::NewPtr<SGPHost>(
+        random, host_copy_world, my_config, cpu.GetProgram(), GetIntVal());
+    cpu.state.in_progress_repro = -1;
+    return host_baby;
+  }
+  
   /**
    * Input: None
    *

@@ -134,18 +134,21 @@ class MetapopWorld : public emp::World<SGPWorld> {
   }
 
   /**
-   * Input: The position of the population from which to copy a random host
+   * Input: The position of the population from which to copy a random host,
+   * the position of the world which the new organisms (and their cpus) should
+   * point to.
    *
    * Output: A copied random host
    *
    * Purpose: To get a copy of a random host from a particular population
    */
-  emp::Ptr<Organism> CopyRandHost(size_t pop_pos) {
-    Organism& old_host = pop[pop_pos]->GetRandomOrg();
-    emp::Ptr<Organism> new_host = old_host.MakeNew();
-    emp::vector<emp::Ptr<Organism>> syms = old_host.GetSymbionts();
+  emp::Ptr<Organism> CopyRandHost(size_t source_pos, size_t dest_pos) {
+    Organism* host = &pop[source_pos]->GetRandomOrg();
+    emp::Ptr<SGPHost> old_host = dynamic_cast<SGPHost*>(host);
+    emp::Ptr<Organism> new_host = old_host->MakeNew(pop[dest_pos]);
+    emp::vector<emp::Ptr<Organism>> syms = old_host->GetSymbionts();
     for (size_t k = 0; k < syms.size(); k++) {
-      new_host->AddSymbiont(syms[k]->MakeNew());
+      new_host->AddSymbiont(syms[k].DynamicCast<SGPSymbiont>()->MakeNew(pop[dest_pos]));
     }
     return new_host;
   }
@@ -177,7 +180,8 @@ class MetapopWorld : public emp::World<SGPWorld> {
         pop[pop_pos]->GetNumOrgs() * my_config->SAMPLE_PROPORTION();
     emp::vector<emp::Ptr<Organism>> best_orgs;
     for (int j = 0; j < sample_size; j++) {
-      best_orgs.push_back(CopyRandHost(pop_pos));
+      // orgs in pop_pos are sampled to pop_pos
+      best_orgs.push_back(CopyRandHost(pop_pos, pop_pos));
     }
     WipePop(pop_pos);
     for (int j = 0; j < sample_size; j++) {
@@ -201,7 +205,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
         pop[source_pos]->GetNumOrgs() * my_config->SAMPLE_PROPORTION();
     WipePop(self_pos);
     for (int j = 0; j < sample_size; j++) {
-      pop[self_pos]->AddOrgAt(CopyRandHost(source_pos),
+      pop[self_pos]->AddOrgAt(CopyRandHost(source_pos, self_pos),
                               pop[self_pos]->GetNumOrgs());
     }
   }
