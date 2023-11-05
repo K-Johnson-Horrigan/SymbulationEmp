@@ -13,7 +13,7 @@
  */
 void MetapopWorld::CreateDataFiles() {
   std::string file_ending =
-      "_SEED" + std::to_string(my_config->SEED()) + ".data";
+      "_SEED" + std::to_string(my_config->SEED()) + my_config->FILE_NAME() + ".data";
 
   CreateMeansDataFile(file_ending);
   CreateOrgCountsDataFile(file_ending);
