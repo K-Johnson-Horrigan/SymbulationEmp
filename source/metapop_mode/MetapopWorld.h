@@ -73,15 +73,15 @@ class MetapopWorld : public emp::World<SGPWorld> {
    */
   void SampleRandom() {
     emp_assert(my_config->SELECTION_SCHEME() == 0);
-
     if (my_config->RANDOM_SELECTION_SCHEME() == 0) {
       // using SerialTransfer() method from emp for rand select
       emp::vector<size_t> schedule =
           emp::GetPermutation(GetRandom(), GetSize());
       for (size_t i : schedule) {
         if (IsOccupied(i)) {
+          double proportion = (my_config->SAMPLE_PROPORTION() * pop[i]->size())/pop[i]->GetNumOrgs(); 
           pop[i]->to_reproduce.clear();
-          pop[i]->SerialTransfer(my_config->SAMPLE_PROPORTION());
+          pop[i]->SerialTransfer(proportion);
           pop[i]->Resize(my_config->GRID_X(), my_config->GRID_Y());
         }
       }
@@ -174,18 +174,20 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * Purpose: For the next generation of this population to be sampled
    * from itself
    */
-  void SampleSelf(size_t pop_pos) {
-    emp_assert(IsOccupied(pop_pos));
-    int sample_size =
-        pop[pop_pos]->GetNumOrgs() * my_config->SAMPLE_PROPORTION();
-    emp::vector<emp::Ptr<Organism>> best_orgs;
-    for (int j = 0; j < sample_size; j++) {
-      // orgs in pop_pos are sampled to pop_pos
-      best_orgs.push_back(CopyRandHost(pop_pos, pop_pos));
+  void SampleSelf(size_t self_pos) {
+    emp_assert(IsOccupied(self_pos));
+    size_t sample_size = pop[self_pos]->size() * my_config->SAMPLE_PROPORTION();
+    if(sample_size > pop[self_pos]->GetNumOrgs()){
+      sample_size = pop[self_pos]->GetNumOrgs();
     }
-    WipePop(pop_pos);
-    for (int j = 0; j < sample_size; j++) {
-      pop[pop_pos]->AddOrgAt(best_orgs[j], pop[pop_pos]->GetNumOrgs());
+    emp::vector<emp::Ptr<Organism>> best_orgs;
+    for (size_t j = 0; j < sample_size; j++) {
+      // orgs in self_pos are sampled to self_pos
+      best_orgs.push_back(CopyRandHost(self_pos, self_pos));
+    }
+    WipePop(self_pos); 
+    for (size_t j = 0; j < sample_size; j++) {
+      pop[self_pos]->AddOrgAt(best_orgs[j], pop[self_pos]->GetNumOrgs());
     }
   }
 
@@ -201,17 +203,17 @@ class MetapopWorld : public emp::World<SGPWorld> {
   void SampleSource(size_t self_pos, size_t source_pos) {
     emp_assert(source_pos != self_pos);
     emp_assert(IsOccupied(self_pos) && IsOccupied(source_pos));
-    int sample_size =
-        pop[source_pos]->GetNumOrgs() * my_config->SAMPLE_PROPORTION();
+    size_t sample_size = pop[source_pos]->size() * my_config->SAMPLE_PROPORTION();
+    if (sample_size > pop[source_pos]->GetNumOrgs()) {
+      sample_size = pop[source_pos]->GetNumOrgs();
+    }
     WipePop(self_pos);
-    for (int j = 0; j < sample_size; j++) {
+    for (size_t j = 0; j < sample_size; j++) {
       pop[self_pos]->AddOrgAt(CopyRandHost(source_pos, self_pos),
                               pop[self_pos]->GetNumOrgs());
     }
   }
 
-  // TODO fix the seg fault that happens when there are living orgs at the end
-  // of the run
   /**
    * Input: None
    *
