@@ -38,8 +38,15 @@ class MetapopWorld : public emp::World<SGPWorld> {
 
     // define what is "fit"
     fun_calc_fitness_t fit_fun = [&](SGPWorld& population) {
+      // do population-level fitness by removing the amount of points gained from
+      // host ORN and making it contribute only to population-level fitness
+      // (then do combos)
       // reference to an organism and return a fitness value of type double.
-      double fitness_val = population.GetNumOrgs();
+      auto& pop_host_tasks = population.GetHostTasksDataNodeVector();
+      emp_assert(pop_host_tasks.size() > 3);
+      int orn_i = 3;
+      double fitness_val = pop_host_tasks[orn_i].GetTotal();
+      // maybe divide by # orgs to not reward just growing quickly?
       return fitness_val;
     };
     SetFitFun(fit_fun);

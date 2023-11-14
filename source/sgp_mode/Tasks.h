@@ -271,18 +271,18 @@ public:
 // These are checked top-to-bottom and the reward is given for the first one
 // that matches
 const InputTask
-    NOT = {"NOT", 1, 5.0, [](auto &x) { return ~x[0]; }, true},
+// modification: ORN is now a population task :) 
+    NOT =  {"NOT",  1, 5.0, [](auto &x) { return ~x[0]; }, true},
     NAND = {"NAND", 2, 5.0, [](auto &x) { return ~(x[0] & x[1]); }, true},
-    AND = {"AND", 2, 5.0, [](auto &x) { return x[0] & x[1]; }, true},
-    ORN = {"ORN", 2, 5.0, [](auto &x) { return x[0] | ~x[1]; }, true},
-    OR = {"OR", 2, 5.0, [](auto &x) { return x[0] | x[1]; }, true},
-    ANDN = {"ANDN", 2,        5.0, [](auto &x) { return x[0] & ~x[1]; }, true},
-    NOR = {"NOR", 2,        5.0, [](auto &x) { return ~(x[0] | x[1]); },
-           true},
-    XOR = {"XOR", 2,        5.0, [](auto &x) { return x[0] ^ x[1]; },
-           true},
-    EQU = {"EQU", 2,        5.0, [](auto &x) { return ~(x[0] ^ x[1]); },
-           true};
+    AND =  {"AND",  2, 5.0, [](auto &x) { return x[0] & x[1]; }, true},
+    ORN =  {"ORN",  2, 2.0, [](auto &x) { return x[0] | ~x[1]; }, true},
+    OR =   {"OR",   2, 5.0, [](auto &x) { return x[0] | x[1]; }, true},
+    ANDN = {"ANDN", 2, 5.0, [](auto &x) { return x[0] & ~x[1]; }, true},
+    NOR =  {"NOR",  2, 5.0, [](auto &x) { return ~(x[0] | x[1]); }, true},
+    XOR =  {"XOR",  2, 5.0, [](auto &x) { return x[0] ^ x[1]; }, true},
+    EQU =  {"EQU",  2, 5.0, [](auto &x) { return ~(x[0] ^ x[1]); }, true};
+
+
 const TaskSet LogicTasks{
     emp::NewPtr<InputTask>(NOT), emp::NewPtr<InputTask>(NAND),
     emp::NewPtr<InputTask>(AND), emp::NewPtr<InputTask>(ORN),

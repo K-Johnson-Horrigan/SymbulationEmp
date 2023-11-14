@@ -46,7 +46,7 @@ emp::DataFile& MetapopWorld::CreateMeansDataFile(
   file.AddMean(av_sym_count, "av_sym_count", "Average symbiont count");
   file.AddMean(av_host_count, "av_host_count", "Average host count");
 
-  TaskSet task_set = pop[GetRandomOrgID()]->GetTaskSet();
+  TaskSet& task_set = pop[GetRandomOrgID()]->GetTaskSet();
   // each position in the data_node_host_tasks (and sym) vectors holds the
   // total counts for all the subworlds; so take the mean
   int j = 0;
@@ -169,7 +169,7 @@ void MetapopWorld::SetupTasksNodes() {
         if (!IsOccupied(i)) {
           continue;
         }
-        TaskSet task_set = pop[i]->GetTaskSet();
+        TaskSet& task_set = pop[i]->GetTaskSet();
         int num_tasks = task_set.NumTasks();
         auto& pop_host_tasks = pop[i]->GetHostTasksDataNodeVector();
         auto& pop_sym_tasks = pop[i]->GetSymTasksDataNodeVector();
