@@ -43,11 +43,19 @@ class MetapopWorld : public emp::World<SGPWorld> {
       // (then do combos)
       // reference to an organism and return a fitness value of type double.
       auto& pop_host_tasks = population.GetHostTasksDataNodeVector();
-      // skip NOT
+
       double fitness_val = 0;
-      for (size_t i = 1; i < pop_host_tasks.size(); i++) {
-        fitness_val += pop_host_tasks[i].GetTotal();
+
+
+      // everything other than NAND
+      for (size_t i = 0; i < pop_host_tasks.size(); i++) {
+        if(i!=1) fitness_val += pop_host_tasks[i].GetTotal();
       }
+
+      // everything other than NOT
+      // for (size_t i = 1; i < pop_host_tasks.size(); i++) {
+      //   fitness_val += pop_host_tasks[i].GetTotal();
+      // }
       return fitness_val;
     };
     SetFitFun(fit_fun);

@@ -271,9 +271,8 @@ public:
 // These are checked top-to-bottom and the reward is given for the first one
 // that matches
 const InputTask
-// modification: ORN is now a population task :) 
-    NOT =  {"NOT",  1, 5.0, [](auto &x) { return ~x[0]; }, true},
-    NAND = {"NAND", 2, 0.0, [](auto &x) { return ~(x[0] & x[1]); }, true},
+    NOT =  {"NOT",  1, 1.0, [](auto &x) { return ~x[0]; }, true},
+    NAND = {"NAND", 2, 10.0, [](auto &x) { return ~(x[0] & x[1]); }, true},
     AND =  {"AND",  2, 0.0, [](auto &x) { return x[0] & x[1]; }, true},
     ORN =  {"ORN",  2, 0.0, [](auto &x) { return x[0] | ~x[1]; }, true},
     OR =   {"OR",   2, 0.0, [](auto &x) { return x[0] | x[1]; }, true},
