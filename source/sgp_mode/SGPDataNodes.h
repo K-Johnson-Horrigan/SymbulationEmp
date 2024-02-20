@@ -151,6 +151,11 @@ void SGPWorld::SetupTasksNodes() {
     OnUpdate([&](auto) {
       int i = 0;
       for (auto data : task_set) {
+        if (i == 1) { // NAND; increment ind task counter
+          ind_task_count += data.n_succeeds_host;
+        } else { // not NAND; increment pop task counter
+          pop_task_count += data.n_succeeds_host;
+        }
         data_node_host_tasks[i].AddDatum(data.n_succeeds_host);
         data_node_sym_tasks[i].AddDatum(data.n_succeeds_sym);
         i++;

@@ -46,6 +46,8 @@ private:
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_earned;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
+  size_t pop_task_count = 0;
+  size_t ind_task_count = 0;
 
 public:
   std::map<uint32_t, size_t> data_node_host_squares;
@@ -65,6 +67,39 @@ public:
     // The vectors will delete themselves automatically
   }
 
+  /**
+   * Input: None
+   *
+   * Output: The number of population-level tasks accomplished by
+   * this world.
+   *
+   * Purpose: Allows indentification of how many population-level tasks
+   * have been accomplished.
+   */
+  int GetPopTaskCount(){ return pop_task_count; }
+  
+  /**
+   * Input: None
+   *
+   * Output: The number of individual-level tasks accomplished by
+   * this world.
+   *
+   * Purpose: Allows indentification of how many individual-level tasks
+   * have been accomplished.
+   */
+  int GetIndTaskCount(){ return ind_task_count; }
+  
+  /**
+   * Input: None
+   *
+   * Output: None
+   *
+   * Purpose: Set the population and individual level trackers back to 0. 
+   */
+  void ResetIndPopTaskCounts(){
+    pop_task_count = 0;
+    ind_task_count = 0;
+  }
   /**
    * Input: None
    *

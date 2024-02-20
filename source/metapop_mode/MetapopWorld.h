@@ -38,25 +38,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
 
     // define what is "fit"
     fun_calc_fitness_t fit_fun = [&](SGPWorld& population) {
-      // do population-level fitness by removing the amount of points gained from
-      // host ORN and making it contribute only to population-level fitness
-      // (then do combos)
-      // reference to an organism and return a fitness value of type double.
-      auto& pop_host_tasks = population.GetHostTasksDataNodeVector();
-
-      double fitness_val = 0;
-
-
-      // everything other than NAND
-      for (size_t i = 0; i < pop_host_tasks.size(); i++) {
-        if(i!=1) fitness_val += pop_host_tasks[i].GetTotal();
-      }
-
-      // everything other than NOT
-      // for (size_t i = 1; i < pop_host_tasks.size(); i++) {
-      //   fitness_val += pop_host_tasks[i].GetTotal();
-      // }
-      return fitness_val;
+      return population.GetPopTaskCount();
     };
     SetFitFun(fit_fun);
   }
@@ -138,7 +120,6 @@ class MetapopWorld : public emp::World<SGPWorld> {
       }
     }
     size_t best_i = best_pop.second;
-
     // empty all not-best worlds & inject best orgs into the
     for (size_t i = 0; i < size(); i++) {
       if (i == best_i) continue;  // skip the best world
@@ -244,6 +225,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
     emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
     for (size_t i : schedule) {
       if (IsOccupied(i)) {
+        pop[i]->ResetIndPopTaskCounts();
         pop[i]->RunExperiment(false);
       }
     }
