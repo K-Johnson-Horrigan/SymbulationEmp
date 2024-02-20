@@ -142,18 +142,21 @@ class TaskSet {
 
   float MarkPerformedTask(CPUState &state, uint32_t output, size_t task_id,
                           bool shared, float score) {
-    if (state.tasks_performed->Get(task_id)){
-      //Half points if they did the task before, pushing them to do more tasks instead of cycling
-      score = score/2.0;
+    if(score > 0){
+      if (state.tasks_performed->Get(task_id)){
+        //Half points if they did the task before, pushing them to do more tasks instead of cycling
+        score = score/2.0;
+      }
+      if (state.organism->IsHost()){
+        score = state.world.Cast<SymWorld>()->PullResources(score);
+      }
+      
+      
     }
-    if (state.organism->IsHost()){
-      score = state.world.Cast<SymWorld>()->PullResources(score);
-    }
-    if (score == 0.0) {
-      return score;
-    }
-
+    
+    // was inside if, now is not.
     tasks[task_id]->MarkPerformed(state, output, task_id, shared);
+
 
     if (state.organism->IsHost())
       ++*n_succeeds_host[task_id];
@@ -213,6 +216,11 @@ public:
           score = MarkPerformedTask(state, output, i, shared, score);
           return score;
         }
+        else if (score == -1){
+          // population level task--no individual contribution, but still runs
+          score = MarkPerformedTask(state, output, i, shared, 0);
+          return 0;
+        }
       // } else if(!state.organism->IsHost()) {
       //   float score = tasks[i]->CheckOutput(state, output);
       //   if (score > 0.0) {
@@ -223,7 +231,7 @@ public:
       //   }
       }
     }
-    if (sym_special){
+    if (sym_special){ 
       return 2.5;
     } 
     return 0.0f;
@@ -271,15 +279,15 @@ public:
 // These are checked top-to-bottom and the reward is given for the first one
 // that matches
 const InputTask
-    NOT =  {"NOT",  1, 1.0, [](auto &x) { return ~x[0]; }, true},
+    NOT =  {"NOT",  1, -1.0, [](auto &x) { return ~x[0]; }, true},
     NAND = {"NAND", 2, 10.0, [](auto &x) { return ~(x[0] & x[1]); }, true},
-    AND =  {"AND",  2, 0.0, [](auto &x) { return x[0] & x[1]; }, true},
-    ORN =  {"ORN",  2, 0.0, [](auto &x) { return x[0] | ~x[1]; }, true},
-    OR =   {"OR",   2, 0.0, [](auto &x) { return x[0] | x[1]; }, true},
-    ANDN = {"ANDN", 2, 0.0, [](auto &x) { return x[0] & ~x[1]; }, true},
-    NOR =  {"NOR",  2, 0.0, [](auto &x) { return ~(x[0] | x[1]); }, true},
-    XOR =  {"XOR",  2, 0.0, [](auto &x) { return x[0] ^ x[1]; }, true},
-    EQU =  {"EQU",  2, 0.0, [](auto &x) { return ~(x[0] ^ x[1]); }, true};
+    AND =  {"AND",  2, -1.0, [](auto &x) { return x[0] & x[1]; }, true},
+    ORN =  {"ORN",  2, -1.0, [](auto &x) { return x[0] | ~x[1]; }, true},
+    OR =   {"OR",   2, -1.0, [](auto &x) { return x[0] | x[1]; }, true},
+    ANDN = {"ANDN", 2, -1.0, [](auto &x) { return x[0] & ~x[1]; }, true},
+    NOR =  {"NOR",  2, -1.0, [](auto &x) { return ~(x[0] | x[1]); }, true},
+    XOR =  {"XOR",  2, -1.0, [](auto &x) { return x[0] ^ x[1]; }, true},
+    EQU =  {"EQU",  2, -1.0, [](auto &x) { return ~(x[0] ^ x[1]); }, true};
 
 
 const TaskSet LogicTasks{

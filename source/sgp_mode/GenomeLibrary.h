@@ -283,6 +283,12 @@ sgpl::Program<Spec> CreatePrivateNotNandProgram(size_t length) {
   return program.Build(length);
 }
 
+sgpl::Program<Spec> CreatePrivateNandProgram(size_t length) {
+  ProgramBuilder program;
+  program.AddPrivateNand();
+  return program.Build(length);
+}
+
 sgpl::Program<Spec> CreateSquareProgram(size_t length) {
   ProgramBuilder program;
   program.AddSquare();
@@ -298,7 +304,14 @@ sgpl::Program<Spec> CreateStartProgram(emp::Ptr<SymConfigBase> config) {
   if (config->RANDOM_ANCESTOR()) {
     return CreateRandomProgram(PROGRAM_LENGTH);
   } else if (config->TASK_TYPE() == 1) {
-    return CreatePrivateNotProgram(PROGRAM_LENGTH);
+    if (config->START_GENOME_TYPE() == 1){
+      return CreatePrivateNotProgram(PROGRAM_LENGTH);
+    } else if (config->START_GENOME_TYPE() == 2) {
+      return CreatePrivateNandProgram(PROGRAM_LENGTH);
+    } else { // assuming config->START_GENOME_TYPE() == 3
+      emp_assert(config->START_GENOME_TYPE() == 3 && "START_GENOME_TYPE must be 1, 2, or 3");
+      return CreatePrivateNotNandProgram(PROGRAM_LENGTH);
+    }
   } else {
     return CreateSquareProgram(PROGRAM_LENGTH);
   }
