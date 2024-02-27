@@ -173,10 +173,8 @@ class MetapopWorld : public emp::World<SGPWorld> {
    */
   void SampleSelf(size_t self_pos) {
     emp_assert(IsOccupied(self_pos));
-    size_t sample_size = pop[self_pos]->size() * my_config->SAMPLE_PROPORTION();
-    if(sample_size > pop[self_pos]->GetNumOrgs()){
-      sample_size = pop[self_pos]->GetNumOrgs();
-    }
+    // resample the same orgs if necessary to start each generation with the desired # of hosts
+    size_t sample_size = my_config->GRID_X() * my_config->GRID_Y() * my_config->SAMPLE_PROPORTION();
     emp::vector<emp::Ptr<Organism>> best_orgs;
     for (size_t j = 0; j < sample_size; j++) {
       // orgs in self_pos are sampled to self_pos
@@ -200,10 +198,8 @@ class MetapopWorld : public emp::World<SGPWorld> {
   void SampleSource(size_t self_pos, size_t source_pos) {
     emp_assert(source_pos != self_pos);
     emp_assert(IsOccupied(self_pos) && IsOccupied(source_pos));
-    size_t sample_size = pop[source_pos]->size() * my_config->SAMPLE_PROPORTION();
-    if (sample_size > pop[source_pos]->GetNumOrgs()) {
-      sample_size = pop[source_pos]->GetNumOrgs();
-    }
+    // resample the same orgs if necessary to start each generation with the desired # of hosts
+    size_t sample_size = my_config->GRID_X() * my_config->GRID_Y() * my_config->SAMPLE_PROPORTION();
     WipePop(self_pos);
     for (size_t j = 0; j < sample_size; j++) {
       pop[self_pos]->AddOrgAt(CopyRandHost(source_pos, self_pos),
