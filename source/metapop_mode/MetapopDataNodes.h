@@ -15,7 +15,8 @@ void MetapopWorld::CreateDataFiles() {
   std::string file_ending =
       "_SEED" + std::to_string(my_config->SEED()) + "_SS" + std::to_string(my_config->SELECTION_SCHEME()) + my_config->FILE_NAME() + ".data";
 
-  CreateMeansDataFile(file_ending);
+  SetupTasksNodes();
+  //CreateMeansDataFile(file_ending);
   CreateOrgCountsDataFile(file_ending);
 }
 
@@ -34,7 +35,6 @@ emp::DataFile& MetapopWorld::CreateMeansDataFile(
 
   auto& av_sym_count = GetSymCountDataNode();
   auto& av_host_count = GetHostCountDataNode();
-  SetupTasksNodes();
 
   // trigger something about the data nodes?
   // makes them work correctly for the first generation
@@ -87,6 +87,10 @@ emp::DataFile& MetapopWorld::CreateOrgCountsDataFile(
                   "Average host count in " + world_name);
     file.AddTotal(pop[i]->GetSymCountDataNode(), world_name + "_sym_count",
                   "Average symbiont count in " + world_name);
+    file.AddVar(pop_task_counts[i], world_name + "_pop_task_count",
+                  "Average pop task count in " + world_name);
+    file.AddVar(ind_task_counts[i], world_name + "_ind_task_count",
+                  "Average ind task count in " + world_name);
   }
 
   file.PrintHeaderKeys();

@@ -12,6 +12,14 @@ class MetapopWorld : public emp::World<SGPWorld> {
    *
    */
   emp::Ptr<SymConfigBase> my_config = NULL;
+  
+  /**
+   *
+   * Purpose: Stores the task counts of each world locally.
+   *
+   */
+  emp::vector<int> ind_task_counts;
+  emp::vector<int> pop_task_counts;
 
   /**
    *
@@ -41,6 +49,9 @@ class MetapopWorld : public emp::World<SGPWorld> {
       return population.GetPopTaskCount();
     };
     SetFitFun(fit_fun);
+
+    ind_task_counts.resize(my_config->NUM_POPULATIONS());
+    pop_task_counts.resize(my_config->NUM_POPULATIONS());
   }
 
   /**
@@ -130,6 +141,61 @@ class MetapopWorld : public emp::World<SGPWorld> {
     SampleSelf(best_i);
   }
 
+    /**
+   * Input: None
+   *
+   * Output: None
+   *
+   * Purpose: To tournament select the next generation of organisms for each
+   * population.
+   */
+  void SampleTournament() {
+    size_t sample_size = my_config->GRID_X() * my_config->GRID_Y() * my_config->SAMPLE_PROPORTION();
+    emp::vector<emp::vector<emp::Ptr<Organism>>> new_gen;
+    for(size_t i = 0; i < size(); i++){
+      emp::vector<emp::Ptr<Organism>> host_holder; 
+      new_gen.push_back(host_holder);
+    }
+    emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
+    for(size_t i: schedule){
+
+      // select the best world out of the tournament size amount of random world
+      std::pair<double, size_t> best_pop(-1, -1);
+      size_t worlds_checked = 0;
+      emp::vector<size_t> tournament_schedule = emp::GetPermutation(GetRandom(), GetSize());
+      for (size_t j : tournament_schedule) {
+        if(worlds_checked >= my_config->TOURNAMENT_SIZE()) break;
+        emp_assert(IsOccupied(j));  // there should be no empty cells in metapop world
+        double fitness = CalcFitnessID(j);
+        if (fitness > best_pop.first) {
+          best_pop = std::make_pair(fitness, j);
+        }
+        worlds_checked++; 
+      }
+      size_t best_i = best_pop.second;
+
+
+      //  fill new_gen[i] with the orgs we want 
+      for(size_t j = 0; j < sample_size; j++){
+        new_gen[i].push_back(CopyRandHost(best_i, i));
+      }
+      
+    }
+
+    // switch over new_gen to our current populations
+    for(size_t i = 0; i < num_orgs; i++){
+      WipePop(i);
+      // insert 
+      size_t source_pos = 0;
+      emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
+      for(size_t j: schedule){
+        if(source_pos >= sample_size) break;
+        pop[i]->AddOrgAt(new_gen[i][source_pos], j);
+        source_pos++;
+      }
+    }
+  }
+
   /**
    * Input: The position of the population from which to copy a random host,
    * the position of the world which the new organisms (and their cpus) should
@@ -217,14 +283,21 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * produce the next generation.
    */
   void Update() {
+    for(size_t i = 0; i < my_config->NUM_POPULATIONS(); i++){
+      ind_task_counts[i] = 0;
+      pop_task_counts[i] = 0;
+    }
     // fully evolve each world
     emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
     for (size_t i : schedule) {
       if (IsOccupied(i)) {
         pop[i]->ResetIndPopTaskCounts();
         pop[i]->RunExperiment(false);
+        ind_task_counts[i] = pop[i]->GetIndTaskCount();
+        pop_task_counts[i] = pop[i]->GetPopTaskCount();
       }
     }
+
 
     // run emp world update to get all the data file stuff
     // do this AFTER the experiments in order to get the result of the
@@ -240,6 +313,8 @@ class MetapopWorld : public emp::World<SGPWorld> {
       SampleRandom();
     } else if (my_config->SELECTION_SCHEME() == 1) {
       SampleTruncate();
+    } else if (my_config->SELECTION_SCHEME() == 2) {
+      SampleTournament();
     }
   }
 
