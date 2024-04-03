@@ -113,6 +113,7 @@ public:
     bool run_before = random->P(1.0);
     if (host_cycle && run_before) {
       cpu.RunCPUStep(pos, my_config->CYCLES_PER_UPDATE());
+      AddPoints(my_world->PullResources(my_config->RES_DISTRIBUTE()));
     }
 
     if (HasSym() && !host_cycle) { // let each sym do whatever they need to do
@@ -138,6 +139,7 @@ public:
 
     if (host_cycle && !run_before) {
       cpu.RunCPUStep(pos, my_config->CYCLES_PER_UPDATE());
+      AddPoints(my_world->PullResources(my_config->RES_DISTRIBUTE()));
     }
 
     GrowOlder();
