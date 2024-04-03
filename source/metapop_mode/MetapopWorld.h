@@ -151,31 +151,28 @@ class MetapopWorld : public emp::World<SGPWorld> {
    */
   void SampleTournament() {
     size_t sample_size = my_config->GRID_X() * my_config->GRID_Y() * my_config->SAMPLE_PROPORTION();
+    // fill our new generation holder with empty vectors of hosts (which we will later fill)
     emp::vector<emp::vector<emp::Ptr<Organism>>> new_gen;
-    for(size_t i = 0; i < size(); i++){
+    for(size_t i = 0; i < my_config->NUM_POPULATIONS(); i++){
       emp::vector<emp::Ptr<Organism>> host_holder; 
       new_gen.push_back(host_holder);
     }
-    emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
-    for(size_t i: schedule){
 
-      // select the best world out of the tournament size amount of random world
-      std::pair<double, size_t> best_pop(-1, -1);
-      size_t worlds_checked = 0;
-      emp::vector<size_t> tournament_schedule = emp::GetPermutation(GetRandom(), GetSize());
-      for (size_t j : tournament_schedule) {
-        if(worlds_checked >= my_config->TOURNAMENT_SIZE()) break;
-        emp_assert(IsOccupied(j));  // there should be no empty cells in metapop world
-        double fitness = CalcFitnessID(j);
+    // loop through the number of metapop worlds we want to create
+    for(size_t i = 0; i < my_config->NUM_POPULATIONS(); i++){
+
+      // draw a tournament (with replacement) of worlds and find the highest achiever
+      std::pair<double, size_t> best_pop(-1, 0);
+      for (size_t j = 0; j < my_config->TOURNAMENT_SIZE(); j++) {
+        size_t participant_index = GetRandomOrgID();
+        double fitness = CalcFitnessID(participant_index);
         if (fitness > best_pop.first) {
-          best_pop = std::make_pair(fitness, j);
+          best_pop = std::make_pair(fitness, participant_index);
         }
-        worlds_checked++; 
       }
       size_t best_i = best_pop.second;
 
-
-      //  fill new_gen[i] with the orgs we want 
+      //  fill new_gen[i] with host copies from our chosen parent
       for(size_t j = 0; j < sample_size; j++){
         new_gen[i].push_back(CopyRandHost(best_i, i));
       }
@@ -183,11 +180,12 @@ class MetapopWorld : public emp::World<SGPWorld> {
     }
 
     // switch over new_gen to our current populations
-    for(size_t i = 0; i < num_orgs; i++){
+    // randomly spread hosts across the new world
+    for(size_t i = 0; i < my_config->NUM_POPULATIONS(); i++){
       WipePop(i);
-      // insert 
       size_t source_pos = 0;
-      emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
+      size_t subworld_size = my_config->GRID_X() * my_config->GRID_Y();
+      emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), subworld_size);
       for(size_t j: schedule){
         if(source_pos >= sample_size) break;
         pop[i]->AddOrgAt(new_gen[i][source_pos], j);
@@ -195,6 +193,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
       }
     }
   }
+
 
   /**
    * Input: The position of the population from which to copy a random host,

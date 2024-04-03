@@ -56,7 +56,7 @@ TEST_CASE("MetaPop Update", "[metapop]") {
 
   int expected_sample_size = world_size * proportion;
 
-  // sampling behavior should be the sample between selection schemes
+  // sampling behavior should be the same between selection schemes
   WHEN("Random selection is used"){
     config.SELECTION_SCHEME(0);
     config.RANDOM_SELECTION_SCHEME(2);
@@ -76,6 +76,21 @@ TEST_CASE("MetaPop Update", "[metapop]") {
 
   WHEN("Truncation selection is used"){
     config.SELECTION_SCHEME(1);
+    THEN("Hosts are sampled"){
+      for(size_t i = 0; i < num_worlds; i++){
+        int host_count = world.GetOrg(i).GetNumOrgs();
+        REQUIRE(host_count == world_size);
+      }
+      world.Update();
+      for(size_t i = 0; i < num_worlds; i++){
+        int host_count = world.GetOrg(i).GetNumOrgs();
+        REQUIRE(host_count == expected_sample_size);
+      }
+    }
+  }
+
+   WHEN("Tournament selection is used"){
+    config.SELECTION_SCHEME(2);
     THEN("Hosts are sampled"){
       for(size_t i = 0; i < num_worlds; i++){
         int host_count = world.GetOrg(i).GetNumOrgs();
