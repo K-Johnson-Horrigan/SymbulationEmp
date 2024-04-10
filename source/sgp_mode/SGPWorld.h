@@ -46,7 +46,8 @@ private:
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_earned;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
-  emp::vector<int> task_counts;
+  emp::vector<int> host_task_counts;
+  emp::vector<int> sym_task_counts;
 
 public:
   std::map<uint32_t, size_t> data_node_host_squares;
@@ -60,7 +61,8 @@ public:
         task_set(task_set) {
 
           // set up the whole-experiment task count vector
-          task_counts.assign(task_set.NumTasks(), 0);
+          host_task_counts.assign(task_set.NumTasks(), 0);
+          sym_task_counts.assign(task_set.NumTasks(), 0);
   }
 
   virtual ~SGPWorld() {
@@ -79,7 +81,18 @@ public:
    * Purpose: Allows indentification of how many population-and individual
    * level tasks have been accomplished.
    */
-  emp::vector<int>* GetTaskCounts(){ return &task_counts; }
+  emp::vector<int>* GetHostTaskCounts(){ return &host_task_counts; }
+
+    /**
+   * Input: None
+   *
+   * Output: A vector containing the number of time each task has been 
+   * executed by symbionts over the course of the experiment
+   *
+   * Purpose: Allows indentification of how many tasks have been
+   * performed by symbionts while hosts worked toward ind/pop tasks
+   */
+  emp::vector<int>* GetSymTaskCounts(){ return &sym_task_counts; }
   
   /**
    * Input: None
@@ -89,8 +102,9 @@ public:
    * Purpose: Set the population and individual level trackers back to 0. 
    */
   void ResetTaskCounts(){
-    for(size_t i = 0; i < task_counts.size(); i++){
-      task_counts[i] = 0;
+    for(size_t i = 0; i < host_task_counts.size(); i++){
+      host_task_counts[i] = 0;
+      sym_task_counts[i] = 0;
     }
   }
 

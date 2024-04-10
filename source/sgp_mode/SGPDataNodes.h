@@ -152,8 +152,9 @@ void SGPWorld::SetupTasksNodes() {
       int i = 0;
       for (auto data : task_set) {
         // pop/ind task tracking (counts over whole experiment)
-        task_counts[i] += data.n_succeeds_host;
-        
+        host_task_counts[i] += data.n_succeeds_host;
+        sym_task_counts[i] += data.n_succeeds_sym;
+
         // data node tracking (tracks between specified intervals)
         data_node_host_tasks[i].AddDatum(data.n_succeeds_host);
         data_node_sym_tasks[i].AddDatum(data.n_succeeds_sym);

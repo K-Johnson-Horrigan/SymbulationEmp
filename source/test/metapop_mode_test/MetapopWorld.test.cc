@@ -7,7 +7,7 @@
 // (i.e. is it working as expected)
 int GetPopTaskCount(SGPWorld* world){
   int sum_pop_tasks = 0; 
-  emp::vector<int>* task_counts = world->GetTaskCounts();
+  emp::vector<int>* task_counts = world->GetHostTaskCounts();
   for(size_t i = 0; i < task_counts->size(); i++){
     if(i == 1) continue; // skip NAND; it's individual
     sum_pop_tasks += task_counts->at(i);
@@ -20,7 +20,7 @@ int GetPopTaskCount(SGPWorld* world){
 // independent fitness
 int GetIndTaskCount(SGPWorld* world){
   // NAND count
-  return world->GetTaskCounts()->at(1);
+  return world->GetHostTaskCounts()->at(1);
 }
 
 

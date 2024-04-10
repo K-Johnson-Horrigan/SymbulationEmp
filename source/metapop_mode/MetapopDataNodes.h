@@ -48,11 +48,14 @@ emp::DataFile& MetapopWorld::CreateOrgCountsDataFile(
     file.AddTotal(pop[i]->GetSymCountDataNode(), world_name + "_sym_count",
                   "Average symbiont count in " + world_name);
 
-    emp::vector<int>* task_counts = pop[i]->GetTaskCounts();
+    emp::vector<int>* host_task_counts = pop[i]->GetHostTaskCounts();
+    emp::vector<int>* sym_task_counts = pop[i]->GetHostTaskCounts();
     int t = 0;
     for (auto data : task_set) {
-      file.AddVar(task_counts->at(t), world_name + "_"+ data.task.name +"_count",
+      file.AddVar(host_task_counts->at(t), world_name + "_"+ data.task.name +"_host_count",
                   "Overall host completions of " + data.task.name + " in " + world_name);
+      file.AddVar(sym_task_counts->at(t), world_name + "_"+ data.task.name +"_sym_count",
+                  "Overall symbiont completions of " + data.task.name + " in " + world_name);
       t++;
     }
   }

@@ -28,7 +28,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
     // define what is "fit"
     fun_calc_fitness_t fit_fun = [&](SGPWorld& population) {
       int sum_pop_tasks = 0; 
-      emp::vector<int>* task_counts = population.GetTaskCounts();
+      emp::vector<int>* task_counts = population.GetHostTaskCounts();
       for(size_t i = 0; i < task_counts->size(); i++){
         if(i == 1) continue; // skip NAND; it's individual
         sum_pop_tasks += task_counts->at(i);
