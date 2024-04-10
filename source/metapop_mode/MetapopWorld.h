@@ -3,7 +3,7 @@
 
 #include "../sgp_mode/SGPWorld.h"
 #include "../sgp_mode/SGPWorldSetup.cc"
-// TODO data node tests
+
 class MetapopWorld : public emp::World<SGPWorld> {
  protected:
   /**
@@ -12,25 +12,6 @@ class MetapopWorld : public emp::World<SGPWorld> {
    *
    */
   emp::Ptr<SymConfigBase> my_config = NULL;
-  
-  /**
-   *
-   * Purpose: Stores the task counts of each world locally.
-   *
-   */
-  emp::vector<int> ind_task_counts;
-  emp::vector<int> pop_task_counts;
-
-  /**
-   *
-   * Purpose: Data nodes which collect information pertaining to this
-   * experiment.
-   *
-   */
-  emp::Ptr<emp::DataMonitor<int>> data_node_symcount;
-  emp::Ptr<emp::DataMonitor<int>> data_node_hostcount;
-  emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
-  emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
 
  public:
   /**
@@ -46,12 +27,15 @@ class MetapopWorld : public emp::World<SGPWorld> {
 
     // define what is "fit"
     fun_calc_fitness_t fit_fun = [&](SGPWorld& population) {
-      return population.GetPopTaskCount();
+      int sum_pop_tasks = 0; 
+      emp::vector<int>* task_counts = population.GetTaskCounts();
+      for(size_t i = 0; i < task_counts->size(); i++){
+        if(i == 1) continue; // skip NAND; it's individual
+        sum_pop_tasks += task_counts->at(i);
+      }
+      return sum_pop_tasks;
     };
     SetFitFun(fit_fun);
-
-    ind_task_counts.resize(my_config->NUM_POPULATIONS());
-    pop_task_counts.resize(my_config->NUM_POPULATIONS());
   }
 
   /**
@@ -62,10 +46,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * Purpose: To destruct the objects belonging to MetapopWorld to conserve
    * memory.
    */
-  ~MetapopWorld() {
-    if (data_node_symcount) data_node_symcount.Delete();
-    if (data_node_hostcount) data_node_hostcount.Delete();
-  }
+  ~MetapopWorld() {}
 
   /**
    * Definition of a setup functions, expanded in MetapopWorldSetup.cc
@@ -282,18 +263,12 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * produce the next generation.
    */
   void Update() {
-    for(size_t i = 0; i < my_config->NUM_POPULATIONS(); i++){
-      ind_task_counts[i] = 0;
-      pop_task_counts[i] = 0;
-    }
     // fully evolve each world
     emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), GetSize());
     for (size_t i : schedule) {
       if (IsOccupied(i)) {
-        pop[i]->ResetIndPopTaskCounts();
+        pop[i]->ResetTaskCounts();
         pop[i]->RunExperiment(false);
-        ind_task_counts[i] = pop[i]->GetIndTaskCount();
-        pop_task_counts[i] = pop[i]->GetPopTaskCount();
       }
     }
 
@@ -321,10 +296,7 @@ class MetapopWorld : public emp::World<SGPWorld> {
    * Data node methods expanded in MetapopDataNodes.h
    */
   void CreateDataFiles();
-  emp::DataFile& CreateMeansDataFile(const std::string &file_ending);
   emp::DataFile& CreateOrgCountsDataFile(const std::string &file_ending);
-  emp::DataMonitor<int>& GetSymCountDataNode();
-  emp::DataMonitor<int>& GetHostCountDataNode();
   void SetupTasksNodes();
 };  // MetapopWorld class
 #endif

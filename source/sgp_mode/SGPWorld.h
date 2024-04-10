@@ -46,8 +46,7 @@ private:
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_earned;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
-  size_t pop_task_count = 0;
-  size_t ind_task_count = 0;
+  emp::vector<int> task_counts;
 
 public:
   std::map<uint32_t, size_t> data_node_host_squares;
@@ -58,7 +57,11 @@ public:
 
   SGPWorld(emp::Random &r, emp::Ptr<SymConfigBase> _config, TaskSet task_set)
       : SymWorld(r, _config), scheduler(*this, _config->THREAD_COUNT()),
-        task_set(task_set) {}
+        task_set(task_set) {
+
+          // set up the whole-experiment task count vector
+          task_counts.assign(task_set.NumTasks(), 0);
+  }
 
   virtual ~SGPWorld() {
     if(data_node_sym_donated) data_node_sym_donated.Delete();
@@ -70,24 +73,13 @@ public:
   /**
    * Input: None
    *
-   * Output: The number of population-level tasks accomplished by
-   * this world.
+   * Output: A vector containing the number of time each task has been 
+   * executed by hosts over the course of the experiment
    *
-   * Purpose: Allows indentification of how many population-level tasks
-   * have been accomplished.
+   * Purpose: Allows indentification of how many population-and individual
+   * level tasks have been accomplished.
    */
-  int GetPopTaskCount(){ return pop_task_count; }
-  
-  /**
-   * Input: None
-   *
-   * Output: The number of individual-level tasks accomplished by
-   * this world.
-   *
-   * Purpose: Allows indentification of how many individual-level tasks
-   * have been accomplished.
-   */
-  int GetIndTaskCount(){ return ind_task_count; }
+  emp::vector<int>* GetTaskCounts(){ return &task_counts; }
   
   /**
    * Input: None
@@ -96,10 +88,12 @@ public:
    *
    * Purpose: Set the population and individual level trackers back to 0. 
    */
-  void ResetIndPopTaskCounts(){
-    pop_task_count = 0;
-    ind_task_count = 0;
+  void ResetTaskCounts(){
+    for(size_t i = 0; i < task_counts.size(); i++){
+      task_counts[i] = 0;
+    }
   }
+
   /**
    * Input: None
    *

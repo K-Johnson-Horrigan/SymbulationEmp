@@ -2,6 +2,30 @@
 #include "../../metapop_mode/MetapopDataNodes.h"
 #include "../../metapop_mode/MetapopWorldSetup.cc"
 
+// this is essentially just CalcFitnessID()
+// but done locally for testing purposes 
+// (i.e. is it working as expected)
+int GetPopTaskCount(SGPWorld* world){
+  int sum_pop_tasks = 0; 
+  emp::vector<int>* task_counts = world->GetTaskCounts();
+  for(size_t i = 0; i < task_counts->size(); i++){
+    if(i == 1) continue; // skip NAND; it's individual
+    sum_pop_tasks += task_counts->at(i);
+  }
+  return sum_pop_tasks;
+}
+
+// wrapper to get individual task count
+// currently only NAND contributes to 
+// independent fitness
+int GetIndTaskCount(SGPWorld* world){
+  // NAND count
+  return world->GetTaskCounts()->at(1);
+}
+
+
+
+
 
 TEST_CASE("Populate", "[metapop]") {
   emp::Random random(61);
@@ -158,24 +182,24 @@ TEST_CASE("Selection schemes", "[metapop]"){
   emp::vector<size_t> schedule = emp::GetPermutation(world.GetRandom(), num_worlds);
   for (size_t i : schedule) {
     if (world.IsOccupied(i)) {
-      world.GetOrg(i).ResetIndPopTaskCounts();
+      world.GetOrg(i).ResetTaskCounts();
       world.GetOrg(i).RunExperiment(false);
     }
   }
   world.emp::World<SGPWorld>::Update(); 
   
   // SET UP BASELINE TASK COUNTS FOR THIS SYSTEM
-  double pop_tasks_pre = 0;
-  double ind_tasks_pre = 0;
+  int pop_tasks_pre = 0;
+  int ind_tasks_pre = 0;
   
-  double expected_highest_pop = world.GetOrg(0).GetPopTaskCount();
-  double expected_lowest_ind = world.GetOrg(0).GetIndTaskCount();
-  double expected_lower_pop = world.GetOrg(1).GetPopTaskCount();
+  int expected_highest_pop = GetPopTaskCount(&world.GetOrg(0));
+  int expected_lowest_ind = GetIndTaskCount(&world.GetOrg(0));
+  int expected_lower_pop = GetPopTaskCount(&world.GetOrg(1));
 
   for (size_t i = 0; i < num_worlds; i++){
     emp_assert(world.IsOccupied(i));
-    pop_tasks_pre += world.GetOrg(i).GetPopTaskCount();
-    ind_tasks_pre += world.GetOrg(i).GetIndTaskCount();
+    pop_tasks_pre += GetPopTaskCount(&world.GetOrg(i));
+    ind_tasks_pre += GetIndTaskCount(&world.GetOrg(i));
   }
 
   WHEN("We run the worlds (not sampling them)"){
@@ -187,8 +211,8 @@ TEST_CASE("Selection schemes", "[metapop]"){
 
       for (size_t i = 1; i < num_worlds; i++){
         emp_assert(world.IsOccupied(i));
-        REQUIRE(world.GetOrg(i).GetPopTaskCount() + 100 < expected_highest_pop);
-        REQUIRE(world.GetOrg(i).GetIndTaskCount() - 100 > expected_lowest_ind);
+        REQUIRE(GetPopTaskCount(&world.GetOrg(i)) + 100 < expected_highest_pop);
+        REQUIRE(GetIndTaskCount(&world.GetOrg(i)) - 100 > expected_lowest_ind);
       }
     }
   }
@@ -206,7 +230,7 @@ TEST_CASE("Selection schemes", "[metapop]"){
     emp::vector<size_t> schedule = emp::GetPermutation(world.GetRandom(), num_worlds);
     for (size_t i : schedule) {
       if (world.IsOccupied(i)) {
-        world.GetOrg(i).ResetIndPopTaskCounts();
+        world.GetOrg(i).ResetTaskCounts();
         world.GetOrg(i).RunExperiment(false);
       }
     }
@@ -219,13 +243,13 @@ TEST_CASE("Selection schemes", "[metapop]"){
     }
 
     THEN("The mean number of population level tasks in the next generation will increase"){
-      double pop_tasks_post = 0;
-      double ind_tasks_post = 0;
+      int pop_tasks_post = 0;
+      int ind_tasks_post = 0;
 
       for (size_t i = 0; i < num_worlds; i++){
         emp_assert(world.IsOccupied(i));
-        pop_tasks_post += world.GetOrg(i).GetPopTaskCount();
-        ind_tasks_post += world.GetOrg(i).GetIndTaskCount();
+        pop_tasks_post += GetPopTaskCount(&world.GetOrg(i));
+        ind_tasks_post += GetIndTaskCount(&world.GetOrg(i));
       }
       
       REQUIRE(pop_tasks_post > 0); // NOTs 
@@ -235,7 +259,7 @@ TEST_CASE("Selection schemes", "[metapop]"){
 
       for (size_t i = 1; i < num_worlds; i++){
         emp_assert(world.IsOccupied(i));
-        REQUIRE(world.GetOrg(i).GetPopTaskCount() - 100 > expected_lower_pop);
+        REQUIRE(GetPopTaskCount(&world.GetOrg(i)) - 100 > expected_lower_pop);
       }
         
     }
@@ -255,7 +279,7 @@ TEST_CASE("Selection schemes", "[metapop]"){
     emp::vector<size_t> schedule = emp::GetPermutation(world.GetRandom(), num_worlds);
     for (size_t i : schedule) {
       if (world.IsOccupied(i)) {
-        world.GetOrg(i).ResetIndPopTaskCounts();
+        world.GetOrg(i).ResetTaskCounts();
         world.GetOrg(i).RunExperiment(false);
       }
     }
@@ -268,13 +292,13 @@ TEST_CASE("Selection schemes", "[metapop]"){
     }
 
     THEN("The mean number of population level tasks in the next generation will increase"){
-      double pop_tasks_post = 0;
-      double ind_tasks_post = 0;
+      int pop_tasks_post = 0;
+      int ind_tasks_post = 0;
 
       for (size_t i = 0; i < num_worlds; i++){
         emp_assert(world.IsOccupied(i));
-        pop_tasks_post += world.GetOrg(i).GetPopTaskCount();
-        ind_tasks_post += world.GetOrg(i).GetIndTaskCount();
+        pop_tasks_post += GetPopTaskCount(&world.GetOrg(i));
+        ind_tasks_post += GetIndTaskCount(&world.GetOrg(i));
       }
       REQUIRE(pop_tasks_post < ind_tasks_post); 
       REQUIRE(pop_tasks_post < pop_tasks_pre); // if there are NOTs, there are very few of them accross the 10 worlds
@@ -283,7 +307,7 @@ TEST_CASE("Selection schemes", "[metapop]"){
 
       for (size_t i = 1; i < num_worlds; i++){
         emp_assert(world.IsOccupied(i));
-        REQUIRE(world.GetOrg(i).GetPopTaskCount() < 100);
+        REQUIRE(GetPopTaskCount(&world.GetOrg(i)) < 100);
       }
         
     }
