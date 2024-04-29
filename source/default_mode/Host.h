@@ -439,13 +439,18 @@ public:
    * Purpose: To add a symbionts to a host's symbionts
    */
   int AddSymbiont(emp::Ptr<Organism> _in) {
-    if((int)syms.size() >= my_config->SYM_LIMIT()){
+    // very hacky ousting which only lets one sym be ousted
+    bool oust_prev_sym = false;
+    if((int)syms.size() == my_config->SYM_LIMIT()){
       emp::Ptr<Organism> last_sym = syms.back();
-      syms.pop_back();
       last_sym->SetDead();
+      oust_prev_sym = true;
     }
 
-    if((int)syms.size() < my_config->SYM_LIMIT() && SymAllowedIn()){
+    // host update should loop over syms.size(), and so will catch the "extra" dead hosted sym
+    // only allow one oust per host update
+    bool have_space = (int)syms.size() < my_config->SYM_LIMIT() || ((int)syms.size() == my_config->SYM_LIMIT() && oust_prev_sym);
+    if(have_space && SymAllowedIn()){
       syms.push_back(_in);
       _in->SetHost(this);
       _in->UponInjection();

@@ -125,6 +125,9 @@ public:
    * movement
    */
   void Process(emp::WorldPosition pos) {
+    // don't let the # points get too high (since addpoints(--1) = + 1 point per update)
+    if(my_config->SYM_HORIZ_TRANS_RES() == -1){ points = 1; } 
+    
     if (my_host == nullptr && my_world->GetUpdate() % my_config->LIMITED_TASK_RESET_INTERVAL() == 0)
       cpu.state.used_resources->reset();
     // Instead of calling Host::Process, do the important stuff here
