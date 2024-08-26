@@ -146,13 +146,13 @@ class TaskSet {
       //Half points if they did the task before, pushing them to do more tasks instead of cycling
       score = score/2.0;
     }
-    if (state.organism->IsHost()){
-      score = state.world.Cast<SymWorld>()->PullResources(score);
-    }
+    // stress symbionts and hosts take resources from world
+    score = state.world.Cast<SymWorld>()->PullResources(score);
+
     if (score == 0.0) {
       return score;
     }
-
+    
     tasks[task_id]->MarkPerformed(state, output, task_id, shared);
 
     if (state.organism->IsHost())
