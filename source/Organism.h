@@ -239,5 +239,11 @@ class Organism {
     std::cout << "ProcessPool called from Organism" << std::endl;
     throw "Organism method called!";}
 
+
+  // Stress parasite host function
+  virtual void AddSurvivalResource(int _in) {
+    std::cout << "AddSurvivalResource called from Organism" << std::endl;
+    throw "Organism method called!";}
+  
 };
 #endif

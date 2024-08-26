@@ -214,6 +214,17 @@ INST(Infect, {
   }
 });
 
+
+INST(Attack, { // stress parasite
+  // not compatible with ecto
+  if (state.organism->IsHost() || state.organism->GetHost() == nullptr) return;
+  state.organism->GetHost()->AddSurvivalResource(-1);
+});
+
+INST(Protect, { // stress mutualist
+  if (state.organism->IsHost() || state.organism->GetHost() == nullptr) return;
+  state.organism->GetHost()->AddSurvivalResource(1);
+});
 } // namespace inst
 
 #endif

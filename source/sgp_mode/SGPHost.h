@@ -11,6 +11,7 @@ class SGPHost : public Host {
 private:
   CPU cpu;
   const emp::Ptr<SGPWorld> my_world;
+  int survival_resource = 75;
 
 public:
   /**
@@ -86,6 +87,16 @@ public:
   CPU &GetCPU() { return cpu; }
 
   /**
+   * Input: The amount to change the survival stash by
+   *
+   * Output: None
+   *
+   * Purpose: Allows modification of the host's survival 
+   * chance by symbionts
+   */
+  void AddSurvivalResource(int _in) { survival_resource += _in; }
+
+  /**
    * Input: The location of the host.
    *
    * Output: None
@@ -99,11 +110,13 @@ public:
       //cpu.state.used_resources->reset();
     // Instead of calling Host::Process, do the important stuff here
     // Our instruction handles reproduction
-
+    
     // stress condition death event  
     if(my_world->GetUpdate() % 2000 == 0){
-      double death_chance = 0.25;
-      if(HasSym()) death_chance = 0.125;
+      double death_chance = survival_resource/100.0;;
+      if(survival_resource > 100) death_chance = 1.0;
+      else if(survival_resource <= 0) death_chance = 0.0;
+      
       bool do_random_death = random->P(death_chance);
       if(do_random_death) {
         SetDead();
