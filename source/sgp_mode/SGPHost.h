@@ -99,6 +99,18 @@ public:
       //cpu.state.used_resources->reset();
     // Instead of calling Host::Process, do the important stuff here
     // Our instruction handles reproduction
+
+    // stress condition death event  
+    if(my_world->GetUpdate() % 2000 == 0){
+      double death_chance = 0.25;
+      if(HasSym()) death_chance = 0.125;
+      bool do_random_death = random->P(death_chance);
+      if(do_random_death) {
+        SetDead();
+      }
+    }
+
+
     if (GetDead()) {
       return;
     }
