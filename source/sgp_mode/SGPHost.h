@@ -11,7 +11,7 @@ class SGPHost : public Host {
 private:
   CPU cpu;
   const emp::Ptr<SGPWorld> my_world;
-  int survival_resource = 75;
+  int survival_resources = 75;
 
 public:
   /**
@@ -94,7 +94,17 @@ public:
    * Purpose: Allows modification of the host's survival 
    * chance by symbionts
    */
-  void AddSurvivalResource(int _in) { survival_resource += _in; }
+  void AddSurvivalResource(int _in) { survival_resources += _in; }
+
+  /**
+   * Input: None
+   *
+   * Output: The number of survival resources the host
+   * posses
+   *
+   * Purpose: Allows collection of survival resource data
+   */
+  int GetSurvivalResources() { return survival_resources; }
 
   /**
    * Input: The location of the host.
@@ -113,9 +123,9 @@ public:
     
     // stress condition death event  
     if(my_world->GetUpdate() % 2000 == 0){
-      double death_chance = survival_resource/100.0;;
-      if(survival_resource > 100) death_chance = 1.0;
-      else if(survival_resource <= 0) death_chance = 0.0;
+      double death_chance = survival_resources/100.0;;
+      if(survival_resources > 100) death_chance = 1.0;
+      else if(survival_resources <= 0) death_chance = 0.0;
       
       bool do_random_death = random->P(death_chance);
       if(do_random_death) {

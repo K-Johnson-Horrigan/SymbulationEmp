@@ -46,6 +46,9 @@ private:
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_earned;
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_attacked;
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_protected;
+  emp::Ptr<emp::DataMonitor<double>> data_node_host_survival_res;
+  emp::Ptr<emp::DataMonitor<double>> data_node_positive_host_survival_res;
+  emp::Ptr<emp::DataMonitor<double>> data_node_count_positive_host_survival_res;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
 
@@ -66,6 +69,9 @@ public:
     data_node_sym_earned.Delete();
     data_node_sym_attacked.Delete();
     data_node_sym_protected.Delete();
+    data_node_host_survival_res.Delete();
+    data_node_positive_host_survival_res.Delete();
+    data_node_count_positive_host_survival_res.Delete();
     // The vectors will delete themselves automatically
   }
 
@@ -155,6 +161,9 @@ public:
   SyncDataMonitor<double> &GetSymEarnedDataNode();
   SyncDataMonitor<double> &GetSymAttackedDataNode();
   SyncDataMonitor<double> &GetSymProtectedDataNode();
+  emp::DataMonitor<double> &GetHostSurvivalResDataNode();
+  emp::DataMonitor<double> &GetPositiveHostSurvivalResDataNode();
+  emp::DataMonitor<double> &GetCountPositiveHostSurvivalResDataNode();
   void SetupTasksNodes();
 
   emp::DataFile &SetUpOrgCountFile(const std::string &filename);

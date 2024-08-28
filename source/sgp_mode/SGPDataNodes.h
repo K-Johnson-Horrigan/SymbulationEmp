@@ -124,22 +124,8 @@ emp::DataFile &SGPWorld::SetupSymDonatedFile(const std::string &filename) {
   GetSymEarnedDataNode();
   file.AddTotal(data_node_sym_earned->UnsynchronizedGetMonitor(),
                 "sym_points_earned", "Points earned by symbionts", true);
-  GetSymDonatedDataNode();
-  file.AddFun<size_t>(
-      [&]() {
-        return data_node_sym_donated->UnsynchronizedGetMonitor().GetCount();
-      },
-      "sym_donate_calls", "Number of donate calls");
-  file.AddTotal(data_node_sym_donated->UnsynchronizedGetMonitor(),
-                "sym_points_donated", "Points donated by symbionts", true);
-  GetSymStolenDataNode();
-  file.AddFun<size_t>(
-      [&]() {
-        return data_node_sym_stolen->UnsynchronizedGetMonitor().GetCount();
-      },
-      "sym_steal_calls", "Number of steal calls");
-  file.AddTotal(data_node_sym_stolen->UnsynchronizedGetMonitor(),
-                "sym_points_stolen", "Points stolen by symbionts", true);
+  
+  // deleted sym donated/stolen columns for now
 
   // stress parasites
   GetSymAttackedDataNode();
@@ -160,6 +146,10 @@ emp::DataFile &SGPWorld::SetupSymDonatedFile(const std::string &filename) {
   file.AddTotal(data_node_sym_protected->UnsynchronizedGetMonitor(),
                 "sym_points_protected", "Survival resources incremented by symbionts", true);
 
+  file.AddMean(GetHostSurvivalResDataNode(), "mean_survival_res", "Average number of survival resources per host");
+  
+  file.AddMean(GetPositiveHostSurvivalResDataNode(), "mean_positive_survival_res", "Average positive number of survival resources per host");
+  file.AddTotal(GetCountPositiveHostSurvivalResDataNode(), "count_positive_survival_res", "Number of hosts with positive survival resource values");
   file.PrintHeaderKeys();
   return file;
 }
@@ -178,6 +168,48 @@ void SGPWorld::SetupTasksNodes() {
       task_set.ResetTaskData();
     });
   }
+}
+
+emp::DataMonitor<double> &SGPWorld::GetHostSurvivalResDataNode() {
+  if (!data_node_host_survival_res) {
+    data_node_host_survival_res.New();
+    OnUpdate([this](size_t){
+      data_node_host_survival_res->Reset();
+      for (size_t i = 0; i< pop.size(); i++) {
+        if (IsOccupied(i)) {
+          data_node_host_survival_res->AddDatum(pop[i]->GetSurvivalResources());
+        }
+      }
+    });
+  }
+  return *data_node_host_survival_res;
+}
+
+emp::DataMonitor<double> &SGPWorld::GetPositiveHostSurvivalResDataNode() {
+  if (!data_node_positive_host_survival_res) {
+    data_node_positive_host_survival_res.New();
+    OnUpdate([this](size_t){
+      data_node_positive_host_survival_res->Reset();
+      data_node_count_positive_host_survival_res->Reset();
+      for (size_t i = 0; i< pop.size(); i++) {
+        if (IsOccupied(i)) {
+          int survival_res = pop[i]->GetSurvivalResources();
+          if(survival_res > 0) {
+            data_node_positive_host_survival_res->AddDatum(survival_res);
+            data_node_count_positive_host_survival_res->AddDatum(1);
+          }
+        }
+      }
+    });
+  }
+  return *data_node_positive_host_survival_res;
+}
+
+emp::DataMonitor<double> &SGPWorld::GetCountPositiveHostSurvivalResDataNode() {
+  if (!data_node_count_positive_host_survival_res) {
+    data_node_count_positive_host_survival_res.New();
+  }
+  return *data_node_count_positive_host_survival_res;
 }
 
 SyncDataMonitor<double> &SGPWorld::GetSymEarnedDataNode() {
