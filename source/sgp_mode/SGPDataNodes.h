@@ -140,6 +140,26 @@ emp::DataFile &SGPWorld::SetupSymDonatedFile(const std::string &filename) {
       "sym_steal_calls", "Number of steal calls");
   file.AddTotal(data_node_sym_stolen->UnsynchronizedGetMonitor(),
                 "sym_points_stolen", "Points stolen by symbionts", true);
+
+  // stress parasites
+  GetSymAttackedDataNode();
+  file.AddFun<size_t>(
+      [&]() {
+        return data_node_sym_attacked->UnsynchronizedGetMonitor().GetCount();
+      },
+      "sym_attack_calls", "Number of attack calls");
+  file.AddTotal(data_node_sym_attacked->UnsynchronizedGetMonitor(),
+                "sym_points_attacked", "Survival resources decremented by symbionts", true);
+
+  GetSymProtectedDataNode();
+  file.AddFun<size_t>(
+      [&]() {
+        return data_node_sym_protected->UnsynchronizedGetMonitor().GetCount();
+      },
+      "sym_protect_calls", "Number of protect calls");
+  file.AddTotal(data_node_sym_protected->UnsynchronizedGetMonitor(),
+                "sym_points_protected", "Survival resources incremented by symbionts", true);
+
   file.PrintHeaderKeys();
   return file;
 }
@@ -179,6 +199,20 @@ SyncDataMonitor<double> &SGPWorld::GetSymStolenDataNode() {
     data_node_sym_stolen.New();
   }
   return *data_node_sym_stolen;
+}
+
+SyncDataMonitor<double> &SGPWorld::GetSymAttackedDataNode() {
+  if (!data_node_sym_attacked) {
+    data_node_sym_attacked.New();
+  }
+  return *data_node_sym_attacked;
+}
+
+SyncDataMonitor<double> &SGPWorld::GetSymProtectedDataNode() {
+  if (!data_node_sym_protected) {
+    data_node_sym_protected.New();
+  }
+  return *data_node_sym_protected;
 }
 
 #endif

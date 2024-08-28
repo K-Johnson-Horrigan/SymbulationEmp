@@ -218,12 +218,18 @@ INST(Infect, {
 INST(Attack, { // stress parasite
   // not compatible with ecto
   if (state.organism->IsHost() || state.organism->GetHost() == nullptr) return;
-  state.organism->GetHost()->AddSurvivalResource(-1);
+  int to_attack = -1;
+  state.world->GetSymAttackedDataNode().WithMonitor(
+          [=](auto &m) { m.AddDatum(to_attack); });
+  state.organism->GetHost()->AddSurvivalResource(to_attack);
 });
 
 INST(Protect, { // stress mutualist
   if (state.organism->IsHost() || state.organism->GetHost() == nullptr) return;
-  state.organism->GetHost()->AddSurvivalResource(1);
+  int to_protect = -1;
+  state.world->GetSymProtectedDataNode().WithMonitor(
+          [=](auto &m) { m.AddDatum(to_protect); });
+  state.organism->GetHost()->AddSurvivalResource(to_protect);
 });
 } // namespace inst
 

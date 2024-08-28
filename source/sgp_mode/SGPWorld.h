@@ -44,6 +44,8 @@ private:
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_donated;
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_stolen;
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_earned;
+  emp::Ptr<SyncDataMonitor<double>> data_node_sym_attacked;
+  emp::Ptr<SyncDataMonitor<double>> data_node_sym_protected;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
 
@@ -62,6 +64,8 @@ public:
     data_node_sym_donated.Delete();
     data_node_sym_stolen.Delete();
     data_node_sym_earned.Delete();
+    data_node_sym_attacked.Delete();
+    data_node_sym_protected.Delete();
     // The vectors will delete themselves automatically
   }
 
@@ -149,6 +153,8 @@ public:
   SyncDataMonitor<double> &GetSymDonatedDataNode();
   SyncDataMonitor<double> &GetSymStolenDataNode();
   SyncDataMonitor<double> &GetSymEarnedDataNode();
+  SyncDataMonitor<double> &GetSymAttackedDataNode();
+  SyncDataMonitor<double> &GetSymProtectedDataNode();
   void SetupTasksNodes();
 
   emp::DataFile &SetUpOrgCountFile(const std::string &filename);
