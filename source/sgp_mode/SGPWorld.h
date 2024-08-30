@@ -46,6 +46,7 @@ private:
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_earned;
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_attacked;
   emp::Ptr<SyncDataMonitor<double>> data_node_sym_protected;
+  emp::Ptr<SyncDataMonitor<double>> data_node_sym_stoodby;
   emp::Ptr<emp::DataMonitor<double>> data_node_host_survival_res;
   emp::Ptr<emp::DataMonitor<double>> data_node_positive_host_survival_res;
   emp::Ptr<emp::DataMonitor<double>> data_node_count_positive_host_survival_res;
@@ -69,6 +70,7 @@ public:
     data_node_sym_earned.Delete();
     data_node_sym_attacked.Delete();
     data_node_sym_protected.Delete();
+    data_node_sym_stoodby.Delete();
     data_node_host_survival_res.Delete();
     data_node_positive_host_survival_res.Delete();
     data_node_count_positive_host_survival_res.Delete();
@@ -161,6 +163,7 @@ public:
   SyncDataMonitor<double> &GetSymEarnedDataNode();
   SyncDataMonitor<double> &GetSymAttackedDataNode();
   SyncDataMonitor<double> &GetSymProtectedDataNode();
+  SyncDataMonitor<double> &GetSymStandbyDataNode();
   emp::DataMonitor<double> &GetHostSurvivalResDataNode();
   emp::DataMonitor<double> &GetPositiveHostSurvivalResDataNode();
   emp::DataMonitor<double> &GetCountPositiveHostSurvivalResDataNode();

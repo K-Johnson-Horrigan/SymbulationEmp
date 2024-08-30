@@ -226,10 +226,18 @@ INST(Attack, { // stress parasite
 
 INST(Protect, { // stress mutualist
   if (state.organism->IsHost() || state.organism->GetHost() == nullptr) return;
-  int to_protect = -1;
+  int to_protect = 1;
   state.world->GetSymProtectedDataNode().WithMonitor(
           [=](auto &m) { m.AddDatum(to_protect); });
   state.organism->GetHost()->AddSurvivalResource(to_protect);
+});
+
+INST(Standby, { // baseline to check how many insts we expect with drift
+  if (state.organism->IsHost() || state.organism->GetHost() == nullptr) return;
+  int to_do_nothing = 0;
+  state.world->GetSymStandbyDataNode().WithMonitor(
+          [=](auto &m) { m.AddDatum(to_do_nothing); });
+  state.organism->GetHost()->AddSurvivalResource(to_do_nothing);
 });
 } // namespace inst
 

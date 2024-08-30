@@ -145,7 +145,16 @@ emp::DataFile &SGPWorld::SetupSymDonatedFile(const std::string &filename) {
       "sym_protect_calls", "Number of protect calls");
   file.AddTotal(data_node_sym_protected->UnsynchronizedGetMonitor(),
                 "sym_points_protected", "Survival resources incremented by symbionts", true);
-
+  
+  GetSymStandbyDataNode();
+  file.AddFun<size_t>(
+      [&]() {
+        return data_node_sym_stoodby->UnsynchronizedGetMonitor().GetCount();
+      },
+      "sym_standby_calls", "Number of standby calls");
+  file.AddTotal(data_node_sym_stoodby->UnsynchronizedGetMonitor(),
+                "sym_points_stoodby", "Survival resources contributed by standby calls", true);
+  
   file.AddMean(GetHostSurvivalResDataNode(), "mean_survival_res", "Average number of survival resources per host");
   
   file.AddMean(GetPositiveHostSurvivalResDataNode(), "mean_positive_survival_res", "Average positive number of survival resources per host");
@@ -246,5 +255,13 @@ SyncDataMonitor<double> &SGPWorld::GetSymProtectedDataNode() {
   }
   return *data_node_sym_protected;
 }
+
+SyncDataMonitor<double> &SGPWorld::GetSymStandbyDataNode() {
+  if (!data_node_sym_stoodby) {
+    data_node_sym_stoodby.New();
+  }
+  return *data_node_sym_stoodby;
+}
+
 
 #endif

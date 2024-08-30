@@ -29,7 +29,7 @@ using Library = sgpl::OpLibrary<
     //fls basics
     //inst::Infect,
     // stressful environment
-    inst::Attack, inst::Protect,
+    inst::Attack, inst::Protect, inst::Standby,
     // if-label doesn't make sense for SGP, same with *-head
     // and set-flow but this is required
     sgpl::global::Anchor 
