@@ -103,7 +103,17 @@ public:
     // stress condition death event  
     if(my_world->GetUpdate() % 2000 == 0){
       double death_chance = 0.25;
-      if(HasSym()) death_chance = 0.125;
+      if (HasSym()) {
+          if (my_config->STRESS_PARASITE() == 0) {
+              death_chance = 0.125;
+          }
+          else if (my_config->STRESS_PARASITE() == 1) {
+              death_chance = 0.5;
+          }
+          else if (my_config->STRESS_PARASITE() == 2) {
+              death_chance = 0.25;
+          }
+      } 
       bool do_random_death = random->P(death_chance);
       if(do_random_death) {
         SetDead();

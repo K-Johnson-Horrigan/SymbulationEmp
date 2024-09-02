@@ -96,5 +96,6 @@ EMP_BUILD_CONFIG(SymConfigBase,
     VALUE(LIMITED_TASK_RESET_INTERVAL, size_t, 8, "Number of updates before an org is allowed to complete a non-unlimited task again"),
     VALUE(STEAL_PENALTY, double, 0.10, "Proportion of resources that are lost when stealing from a host"),
     VALUE(DONATE_PENALTY, double, 0.10, "Proportion of resources that are lost when donating to a host"),
+    VALUE(STRESS_PARASITE, int, 1, "Whether, when doing stress tests, symbionts are mutualists (0), parasites (1), or neutral (2)"),
 )
 #endif
