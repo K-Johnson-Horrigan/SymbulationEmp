@@ -37,6 +37,17 @@ int symbulation_main(int argc, char *argv[]) {
   } else if (config.TASK_TYPE() == 1) {
     task_set = LogicTasks;
   }
+  
+  // note that these hardcoded values get overwritten by command-line settings
+  if (config.STRESS_PARASITE() == 0) { // mutualists only VT
+      config.VERTICAL_TRANSMISSION(1);
+      config.HORIZ_TRANS(0);
+  }
+  else if (config.STRESS_PARASITE() == 0) { // parasites only HT
+      config.VERTICAL_TRANSMISSION(0);
+      config.HORIZ_TRANS(1);
+  }
+  // neutrals obey config settings
 
   SGPWorld world(random, &config, task_set);
 

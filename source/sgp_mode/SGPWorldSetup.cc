@@ -64,4 +64,19 @@ emp::WorldPosition SGPWorld::SymDoBirth(emp::Ptr<Organism> sym_baby, emp::WorldP
     }
   }
 
+bool SGPWorld::StressVertTransCheck(emp::Ptr<Organism> sym_parent, emp::Ptr<Organism> host_parent) {
+  // parents must match tasks (stressful environment)         
+  emp::Ptr<emp::BitSet<64>> parent_tasks = sym_parent.DynamicCast<SGPSymbiont>()->GetCPU().state.tasks_performed;
+  emp::Ptr<emp::BitSet<64>> host_tasks = host_parent.DynamicCast<SGPHost>()->GetCPU().state.tasks_performed;
+  for (int i = host_tasks->size() - 1; i > -1; i--) {
+    if (parent_tasks->Get(i) && host_tasks->Get(i)) {
+      //both parent sym and host can do this task, parasite can infect
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
 #endif
