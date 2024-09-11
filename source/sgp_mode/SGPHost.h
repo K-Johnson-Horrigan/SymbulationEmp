@@ -123,9 +123,9 @@ public:
     
     // stress condition death event  
     if(my_world->GetUpdate() % 2000 == 0){
-      double death_chance = survival_resources/100.0;;
-      if(survival_resources > 100) death_chance = 1.0;
-      else if(survival_resources <= 0) death_chance = 0.0;
+      double death_chance = 1.0 - survival_resources/100.0;;
+      if(survival_resources > 100) death_chance = 0.0;
+      else if(survival_resources <= 0) death_chance = 1.0;
       
       bool do_random_death = random->P(death_chance);
       if(do_random_death) {
