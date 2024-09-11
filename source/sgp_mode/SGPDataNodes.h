@@ -159,6 +159,33 @@ emp::DataFile &SGPWorld::SetupSymDonatedFile(const std::string &filename) {
   
   file.AddMean(GetPositiveHostSurvivalResDataNode(), "mean_positive_survival_res", "Average positive number of survival resources per host");
   file.AddTotal(GetCountPositiveHostSurvivalResDataNode(), "count_positive_survival_res", "Number of hosts with positive survival resource values");
+  
+  
+  auto& sym_attack_protect_node = GetSymAttackProtectProportionDataNode();
+
+
+  file.AddMean(sym_attack_protect_node, "mean_attackprotect", "Average sym attack protect total");
+  file.AddHistBin(sym_attack_protect_node, 0, "Hist_-100", "Count for histogram bin -100 to <-90");
+  file.AddHistBin(sym_attack_protect_node, 1, "Hist_-90", "Count for histogram bin -90 to <-80");
+  file.AddHistBin(sym_attack_protect_node, 2, "Hist_-80", "Count for histogram bin -80 to <-70");
+  file.AddHistBin(sym_attack_protect_node, 3, "Hist_-70", "Count for histogram bin -70 to <-60");
+  file.AddHistBin(sym_attack_protect_node, 4, "Hist_-60", "Count for histogram bin -60 to <-50");
+  file.AddHistBin(sym_attack_protect_node, 5, "Hist_-50", "Count for histogram bin -50 to <-40");
+  file.AddHistBin(sym_attack_protect_node, 6, "Hist_-40", "Count for histogram bin -40 to <-30");
+  file.AddHistBin(sym_attack_protect_node, 7, "Hist_-30", "Count for histogram bin -30 to <-20");
+  file.AddHistBin(sym_attack_protect_node, 8, "Hist_-20", "Count for histogram bin -20 to <-10");
+  file.AddHistBin(sym_attack_protect_node, 9, "Hist_-10", "Count for histogram bin -10 to <0.0");
+  file.AddHistBin(sym_attack_protect_node, 10, "Hist_0", "Count for histogram bin 0 to <10");
+  file.AddHistBin(sym_attack_protect_node, 11, "Hist_10", "Count for histogram bin 10 to <20");
+  file.AddHistBin(sym_attack_protect_node, 12, "Hist_20", "Count for histogram bin 20 to <30");
+  file.AddHistBin(sym_attack_protect_node, 13, "Hist_30", "Count for histogram bin 30 to <40");
+  file.AddHistBin(sym_attack_protect_node, 14, "Hist_40", "Count for histogram bin 40 to <50");
+  file.AddHistBin(sym_attack_protect_node, 15, "Hist_50", "Count for histogram bin 50 to <60");
+  file.AddHistBin(sym_attack_protect_node, 16, "Hist_60", "Count for histogram bin 60 to <70");
+  file.AddHistBin(sym_attack_protect_node, 17, "Hist_70", "Count for histogram bin 70 to <80");
+  file.AddHistBin(sym_attack_protect_node, 18, "Hist_80", "Count for histogram bin 80 to <90");
+  file.AddHistBin(sym_attack_protect_node, 19, "Hist_90", "Count for histogram bin 90 to 100");
+    
   file.PrintHeaderKeys();
   return file;
 }
@@ -200,12 +227,18 @@ emp::DataMonitor<double> &SGPWorld::GetPositiveHostSurvivalResDataNode() {
     OnUpdate([this](size_t){
       data_node_positive_host_survival_res->Reset();
       data_node_count_positive_host_survival_res->Reset();
+      data_node_sym_attack_protect_proportion->Reset();
       for (size_t i = 0; i< pop.size(); i++) {
         if (IsOccupied(i)) {
           int survival_res = pop[i]->GetSurvivalResources();
           if(survival_res > 0) {
             data_node_positive_host_survival_res->AddDatum(survival_res);
             data_node_count_positive_host_survival_res->AddDatum(1);
+          }
+          if (pop[i]->HasSym()) {
+            for (size_t j = 0; j < pop[i]->GetSymbionts().size(); j++) {
+              data_node_sym_attack_protect_proportion->AddDatum(pop[i]->GetSymbionts().at(j)->GetAttackProtect());
+            }
           }
         }
       }
@@ -263,5 +296,13 @@ SyncDataMonitor<double> &SGPWorld::GetSymStandbyDataNode() {
   return *data_node_sym_stoodby;
 }
 
+emp::DataMonitor<double, emp::data::Histogram>& SGPWorld::GetSymAttackProtectProportionDataNode() {
+  if (!data_node_sym_attack_protect_proportion) {
+    data_node_sym_attack_protect_proportion.New();
+  }
+  // copying the int val structure from default--only 20 actual bins
+  data_node_sym_attack_protect_proportion->SetupBins(-100, 101, 21);
+  return *data_node_sym_attack_protect_proportion;
+}
 
 #endif

@@ -50,6 +50,7 @@ private:
   emp::Ptr<emp::DataMonitor<double>> data_node_host_survival_res;
   emp::Ptr<emp::DataMonitor<double>> data_node_positive_host_survival_res;
   emp::Ptr<emp::DataMonitor<double>> data_node_count_positive_host_survival_res;
+  emp::Ptr<emp::DataMonitor<double, emp::data::Histogram>> data_node_sym_attack_protect_proportion;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
 
@@ -74,6 +75,7 @@ public:
     data_node_host_survival_res.Delete();
     data_node_positive_host_survival_res.Delete();
     data_node_count_positive_host_survival_res.Delete();
+    data_node_sym_attack_protect_proportion.Delete();
     // The vectors will delete themselves automatically
   }
 
@@ -167,6 +169,7 @@ public:
   emp::DataMonitor<double> &GetHostSurvivalResDataNode();
   emp::DataMonitor<double> &GetPositiveHostSurvivalResDataNode();
   emp::DataMonitor<double> &GetCountPositiveHostSurvivalResDataNode();
+  emp::DataMonitor<double, emp::data::Histogram>& GetSymAttackProtectProportionDataNode();
   void SetupTasksNodes();
 
   emp::DataFile &SetUpOrgCountFile(const std::string &filename);

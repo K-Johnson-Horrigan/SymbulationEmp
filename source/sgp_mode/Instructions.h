@@ -222,6 +222,7 @@ INST(Attack, { // stress parasite
   state.world->GetSymAttackedDataNode().WithMonitor(
           [=](auto &m) { m.AddDatum(to_attack); });
   state.organism->GetHost()->AddSurvivalResource(to_attack);
+  state.organism->AddAttackProtect(-1);
 });
 
 INST(Protect, { // stress mutualist
@@ -230,6 +231,7 @@ INST(Protect, { // stress mutualist
   state.world->GetSymProtectedDataNode().WithMonitor(
           [=](auto &m) { m.AddDatum(to_protect); });
   state.organism->GetHost()->AddSurvivalResource(to_protect);
+  state.organism->AddAttackProtect(1);
 });
 
 INST(Standby, { // baseline to check how many insts we expect with drift

@@ -247,5 +247,11 @@ class Organism {
   virtual int GetSurvivalResources() {
     std::cout << "GetSurvivalResources called from Organism" << std::endl;
     throw "Organism method called!";}
+  virtual void AddAttackProtect(int _in) {
+    std::cout << "AddAttackProtect called from Organism" << std::endl;
+    throw "Organism method called!";}
+  virtual int GetAttackProtect() {
+    std::cout << "GetAttackProtect called from Organism" << std::endl;
+    throw "Organism method called!";}
 };
 #endif

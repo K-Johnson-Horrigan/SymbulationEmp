@@ -11,6 +11,7 @@ class SGPSymbiont : public Symbiont {
 private:
   CPU cpu;
   const emp::Ptr<SGPWorld> my_world;
+  int attack_protect;
 
 public:
   /**
@@ -105,6 +106,29 @@ public:
     }
     points += _in;
   }
+
+  /**
+   * Input: None
+   *
+   * Output: The number of protect - the number of attack calls made by this symbiont this update.
+   *
+   * Purpose: Allows per-symbiont analysis of attack-protect balance.
+   */
+  int GetAttackProtect(){
+    return attack_protect;
+  }
+
+  /**
+   * Input: A value (-1 if attack, +1 if protect) to weigh this turn's attack_protect ratio.
+   *
+   * Output: None.
+   *
+   * Purpose: To track per-symbiont attack-protect balance.
+   */
+  void AddAttackProtect(int _in) {
+    attack_protect += _in;
+  }
+
   /**
    * Input: None
    *
@@ -125,6 +149,7 @@ public:
    * movement
    */
   void Process(emp::WorldPosition pos) {
+    attack_protect = 0;
     if (my_host == nullptr && my_world->GetUpdate() % my_config->LIMITED_TASK_RESET_INTERVAL() == 0)
       cpu.state.used_resources->reset();
     // Instead of calling Host::Process, do the important stuff here
