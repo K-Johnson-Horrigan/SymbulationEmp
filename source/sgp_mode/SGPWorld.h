@@ -130,7 +130,15 @@ public:
         // Host::Reproduce() doesn't take care of vertical transmission, that
         // happens here
         for (auto &sym : org.first->GetSymbionts()) {
-          sym->VerticalTransmission(child);
+          // do vert trans in stress environment
+          bool task_match = StressVertTransCheck(sym, org.first);
+          if (task_match) {
+            sym->VerticalTransmission(child);
+          }
+          else {
+            // the symbiont made an attempt at vert trans but it didn't work.
+            GetVerticalTransmissionAttemptCount().AddDatum(1);
+          }
         }
         DoBirth(child, org.second);
       } else {
@@ -155,9 +163,10 @@ public:
   void SetupHosts(long unsigned int *POP_SIZE) override;
   void SetupSymbionts(long unsigned int *total_syms) override;
 
-  
+  // special case sym reproduction handler methods
   emp::WorldPosition SymDoBirth(emp::Ptr<Organism> sym_baby, emp::WorldPosition parent_pos) override;
   int GetNeighborHost (size_t id, emp::Ptr<emp::BitSet<64>>);
+  bool StressVertTransCheck(emp::Ptr<Organism> sym_parent, emp::Ptr<Organism> host_parent);
 
   // Prototypes for data node methods
   SyncDataMonitor<double> &GetSymDonatedDataNode();
