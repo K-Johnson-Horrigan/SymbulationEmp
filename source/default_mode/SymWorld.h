@@ -195,16 +195,6 @@ public:
   /**
    * Input: None
    *
-   * Output: A reference to the world graveyard.
-   *
-   * Purpose: To get the world's graveyard.
-   */
-  emp::vector<emp::Ptr<Organism>>& GetGraveyard() { return graveyard; }
-
-
-  /**
-   * Input: None
-   *
    * Output: The boolean representing if vertical transmission will occur
    *
    * Purpose: To determine if vertical transmission will occur
@@ -338,16 +328,6 @@ public:
     pop_sizes.resize(2);
   }
 
-  /**
-   * Input: An organism pointer to add to the graveyard
-   *
-   * Output: None
-   *
-   * Purpose: To add organisms to the graveyard
-   */
-  void SendToGraveyard(emp::Ptr<Organism> org) {
-    graveyard.push_back(org);
-  }
 
   /**
    * Input: An organism pointer to add to the graveyard

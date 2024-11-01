@@ -1615,7 +1615,6 @@ TEST_CASE("SetupHosts", "[default]") {
   }
 }
 
-<<<<<<< HEAD
 TEST_CASE("IsSymPopOccupied", "[default]") {
   GIVEN("a world") {
     emp::Random random(17);
