@@ -50,7 +50,7 @@ protected:
 
   /**
     *
-    * Purpose: Holds all configuration settings and points to same configuration
+    * Purpose: Holds all configuration settings and points to same configuration 
     * object as my_config from superclass, but with the correct subtype.
     *
   */

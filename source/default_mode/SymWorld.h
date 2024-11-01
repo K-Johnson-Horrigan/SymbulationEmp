@@ -88,7 +88,7 @@ protected:
 
 public:
   /**
-   * Input: The world's random seed
+   * Input: The world's random seed and a pointer to this world's config object
    *
    * Output: None
    *
@@ -190,6 +190,16 @@ public:
    * Purpose: Allows accessing the world's config.
    */
   const emp::Ptr<SymConfigBase> GetConfig() const { return my_config; }
+
+
+  /**
+   * Input: None
+   *
+   * Output: A reference to the world graveyard.
+   *
+   * Purpose: To get the world's graveyard.
+   */
+  emp::vector<emp::Ptr<Organism>>& GetGraveyard() { return graveyard; }
 
 
   /**
@@ -328,6 +338,16 @@ public:
     pop_sizes.resize(2);
   }
 
+  /**
+   * Input: An organism pointer to add to the graveyard
+   *
+   * Output: None
+   *
+   * Purpose: To add organisms to the graveyard
+   */
+  void SendToGraveyard(emp::Ptr<Organism> org) {
+    graveyard.push_back(org);
+  }
 
   /**
    * Input: An organism pointer to add to the graveyard
@@ -818,7 +838,7 @@ public:
         else sym_pop[i]->Process(sym_pos); //index 0, since it's freeliving, and id its location in the world
       }
     } // for each cell in schedule
-  
+
     // clean up the graveyard
     for (size_t i = 0; i < graveyard.size(); i++) {
       graveyard[i].Delete();
