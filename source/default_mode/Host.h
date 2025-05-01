@@ -719,8 +719,13 @@ public:
         this->AddPoints(resources - spent);
       }
       else {
+        //SPECIAL CASE, ADDING SYM STEAL HERE EVEN NO SYM
+        // this is for tag matching control; 
+        // we DON'T want uninfected hosts to have an advantage
         double hostDefense = -1.0 * hostIntVal * resources;
-        this->AddPoints(resources - hostDefense);
+        SetResInProcess(resources - hostDefense);
+        StealResources(-0.5);
+        this->AddPoints(GetResInProcess());
       }
       return; //This concludes resource distribution for a host without symbionts
     }
