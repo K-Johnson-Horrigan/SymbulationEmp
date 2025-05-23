@@ -382,6 +382,7 @@ public:
   emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> AddSymToSystematic(emp::Ptr<Organism> sym, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> parent_taxon=nullptr){
     emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> taxon = sym_sys->AddOrg(*sym, emp::WorldPosition(0,0), parent_taxon);
     sym->SetTaxon(taxon);
+    if(my_config->PHYLOGENY_TAXON_TYPE() == 2) taxon->GetData().RecordIntVal(sym->GetIntVal());
     return taxon;
   }
 
@@ -472,7 +473,7 @@ public:
     //SYMBIONTS have position in the overall world as their ID
     //HOSTS have position in the overall world as their index
 
-    //if the pos it out of bounds, expand the worlds so that they can fit it.
+    //if the pos is out of bounds, expand the worlds so that they can fit it.
     if(pos.GetPopID() >= sym_pop.size() || pos.GetIndex() >= pop.size()){
       if(pos.GetPopID() > pos.GetIndex()) Resize(pos.GetPopID() + 1);
       else Resize(pos.GetIndex() + 1);
@@ -480,7 +481,7 @@ public:
 
     if(new_org->IsHost()){ //if the org is a host, use the empirical addorgat function
       emp::World<Organism>::AddOrgAt(new_org, pos, p_pos);
-
+      if (my_config->PHYLOGENY() && my_config->PHYLOGENY_TAXON_TYPE() == 2) new_org->GetTaxon()->GetData().RecordIntVal(new_org->GetIntVal());
     } else { //if it is not a host, then add it to the sym population
       //for symbionts, their place in their host's world is indicated by their ID
       size_t pos_id = pos.GetPopID();
