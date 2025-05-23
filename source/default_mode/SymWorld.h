@@ -168,6 +168,11 @@ public:
       sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>& t) {return std::to_string(t.GetInfo()); }, "info");
       host_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::HostTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
 
+      if (my_config->PHYLOGENY_TAXON_TYPE() == 2) {
+        sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>& t) {return std::to_string(t.GetData().GetIntVal()); }, "mean_int_val");
+        host_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::HostTaxonData>& t) {return std::to_string(t.GetData().GetIntVal()); }, "mean_int_val");
+      }
+
       on_placement_sig.AddAction([this](emp::WorldPosition pos) {
         GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>());
         });
