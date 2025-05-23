@@ -694,7 +694,7 @@ public:
 
       emp::Ptr<Organism> sym_baby = Reproduce();
       if (my_config->TAG_MATCHING()) {
-        double tag_distance = my_world->GetTagMetric()->calculate(host_baby->GetTag(), sym_baby->GetTag())* TAG_LENGTH;
+        double tag_distance = (*my_world->GetTagMetric())(host_baby->GetTag(), sym_baby->GetTag())* TAG_LENGTH;
         double cutoff = random->GetPoisson(my_config->TAG_DISTANCE() * TAG_LENGTH);
         if (tag_distance > cutoff) {
           sym_baby.Delete();
