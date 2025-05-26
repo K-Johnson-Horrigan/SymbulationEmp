@@ -485,7 +485,6 @@ public:
 
     if(new_org->IsHost()){ //if the org is a host, use the empirical addorgat function
       emp::World<Organism>::AddOrgAt(new_org, pos, p_pos);
-      if (my_config->PHYLOGENY() && my_config->PHYLOGENY_TAXON_TYPE() == 2) new_org->GetTaxon()->GetData().RecordIntVal(new_org->GetIntVal());
     } else { //if it is not a host, then add it to the sym population
       //for symbionts, their place in their host's world is indicated by their ID
       size_t pos_id = pos.GetPopID();
