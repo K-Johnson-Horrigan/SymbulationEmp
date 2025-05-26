@@ -387,7 +387,6 @@ public:
   emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> AddSymToSystematic(emp::Ptr<Organism> sym, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> parent_taxon=nullptr){
     emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> taxon = sym_sys->AddOrg(*sym, emp::WorldPosition(0,0), parent_taxon);
     sym->SetTaxon(taxon);
-    if(my_config->PHYLOGENY_TAXON_TYPE() == 2) taxon->GetData().RecordIntVal(sym->GetIntVal());
     return taxon;
   }
 
