@@ -1517,7 +1517,7 @@ TEST_CASE("Tag-based Phylogeny", "[default]") {
   config.STARTING_TAGS_ONE_PROB(0);
 
   int int_val = 0;
-  emp::WorldPosition fake_pos = emp::WorldPosition(-1, -1);
+  emp::WorldPosition fake_pos = emp::WorldPosition(0, 0);
   using taxon_info_t = double;
   using s_taxon_t = emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>;
   using h_taxon_t = emp::Taxon<taxon_info_t, datastruct::HostTaxonData>;
