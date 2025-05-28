@@ -1847,7 +1847,7 @@ TEST_CASE("SetupHosts", "[default]") {
 TEST_CASE("Tag matching", "[default]") {
   int trans_res = 10;
   int starting_res = 15;
-  double tag_distance_limit = 0.125;
+  double tag_distance_mean = 0.25;
   double int_val = 0;
 
   emp::Random random(17);
@@ -1859,27 +1859,47 @@ TEST_CASE("Tag matching", "[default]") {
   config.SYM_HORIZ_TRANS_RES(trans_res);
   config.SYM_VERT_TRANS_RES(trans_res);
   config.TAG_MATCHING(1);
-  config.TAG_DISTANCE(tag_distance_limit);
+  config.TAG_DISTANCE(tag_distance_mean);
   config.TAG_MUTATION_SIZE(0.0);
   
   WHEN("Hamming metric is used") {
     config.TAG_METRIC(0);
     SymWorld world(random, &config);
 
+    emp::BitSet<TAG_LENGTH> symbiont_tag = emp::BitSet<TAG_LENGTH>("00000000000000000000000000000000");
+    emp::BitSet<TAG_LENGTH> similar_tag =  emp::BitSet<TAG_LENGTH>("00000000000000010000010000100000");
+    emp::BitSet<TAG_LENGTH> distant_tag =  emp::BitSet<TAG_LENGTH>("11110000000000000000000111111111");
+
+    WHEN("Tag distances are calculated") {
+      THEN("Close tag distance is calculated correctly") {
+        double mismatch = 3;
+        double expected_difference = mismatch / TAG_LENGTH;
+        double calculated_difference = (*world.GetTagMetric())(symbiont_tag, similar_tag);
+
+        REQUIRE(expected_difference == calculated_difference);
+        REQUIRE(tag_distance_mean > calculated_difference + 0.05);
+      }
+      THEN("Distant tag distance is calculated correctly") {
+        double mismatch = 13;
+        double expected_difference = mismatch / TAG_LENGTH;
+        double calculated_difference = (*world.GetTagMetric())(symbiont_tag, distant_tag);
+
+        REQUIRE(expected_difference == calculated_difference);
+        REQUIRE(tag_distance_mean < calculated_difference - 0.05);
+      }
+    }
+
+
     WHEN("A symbiont tries to vertically transmit offspring into a host child") {
       emp::Ptr<Symbiont> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
       emp::Ptr<Host> host = emp::NewPtr<Host>(&random, &world, &config, int_val);
       
-      // symbiont tag is all 0s
-      emp::BitSet<TAG_LENGTH> bit_set_0 = emp::BitSet<TAG_LENGTH>();
-      symbiont->SetTag(bit_set_0);
+      symbiont->SetTag(symbiont_tag);
       symbiont->AddPoints(starting_res);
 
       WHEN("Their tags are sufficiently close") {
-        // host tag has 4 1s
-        emp::BitSet<TAG_LENGTH> bit_set_1 = emp::BitSet<TAG_LENGTH>(TAG_LENGTH, random, TAG_LENGTH/8);
-        host->SetTag(bit_set_1);
-        REQUIRE((*world.GetTagMetric())(bit_set_0, bit_set_1) <= tag_distance_limit);
+        host->SetTag(similar_tag);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_mean);
 
         symbiont->VerticalTransmission(host);
 
@@ -1894,10 +1914,8 @@ TEST_CASE("Tag matching", "[default]") {
         }
       }
       WHEN("Their tags are too dissimilar") {
-        // host tag has 9 1s
-        emp::BitSet<TAG_LENGTH> bit_set_1 = emp::BitSet<TAG_LENGTH>(TAG_LENGTH, random, (TAG_LENGTH/4)+1);
-        host->SetTag(bit_set_1);
-        REQUIRE((*world.GetTagMetric())(bit_set_0, bit_set_1) > tag_distance_limit);
+        host->SetTag(distant_tag);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, distant_tag) > tag_distance_mean);
 
         symbiont->VerticalTransmission(host);
 
@@ -1920,13 +1938,12 @@ TEST_CASE("Tag matching", "[default]") {
       emp::Ptr<Host> source_host = emp::NewPtr<Host>(&random, &world, &config, int_val);
       emp::Ptr<Host> target_host = emp::NewPtr<Host>(&random, &world, &config, int_val);
       emp::Ptr<Symbiont> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
-      // symbiont tag is all 0s
-      emp::BitSet<TAG_LENGTH> bit_set_0 = emp::BitSet<TAG_LENGTH>();
-      symbiont->SetTag(bit_set_0);
+
+      symbiont->SetTag(symbiont_tag);
       
       WHEN("Their tags are sufficiently close and the host has room") {
-        size_t source_pos = 1;
-        size_t target_pos = 0;
+        size_t source_pos = 0;
+        size_t target_pos = 1;
         world.AddOrgAt(source_host, source_pos);
         source_host->AddSymbiont(symbiont);
         symbiont->AddPoints(starting_res);
@@ -1937,10 +1954,8 @@ TEST_CASE("Tag matching", "[default]") {
         world.AddOrgAt(target_host, target_pos);
         REQUIRE(world.GetNumOrgs() == 2);
 
-        // host tag has 4 1s
-        emp::BitSet<TAG_LENGTH> bit_set_1 = emp::BitSet<TAG_LENGTH>(TAG_LENGTH, random, TAG_LENGTH/8);
-        target_host->SetTag(bit_set_1);
-        REQUIRE((*world.GetTagMetric())(bit_set_0, bit_set_1) == tag_distance_limit);
+        target_host->SetTag(similar_tag);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
         
@@ -1971,10 +1986,8 @@ TEST_CASE("Tag matching", "[default]") {
         world.AddOrgAt(target_host, target_pos);
         REQUIRE(world.GetNumOrgs() == 2);
 
-        // host tag has 4 1s
-        emp::BitSet<TAG_LENGTH> bit_set_1 = emp::BitSet<TAG_LENGTH>(TAG_LENGTH, random, TAG_LENGTH/8);
-        target_host->SetTag(bit_set_1);
-        REQUIRE((*world.GetTagMetric())(bit_set_0, bit_set_1) == tag_distance_limit);
+        target_host->SetTag(similar_tag);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
 
@@ -1999,10 +2012,8 @@ TEST_CASE("Tag matching", "[default]") {
         world.AddOrgAt(target_host, target_pos);
         REQUIRE(world.GetNumOrgs() == 2);
 
-        // host tag has 9 1s
-        emp::BitSet<TAG_LENGTH> bit_set_1 = emp::BitSet<TAG_LENGTH>(TAG_LENGTH, random, (TAG_LENGTH/4)+1);
-        target_host->SetTag(bit_set_1);
-        REQUIRE((*world.GetTagMetric())(bit_set_0, bit_set_1) > tag_distance_limit);
+        target_host->SetTag(distant_tag);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, distant_tag) > tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
 
@@ -2035,7 +2046,7 @@ TEST_CASE("Tag matching", "[default]") {
         double calculated_difference = (*world.GetTagMetric())(symbiont_tag, similar_tag);
 
         REQUIRE(expected_difference == calculated_difference);
-        REQUIRE(tag_distance_limit > calculated_difference + 0.05);
+        REQUIRE(tag_distance_mean > calculated_difference + 0.05);
       }
       THEN("Distant tag distance is calculated correctly"){
         int mismatch = 20;
@@ -2047,7 +2058,7 @@ TEST_CASE("Tag matching", "[default]") {
         double calculated_difference = (*world.GetTagMetric())(symbiont_tag, distant_tag);
 
         REQUIRE(expected_difference == calculated_difference);
-        REQUIRE(tag_distance_limit < calculated_difference - 0.05);
+        REQUIRE(tag_distance_mean < calculated_difference - 0.05);
       }
     }
 
@@ -2060,7 +2071,7 @@ TEST_CASE("Tag matching", "[default]") {
 
       WHEN("Their tags are sufficiently close") {
         host->SetTag(similar_tag);
-        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_mean);
 
         symbiont->VerticalTransmission(host);
 
@@ -2076,7 +2087,7 @@ TEST_CASE("Tag matching", "[default]") {
       }
       WHEN("Their tags are too dissimilar") {
         host->SetTag(distant_tag);
-        REQUIRE((*world.GetTagMetric())(symbiont_tag, distant_tag) > tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, distant_tag) > tag_distance_mean);
 
         symbiont->VerticalTransmission(host);
 
@@ -2113,7 +2124,7 @@ TEST_CASE("Tag matching", "[default]") {
         REQUIRE(world.GetNumOrgs() == 2);
 
         target_host->SetTag(similar_tag);
-        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
 
@@ -2145,7 +2156,7 @@ TEST_CASE("Tag matching", "[default]") {
         REQUIRE(world.GetNumOrgs() == 2);
 
         target_host->SetTag(similar_tag);
-        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, similar_tag) <= tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
 
@@ -2171,7 +2182,7 @@ TEST_CASE("Tag matching", "[default]") {
         REQUIRE(world.GetNumOrgs() == 2);
 
         target_host->SetTag(distant_tag);
-        REQUIRE((*world.GetTagMetric())(symbiont_tag, distant_tag) > tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(symbiont_tag, distant_tag) > tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
 
@@ -2199,14 +2210,14 @@ TEST_CASE("Tag matching", "[default]") {
         double calculated_difference = (*world.GetTagMetric())(similar_tag, symbiont_tag);
 
         REQUIRE(std::abs(expected_difference - calculated_difference) < 0.00001);
-        REQUIRE(tag_distance_limit > calculated_difference + 0.05);
+        REQUIRE(tag_distance_mean > calculated_difference + 0.05);
       }
       THEN("Distance tag distance is calculated correctly") {
         double expected_difference = 0.4593601281;
         double calculated_difference = (*world.GetTagMetric())(distant_tag, symbiont_tag);
 
         REQUIRE(std::abs(expected_difference - calculated_difference) < 0.00001);
-        REQUIRE(tag_distance_limit < calculated_difference - 0.05);
+        REQUIRE(tag_distance_mean < calculated_difference - 0.05);
       }
     }
     
@@ -2219,7 +2230,7 @@ TEST_CASE("Tag matching", "[default]") {
 
       WHEN("Their tags are sufficiently close") {
         host->SetTag(similar_tag);
-        REQUIRE((*world.GetTagMetric())(similar_tag, symbiont_tag) <= tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(similar_tag, symbiont_tag) <= tag_distance_mean);
 
         symbiont->VerticalTransmission(host);
 
@@ -2235,7 +2246,7 @@ TEST_CASE("Tag matching", "[default]") {
       }
       WHEN("Their tags are too dissimilar") {
         host->SetTag(distant_tag);
-        REQUIRE((*world.GetTagMetric())(distant_tag, symbiont_tag) > tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(distant_tag, symbiont_tag) > tag_distance_mean);
 
         symbiont->VerticalTransmission(host);
 
@@ -2273,7 +2284,7 @@ TEST_CASE("Tag matching", "[default]") {
 
         target_host->SetTag(similar_tag);
 
-        REQUIRE((*world.GetTagMetric())(similar_tag, symbiont_tag) <= tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(similar_tag, symbiont_tag) <= tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
 
@@ -2305,7 +2316,7 @@ TEST_CASE("Tag matching", "[default]") {
         REQUIRE(world.GetNumOrgs() == 2);
 
         target_host->SetTag(similar_tag);
-        REQUIRE((*world.GetTagMetric())(similar_tag, symbiont_tag) <= tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(similar_tag, symbiont_tag) <= tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
 
@@ -2331,7 +2342,7 @@ TEST_CASE("Tag matching", "[default]") {
         REQUIRE(world.GetNumOrgs() == 2);
 
         target_host->SetTag(distant_tag);
-        REQUIRE((*world.GetTagMetric())(distant_tag, symbiont_tag) > tag_distance_limit);
+        REQUIRE((*world.GetTagMetric())(distant_tag, symbiont_tag) > tag_distance_mean);
 
         symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
 
