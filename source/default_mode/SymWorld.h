@@ -83,7 +83,7 @@ protected:
     * Purpose: Represents the tag distance calculator.
     *
   */
-  emp::Ptr<emp::HammingMetric<TAG_LENGTH>> hamming_metric;
+  emp::Ptr<emp::BaseMetric<emp::BitSet<TAG_LENGTH>, emp::BitSet<TAG_LENGTH>>> tag_metric;
 
   emp::Ptr<emp::DataMonitor<double, emp::data::Histogram>> data_node_hostintval; // New() reallocates this pointer
   emp::Ptr<emp::DataMonitor<double, emp::data::Histogram>> data_node_symintval;
@@ -180,7 +180,9 @@ public:
     }
 
     if (my_config->TAG_MATCHING()) {
-      hamming_metric = emp::NewPtr<emp::HammingMetric<TAG_LENGTH>>();
+      if(my_config->TAG_METRIC() == 0) tag_metric = emp::NewPtr<emp::HammingMetric<TAG_LENGTH>>();
+      else if(my_config->TAG_METRIC() == 1) tag_metric = emp::NewPtr<emp::StreakMetric<TAG_LENGTH>>();
+      else if(my_config->TAG_METRIC() == 2) tag_metric = emp::NewPtr<emp::HashMetric<TAG_LENGTH>>();
     }
   }
   
@@ -239,7 +241,7 @@ public:
     }
 
     if (my_config->TAG_MATCHING()) {
-      hamming_metric.Delete();
+      tag_metric.Delete();
     }
   }
 
@@ -271,8 +273,8 @@ public:
    *
    * Purpose: To set the world's tag distance calculator
    */
-   void SetTagMetric(emp::Ptr<emp::HammingMetric<TAG_LENGTH>> _in) {
-    hamming_metric = _in;
+   void SetTagMetric(emp::Ptr<emp::BaseMetric<emp::BitSet<TAG_LENGTH>, emp::BitSet<TAG_LENGTH>>> _in) {
+    tag_metric = _in;
   }
 
   /**
@@ -282,8 +284,8 @@ public:
    *
    * Purpose: To get the world's tag distance calculator
    */
-  emp::Ptr<emp::HammingMetric<TAG_LENGTH>> GetTagMetric() {
-    return hamming_metric;
+   emp::Ptr<emp::BaseMetric<emp::BitSet<TAG_LENGTH>, emp::BitSet<TAG_LENGTH>>> GetTagMetric() {
+    return tag_metric;
   }
 
   /**
@@ -757,7 +759,7 @@ public:
         bool size_failed = pop[new_host_pos]->GetSymbionts().size() >= (long unsigned)my_config->SYM_LIMIT();
         bool tag_failed = false;
         if (my_config->TAG_MATCHING()){
-          double tag_distance = hamming_metric->calculate(pop[new_host_pos]->GetTag(), sym_baby->GetTag()) * TAG_LENGTH;
+          double tag_distance = (*tag_metric)(pop[new_host_pos]->GetTag(), sym_baby->GetTag()) * TAG_LENGTH;
           double cutoff = GetRandom().GetPoisson(my_config->TAG_DISTANCE() * TAG_LENGTH);
           tag_failed = tag_distance > cutoff;
         }
