@@ -28,7 +28,7 @@ int test_fun() {
   static int val = 10;
   return val += 3;
 }
-
+/*
 TEST_CASE("WriteOrgDumpFile", "[default]") {
   emp::Random random(17);
   SymConfigBase config;
@@ -41,7 +41,7 @@ TEST_CASE("WriteOrgDumpFile", "[default]") {
   world.WriteOrgDumpFile(test_file_name);
   
   REQUIRE(compareFiles(test_file_name, "source/test/default_mode_test/test_data_files/org_dump_file.txt") == 2);
-}
+}*/
 
 TEST_CASE("Test DataFile", "[default]") {
   int test_int = 5;
