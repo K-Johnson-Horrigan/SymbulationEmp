@@ -7,6 +7,7 @@
 
 #include "../test/default_mode_test/SymWorld.test.cc"
 #include "../test/default_mode_test/DataNodes.test.cc"
+#include "../test/default_mode_test/DataFiles.test.cc"
 
 #include "../test/default_mode_test/Host.test.cc"
 #include "../test/default_mode_test/Symbiont.test.cc"
