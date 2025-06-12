@@ -79,5 +79,5 @@ TEST_CASE("Test DataFile", "[default]") {
     // std::cout << i << std::endl;
   }
 
-  REQUIRE(compareFiles("new_test_file.dat", "source/test/default_mode_test/test_file.txt") == 2);
+  REQUIRE(compareFiles("new_test_file.dat", "source/test/default_mode_test/test_data_files/test_file.txt") == 2);
 }
