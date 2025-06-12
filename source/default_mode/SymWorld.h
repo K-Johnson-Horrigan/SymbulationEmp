@@ -760,7 +760,8 @@ public:
         bool tag_failed = false;
         if (my_config->TAG_MATCHING()){
           double tag_distance = (*tag_metric)(pop[new_host_pos]->GetTag(), sym_baby->GetTag()) * TAG_LENGTH;
-          double cutoff = GetRandom().GetPoisson(my_config->TAG_DISTANCE() * TAG_LENGTH);
+          double permissiveness_mean = (my_config->TAG_DISTANCE_EVOLVES()) ? pop[new_host_pos]->GetTagPermissiveness() : my_config->TAG_DISTANCE();
+          double cutoff = GetRandom().GetPoisson(permissiveness_mean * TAG_LENGTH);
           tag_failed = tag_distance > cutoff;
         }
         if (size_failed || tag_failed) {

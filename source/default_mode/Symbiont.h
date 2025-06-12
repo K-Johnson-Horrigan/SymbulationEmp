@@ -689,7 +689,7 @@ public:
    * Purpose: To allow for vertical transmission to occur
    */
   void VerticalTransmission(emp::Ptr<Organism> host_baby) {
-    if((my_world->WillTransmit()) && GetPoints() >= my_config->SYM_VERT_TRANS_RES()){ //if the world permits vertical tranmission and the sym has enough resources, transmit!
+    if((my_world->WillTransmit()) && GetPoints() >= my_config->SYM_VERT_TRANS_RES()){ //if the world permits vertical transmission and the sym has enough resources, transmit!
 
       //vertical transmission data node
       emp::DataMonitor<double, emp::data::Histogram>& data_node_attempts_verttrans = my_world->GetVerticalTransmissionAttemptCount();
@@ -698,7 +698,8 @@ public:
       emp::Ptr<Organism> sym_baby = Reproduce();
       if (my_config->TAG_MATCHING()) {
         double tag_distance = (*my_world->GetTagMetric())(host_baby->GetTag(), sym_baby->GetTag())* TAG_LENGTH;
-        double cutoff = random->GetPoisson(my_config->TAG_DISTANCE() * TAG_LENGTH);
+        double permissiveness_mean = (my_config->TAG_DISTANCE_EVOLVES()) ? host_baby->GetTagPermissiveness() : my_config->TAG_DISTANCE();
+        double cutoff = random->GetPoisson(permissiveness_mean * TAG_LENGTH);
         if (tag_distance > cutoff) {
           sym_baby.Delete();
           return;

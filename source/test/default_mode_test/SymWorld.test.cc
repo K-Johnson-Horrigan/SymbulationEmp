@@ -2047,6 +2047,109 @@ TEST_CASE("SetupHosts", "[default]") {
   }
 }
 
+TEST_CASE("Evolvable tag permissiveness", "[default]"){
+
+  int trans_res = 10;
+  int starting_res = 15;
+  double tag_distance_mean = 0.25;
+  double int_val = 0;
+
+  emp::Random random(17);
+  SymConfigBase config;
+  config.FREE_HT_FAILURE(0);
+  config.SYM_LIMIT(1);
+  config.SYM_HORIZ_TRANS_RES(trans_res);
+  config.SYM_VERT_TRANS_RES(trans_res);
+
+  config.TAG_MATCHING(1);
+  config.TAG_MUTATION_SIZE(0.0);
+  config.TAG_METRIC(0);
+  config.TAG_DISTANCE(tag_distance_mean);
+  config.TAG_DISTANCE_EVOLVES(1);
+  config.TAG_DISTANCE_MUTATION_SIZE(0);
+
+  SymWorld world(random, &config);
+
+  WHEN("Host tag permissiveness values can evolve") {
+    emp::BitSet<TAG_LENGTH> symbiont_tag = emp::BitSet<TAG_LENGTH>("00000000000000000000000000000000");
+    emp::BitSet<TAG_LENGTH> host_tag = emp::BitSet<TAG_LENGTH>("00000001000000010000010000100000");
+
+    WHEN("A symbiont transmits vertically") {
+      config.VERTICAL_TRANSMISSION(1);
+      emp::Ptr<Symbiont> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+      emp::Ptr<Host> host = emp::NewPtr<Host>(&random, &world, &config, int_val);
+      
+      symbiont->SetPoints(starting_res);
+      symbiont->SetTag(symbiont_tag);
+      host->SetTag(host_tag);
+      host->AddSymbiont(symbiont);
+      
+      WHEN("The host's permissiveness is too low"){
+        double host_permissiveness = 0;
+        host->SetTagPermissiveness(host_permissiveness);
+        THEN("The symbiont offspring cannot vertically transmit") {
+          emp::Ptr<Organism> host_baby = host->Reproduce();
+          symbiont->VerticalTransmission(host_baby);
+          REQUIRE(host_baby->GetTagPermissiveness() == host_permissiveness);
+          REQUIRE(!host_baby->HasSym());
+          REQUIRE(symbiont->GetPoints() == starting_res);
+        }
+      }
+
+      WHEN("The host's permissiveness is sufficiently high") {
+        double host_permissiveness = 1;
+        host->SetTagPermissiveness(host_permissiveness);
+        THEN("The symbiont offspring can vertically transmit") {
+          emp::Ptr<Organism> host_baby = host->Reproduce();
+          symbiont->VerticalTransmission(host_baby);
+          REQUIRE(host_baby->GetTagPermissiveness() == host_permissiveness);
+          REQUIRE(host_baby->HasSym());
+          REQUIRE(symbiont->GetPoints() < starting_res);
+        }
+      }
+      
+      host.Delete();
+    }
+    
+    WHEN("A symbiont transmits horizontally") {
+      emp::Ptr<Symbiont> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+      emp::Ptr<Host> source_host = emp::NewPtr<Host>(&random, &world, &config, int_val);
+      emp::Ptr<Host> target_host = emp::NewPtr<Host>(&random, &world, &config, int_val);
+
+      source_host->AddSymbiont(symbiont);
+      symbiont->AddPoints(starting_res);
+      symbiont->SetTag(symbiont_tag);
+      target_host->SetTag(host_tag);
+
+      size_t source_pos = 0;
+      size_t target_pos = 1;
+      world.AddOrgAt(source_host, source_pos);
+      world.AddOrgAt(target_host, target_pos);
+      REQUIRE(world.GetNumOrgs() == 2);
+
+      WHEN("The host's permissiveness is too low") {
+        target_host->SetTagPermissiveness(0);
+        THEN("The symbiont offspring cannot horizontally transmit") {
+          symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
+          REQUIRE(!target_host->HasSym());
+          REQUIRE(symbiont->GetPoints() == starting_res);
+          // since free HT failure is off, we know that if the point check here fails, it's because of
+          // a sym_limit block, not a tag block!
+        }
+      }
+
+      WHEN("The host's permissiveness is sufficiently high") {
+        target_host->SetTagPermissiveness(1);
+        THEN("The symbiont offspring can horizontally transmit") {
+          symbiont->HorizontalTransmission(emp::WorldPosition(1, source_pos));
+          REQUIRE(target_host->HasSym());
+          REQUIRE(symbiont->GetPoints() < starting_res);
+        }
+      }
+    }
+  }
+}
+
 TEST_CASE("Tag matching", "[default]") {
   int trans_res = 10;
   int starting_res = 15;
