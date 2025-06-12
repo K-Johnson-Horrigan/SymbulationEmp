@@ -152,8 +152,8 @@ public:
     if (interaction_val > 1 || interaction_val < -1) {
        throw "Invalid interaction value. Must be between -1 and 1";  // Exception for invalid interaction value
      };
-    if (my_config->TAG_MATCHING() && my_config->TAG_DISTANCE_EVOLVES()) {
-      tag_permissiveness = my_config->TAG_DISTANCE();
+    if (my_config->TAG_MATCHING() && my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) {
+      tag_permissiveness = my_config->TAG_PERMISSIVENESS();
     }
    }
 
@@ -679,7 +679,7 @@ public:
     emp::Ptr<Organism> host_baby = MakeNew();
     if (my_config->TAG_MATCHING()) {
       host_baby->SetTag(GetTag());
-      if (my_config->TAG_DISTANCE_EVOLVES()) host_baby->SetTagPermissiveness(tag_permissiveness);
+      if (my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) host_baby->SetTagPermissiveness(tag_permissiveness);
     }
     host_baby->Mutate();
     host_baby->SetReproCount(reproductions + 1);
@@ -721,8 +721,8 @@ public:
       interaction_val += random->GetNormal(0.0, mutation_size);
       if(interaction_val < -1) interaction_val = -1;
       else if (interaction_val > 1) interaction_val = 1;
-      if (my_config->TAG_MATCHING() && my_config->TAG_DISTANCE_EVOLVES()) {
-        tag_permissiveness += random->GetNormal(0.0, my_config->TAG_DISTANCE_MUTATION_SIZE());
+      if (my_config->TAG_MATCHING() && my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) {
+        tag_permissiveness += random->GetNormal(0.0, my_config->HOST_TAG_PERMISSIVENESS_MUTATION_RATE());
       }
     }
 

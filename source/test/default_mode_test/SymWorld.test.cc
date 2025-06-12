@@ -2064,9 +2064,9 @@ TEST_CASE("Evolvable tag permissiveness", "[default]"){
   config.TAG_MATCHING(1);
   config.TAG_MUTATION_SIZE(0.0);
   config.TAG_METRIC(0);
-  config.TAG_DISTANCE(tag_distance_mean);
-  config.TAG_DISTANCE_EVOLVES(1);
-  config.TAG_DISTANCE_MUTATION_SIZE(0);
+  config.TAG_PERMISSIVENESS(tag_distance_mean);
+  config.HOST_TAG_PERMISSIVENESS_EVOLVES(1);
+  config.HOST_TAG_PERMISSIVENESS_MUTATION_RATE(0);
 
   SymWorld world(random, &config);
 
@@ -2165,7 +2165,7 @@ TEST_CASE("Tag matching", "[default]") {
   config.SYM_HORIZ_TRANS_RES(trans_res);
   config.SYM_VERT_TRANS_RES(trans_res);
   config.TAG_MATCHING(1);
-  config.TAG_DISTANCE(tag_distance_mean);
+  config.TAG_PERMISSIVENESS(tag_distance_mean);
   config.TAG_MUTATION_SIZE(0.0);
   
   WHEN("Hamming metric is used") {
