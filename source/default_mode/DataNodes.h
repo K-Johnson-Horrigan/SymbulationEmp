@@ -396,7 +396,7 @@ emp::DataFile & SymWorld::SetUpTransmissionFile(const std::string & filename){
   file.AddHistBin(node4, 3, "vert_success_0.2_0.6", "Count for histogram bin for vertical successes with int val 0.2 to <0.6");
   file.AddHistBin(node4, 4, "vert_success_0.6_1", "Count for histogram bin for vertical successes with int val 0.6 to 1", true);
 
-  // horiz failure 
+  // horiz failure
   file.AddHistBin(node5, 0, "horiz_tagfail_-1_-0.6", "Count for histogram bin for horizontal tag failure with int val -1 to <-0.6");
   file.AddHistBin(node5, 1, "horiz_tagfail_-0.6_-0.2", "Count for histogram bin for horizontal tag failure with int val -0.6 to <-0.2");
   file.AddHistBin(node5, 2, "horiz_tagfail_-0.2_0.2", "Count for histogram bin for horizontal tag failure with int val -0.2 to <0.2");
@@ -469,7 +469,10 @@ void SymWorld::WriteOrgDumpFile(const std::string& filename) {
   std::ofstream out_file(filename);
   out_file << "host_int,sym_int,host_repro_count,host_towards_partner_count,host_from_partner_count," << 
     "sym_repro_count,sym_towards_partner_count,sym_from_partner_count";
-  if (my_config->TAG_MATCHING()) out_file << ",host_tag,sym_tag,tag_distance";
+  if (my_config->TAG_MATCHING()) {
+    out_file << ",host_tag,sym_tag,tag_distance";
+    if (my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) out_file << ",host_tag_permissiveness";
+  }
   out_file << "\n";
 
   for (size_t i = 0; i < size(); i++) {
@@ -484,6 +487,7 @@ void SymWorld::WriteOrgDumpFile(const std::string& filename) {
           if (my_config->TAG_MATCHING()) {
             out_file << "," << pop[i]->GetTag().ToBinaryString() << "," << symbionts[j]->GetTag().ToBinaryString() << 
               "," << (*tag_metric)(pop[i]->GetTag(), symbionts[j]->GetTag());
+            if (my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) out_file << "," << pop[i]->GetTagPermissiveness();
           }
         }
       }
@@ -492,6 +496,7 @@ void SymWorld::WriteOrgDumpFile(const std::string& filename) {
           pop[i]->GetTowardsPartnerCount() << "," << pop[i]->GetFromPartnerCount() << ",,,";
         if (my_config->TAG_MATCHING()) {
           out_file << "," << pop[i]->GetTag().ToBinaryString() << ",,";
+          if (my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) out_file << "," << pop[i]->GetTagPermissiveness();
         }
       }
       out_file << "\n";
