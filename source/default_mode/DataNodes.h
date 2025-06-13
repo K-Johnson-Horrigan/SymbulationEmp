@@ -429,6 +429,7 @@ emp::DataFile& SymWorld::SetUpTagDistFile(const std::string& filename) {
   auto& symbiont_tag_richness = GetSymbiontTagRichness();
   auto& symbiont_tag_shannon = GetSymbiontTagShannonDiversity();
   auto& host_tag_richness = GetHostTagRichness();
+  
 
   file.AddVar(update, "update", "Update");
   file.AddMean(tag_dist_node, "mean_tag_distance", "The mean tag distance between symbionts and their hosts");
@@ -447,6 +448,10 @@ emp::DataFile& SymWorld::SetUpTagDistFile(const std::string& filename) {
   file.AddHistBin(tag_dist_node, 8, "tag_0.9", "Count for tag distance histogram bin 0.8 to <0.9");
   file.AddHistBin(tag_dist_node, 9, "tag_1.0", "Count for tag distance histogram bin 0.9 to 1.0");
   
+  if (my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) {
+    auto& host_tag_permissiveness = GetHostTagPermissiveness();
+    file.AddMean(host_tag_permissiveness, "mean_host_permissiveness", "The mean permissiveness of hosts");
+  }
   file.PrintHeaderKeys();
 
   return file;
@@ -1070,6 +1075,31 @@ emp::DataMonitor<double, emp::data::Histogram>& SymWorld::GetTagDistanceDataNode
   data_node_tag_dist->SetupBins(0, 1.1, 11);
   return *data_node_tag_dist;
 }
+
+/**
+ * Input: None
+ *
+ * Output: The DataMonitor<double>& that has the information representing
+ * the average tag permissiveness of hosts.
+ *
+ * Purpose: To retrieve the data nodes that is tracking the
+ * average tag permissiveness of hosts.
+ */
+emp::DataMonitor<double>& SymWorld::GetHostTagPermissiveness() {
+  if (!data_node_host_permissiveness) {
+    data_node_host_permissiveness.New();
+    OnUpdate([this](size_t) {
+      data_node_host_permissiveness->Reset();
+      for (size_t i = 0; i < pop.size(); i++) {
+        if (IsOccupied(i)) {
+          data_node_host_permissiveness->AddDatum(pop[i]->GetTagPermissiveness());
+        } //endif
+      } //end for
+    }); //end OnUpdate
+  } //end if
+  return *data_node_host_permissiveness;
+}
+
 
   emp::DataMonitor<double,emp::data::Histogram>& SymWorld::GetWithinHostVarianceDataNode() {
     if (!data_node_within_host_variance) {
