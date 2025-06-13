@@ -2177,6 +2177,11 @@ TEST_CASE("Tag matching", "[default]") {
     emp::BitSet<TAG_LENGTH> distant_tag =  emp::BitSet<TAG_LENGTH>("11110000000000000000000111111111");
 
     WHEN("Tag distances are calculated") {
+      THEN("Tag has tag distance 0 with itself") {
+        double expected_difference = 0;
+        double calculated_difference = (*world.GetTagMetric())(symbiont_tag, emp::BitSet<TAG_LENGTH>("00000000000000000000000000000000"));
+        REQUIRE(expected_difference == calculated_difference);
+      }
       THEN("Close tag distance is calculated correctly") {
         double mismatch = 3;
         double expected_difference = mismatch / TAG_LENGTH;
@@ -2342,6 +2347,11 @@ TEST_CASE("Tag matching", "[default]") {
     emp::BitSet<TAG_LENGTH> distant_tag = emp::BitSet<TAG_LENGTH>("00111111111111111111110000000000");
 
     WHEN("Tag distances are calculated") {
+      THEN("Tag has tag distance 0 with itself") {
+        double expected_difference = 0;
+        double calculated_difference = (*world.GetTagMetric())(symbiont_tag, emp::BitSet<TAG_LENGTH>("00000000000000000000000000000000"));
+        REQUIRE(std::abs(expected_difference - calculated_difference) < 0.000001);
+      }
       THEN("Close tag distance is calculated correctly"){
         int mismatch = 2;
         int match = 21;
@@ -2511,6 +2521,11 @@ TEST_CASE("Tag matching", "[default]") {
     emp::BitSet<TAG_LENGTH> distant_tag = emp::BitSet<TAG_LENGTH>("00000000011000000010000000000001");
 
     WHEN("Tag distances are calculated") {
+      THEN("All 0s tag does NOT have tag distance 0 with itself") {
+        double expected_difference = 0.0774070847;
+        double calculated_difference = (*world.GetTagMetric())(emp::BitSet<TAG_LENGTH>("00000000000000000000000000000000"), emp::BitSet<TAG_LENGTH>("00000000000000000000000000000000"));
+        REQUIRE(std::abs(expected_difference - calculated_difference) < 0.00001);
+      }
       THEN("Close tag distance is calculated correctly") {
         double expected_difference = 0.0704272055;
         double calculated_difference = (*world.GetTagMetric())(similar_tag, symbiont_tag);
