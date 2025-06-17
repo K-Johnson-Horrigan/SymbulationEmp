@@ -239,7 +239,7 @@ TEST_CASE("Host mutate tag permissiveness", "[default]") {
   config.MUTATION_RATE(1);
   config.TAG_MATCHING(1);
   config.HOST_TAG_PERMISSIVENESS_EVOLVES(1);
-  config.HOST_TAG_PERMISSIVENESS_MUTATION_RATE(tag_permissiveness_mut_size);
+  config.HOST_TAG_PERMISSIVENESS_MUTATION_SIZE(tag_permissiveness_mut_size);
   config.TAG_PERMISSIVENESS(tag_permissiveness);
 
   emp::Ptr<Host> host = emp::NewPtr<Host>(random, &world, &config, int_val);

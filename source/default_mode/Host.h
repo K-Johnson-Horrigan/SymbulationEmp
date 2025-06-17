@@ -722,7 +722,7 @@ public:
       if(interaction_val < -1) interaction_val = -1;
       else if (interaction_val > 1) interaction_val = 1;
       if (my_config->TAG_MATCHING() && my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) {
-        tag_permissiveness += random->GetNormal(0.0, my_config->HOST_TAG_PERMISSIVENESS_MUTATION_RATE());
+        tag_permissiveness += random->GetNormal(0.0, my_config->HOST_TAG_PERMISSIVENESS_MUTATION_SIZE());
       }
     }
 

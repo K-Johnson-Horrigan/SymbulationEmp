@@ -2066,7 +2066,7 @@ TEST_CASE("Evolvable tag permissiveness", "[default]"){
   config.TAG_METRIC(0);
   config.TAG_PERMISSIVENESS(tag_distance_mean);
   config.HOST_TAG_PERMISSIVENESS_EVOLVES(1);
-  config.HOST_TAG_PERMISSIVENESS_MUTATION_RATE(0);
+  config.HOST_TAG_PERMISSIVENESS_MUTATION_SIZE(0);
 
   SymWorld world(random, &config);
 
