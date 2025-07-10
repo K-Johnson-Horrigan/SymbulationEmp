@@ -25,6 +25,9 @@ namespace datastruct {
         }
   };
 
+  struct SymbiontTaxonData : TaxonDataBase {
+  };
+
 }
 
 class Organism {

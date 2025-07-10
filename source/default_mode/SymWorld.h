@@ -76,7 +76,7 @@ protected:
     * Purpose: Represents the systematics object tracking symbionts.
     *
   */
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::TaxonDataBase>> sym_sys;
+  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>> sym_sys;
 
   /**
     *
@@ -160,12 +160,12 @@ public:
       }
 
       host_sys = emp::NewPtr<emp::Systematics<Organism, taxon_info_t, datastruct::HostTaxonData>>(GetCalcHostInfoFun());
-      sym_sys = emp::NewPtr< emp::Systematics<Organism, taxon_info_t, datastruct::TaxonDataBase>>(GetCalcSymInfoFun());
+      sym_sys = emp::NewPtr< emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>>(GetCalcSymInfoFun());
 
       AddSystematics(host_sys);
       sym_sys->SetStorePosition(false);
 
-      sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>& t) {return std::to_string(t.GetInfo()); }, "info");
+      sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
       host_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::HostTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
 
       on_placement_sig.AddAction([this](emp::WorldPosition pos) {
@@ -322,7 +322,7 @@ public:
    *
    * Purpose: To retrieve the symbiont systematic
    */
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::TaxonDataBase>> GetSymSys(){
+  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>> GetSymSys(){
     return sym_sys;
   }
 
@@ -379,7 +379,8 @@ public:
    * Purpose: To add a symbiont to the systematic and to set it to track its taxon
    */
   emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> AddSymToSystematic(emp::Ptr<Organism> sym, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> parent_taxon=nullptr){
-    emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> taxon = sym_sys->AddOrg(*sym, emp::WorldPosition(0,0), parent_taxon);
+    emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> taxon = 
+      sym_sys->AddOrg(*sym, emp::WorldPosition(0, 0), parent_taxon.Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>()).Cast<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>();
     sym->SetTaxon(taxon);
     return taxon;
   }
