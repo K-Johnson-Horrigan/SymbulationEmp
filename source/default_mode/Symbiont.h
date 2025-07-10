@@ -714,7 +714,7 @@ public:
   }
 
   /**
-   * Input: The location of the organism (and it's Host) as a size_t
+   * Input: The location of the organism as a emp::WorldPosition(<index of sym in host +1>, <index of host in world>)
    *
    * Output: None
    *
