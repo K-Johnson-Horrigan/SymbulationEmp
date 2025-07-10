@@ -172,6 +172,14 @@ public:
         GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>());
         });
 
+      if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
+        std::function<void(emp::Ptr<emp::Taxon<double, datastruct::SymbiontTaxonData> >, Organism&)> inherit_host_switch =
+          [&](emp::Ptr<emp::Taxon<double, datastruct::SymbiontTaxonData> > taxon, Organism& org) {
+          if (taxon->GetParent()) taxon->GetData().SetHostSwitch(taxon->GetParent()->GetData().GetHostSwitch());
+          else taxon->GetData().SetHostSwitch(0);
+          };
+        sym_sys->OnNew(inherit_host_switch);
+      }
     }
 
     if (my_config->TAG_MATCHING()) {
@@ -771,8 +779,13 @@ public:
         int new_index = pop[new_host_pos]->AddSymbiont(sym_baby);
 
         if(new_index > 0){ //sym successfully infected
-          if (my_config->PHYLOGENY() && my_config->TRACK_PHYLOGENY_INTERACTIONS()) {
-            pop[new_host_pos]->GetTaxon().Cast<emp::Taxon<taxon_info_t, datastruct::HostTaxonData>>()->GetData().AddInteraction(sym_baby->GetTaxon());
+          if (my_config->PHYLOGENY()){
+            if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
+              sym_baby->GetTaxon().Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>()->GetData().DetermineHostSwitch(pop[new_host_pos]->GetTaxon(), sym_parent->GetHost()->GetTaxon());
+            }
+            if(my_config->TRACK_PHYLOGENY_INTERACTIONS()) {
+              pop[new_host_pos]->GetTaxon().Cast<emp::Taxon<taxon_info_t, datastruct::HostTaxonData>>()->GetData().AddInteraction(sym_baby->GetTaxon());
+            }
           }
           if (my_config->FREE_HT_FAILURE() || my_config->TAG_MATCHING()) {
             // if tag mismatch or free failure is on, don't subtract points until we think the infection is successful

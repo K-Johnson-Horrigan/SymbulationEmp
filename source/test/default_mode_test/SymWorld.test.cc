@@ -1775,6 +1775,144 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
   }
 }
 
+TEST_CASE("Host switch counter", "[default]") {
+  emp::Random random(17);
+  SymConfigBase config;
+  int repro_points = 100;
+  config.SYM_HORIZ_TRANS_RES(repro_points);
+  
+  config.MUTATION_RATE(0); // no phenotypic difference
+  config.VERTICAL_TRANSMISSION(0);
+
+  config.PHYLOGENY(1);
+  config.PHYLOGENY_TAXON_TYPE(3);
+
+  SymWorld world(random, &config);
+  int int_val = 0;
+  int world_size = 4;
+  world.Resize(world_size);
+
+  WHEN("A symbiont vertically transmits") {
+    config.VERTICAL_TRANSMISSION(1);
+
+    emp::Ptr<Organism> host_parent = emp::NewPtr<Host>(&random, &world, &config, int_val);
+    emp::Ptr<Organism> symbiont_parent = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+    world.AddSymToSystematic(symbiont_parent);
+    host_parent->AddSymbiont(symbiont_parent);
+
+    emp::Ptr<Organism> host_offspring = host_parent->Reproduce();
+    symbiont_parent->VerticalTransmission(host_offspring);
+    REQUIRE(host_offspring->HasSym());
+    emp::Ptr<Organism> symbiont_offspring = host_offspring->GetSymbionts().at(0);
+
+    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    THEN("Its host switch counter does not increment") {
+      REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == 0);
+      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == 0);
+      REQUIRE(symbiont_parent_taxon->GetID() != symbiont_offspring_taxon->GetID());
+    }
+
+    host_parent.Delete();
+    host_offspring.Delete();
+  }
+
+  WHEN("A symbiont horizontally transmits into a host who is descended from the symbiont parent's partner") {
+    size_t host_switch_count = 43;
+    emp::WorldPosition host_of_parent_pos = emp::WorldPosition(0, 0);
+
+    emp::Ptr<Organism> host_of_parent = emp::NewPtr<Host>(&random, &world, &config, int_val);
+    emp::Ptr<Organism> symbiont_parent = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+    emp::Ptr<Organism> host_of_offspring = host_of_parent->Reproduce(); 
+
+    world.AddSymToSystematic(symbiont_parent);
+    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    symbiont_parent_taxon->GetData().SetHostSwitch(host_switch_count);
+
+    symbiont_parent->SetPoints(repro_points + 10);
+    host_of_parent->AddSymbiont(symbiont_parent);
+    
+    world.AddOrgAt(host_of_parent, host_of_parent_pos);
+    world.AddOrgAt(host_of_offspring, 1, host_of_parent_pos);
+    REQUIRE(host_of_parent->GetTaxon()->GetID() == host_of_offspring->GetTaxon()->GetParent()->GetID());
+
+    symbiont_parent->HorizontalTransmission(emp::WorldPosition(1, host_of_parent_pos.GetIndex()));
+    REQUIRE(host_of_offspring->HasSym());
+    
+    emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
+    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    
+    THEN("Its host switch counter increments") {
+      REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
+      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count + 1);
+      REQUIRE(symbiont_parent_taxon->GetID() != symbiont_offspring_taxon->GetID());
+    }
+  }
+  
+  WHEN("A symbiont horizontally transmits into a host who is an ancestor of the symbiont parent's partner") {
+    size_t host_switch_count = 19;
+    emp::WorldPosition host_of_offspring_pos = emp::WorldPosition(2, 0);
+    emp::WorldPosition host_of_parent_pos = emp::WorldPosition(0, 0);
+
+    emp::Ptr<Organism> host_of_offspring = emp::NewPtr<Host>(&random, &world, &config, int_val);
+    emp::Ptr<Organism> symbiont_parent = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+    emp::Ptr<Organism> host_of_parent = host_of_offspring->Reproduce();
+
+    world.AddSymToSystematic(symbiont_parent);
+    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    symbiont_parent_taxon->GetData().SetHostSwitch(host_switch_count);
+
+    symbiont_parent->SetPoints(repro_points + 10);
+    host_of_parent->AddSymbiont(symbiont_parent);
+
+    world.AddOrgAt(host_of_offspring, host_of_offspring_pos);
+    world.AddOrgAt(host_of_parent, host_of_parent_pos, host_of_offspring_pos);
+    REQUIRE(host_of_parent->GetTaxon()->GetParent()->GetID() == host_of_offspring->GetTaxon()->GetID());
+
+    symbiont_parent->HorizontalTransmission(emp::WorldPosition(1, host_of_parent_pos.GetIndex()));
+    REQUIRE(host_of_offspring->HasSym());
+
+    emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
+    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+
+    THEN("Its host switch counter increments") {
+      REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
+      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count + 1);
+      REQUIRE(symbiont_parent_taxon->GetID() != symbiont_offspring_taxon->GetID());
+    }
+  }
+
+  WHEN("A symbiont horizontally transmits into a host who is an unrelated to the symbiont parent's partner") {
+    size_t host_switch_count = 8;
+    emp::WorldPosition symbiont_parent_pos = emp::WorldPosition(1, 0);
+
+    emp::Ptr<Organism> host_of_parent = emp::NewPtr<Host>(&random, &world, &config, int_val);
+    emp::Ptr<Organism> symbiont_parent = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+    emp::Ptr<Organism> host_of_offspring = emp::NewPtr<Host>(&random, &world, &config, int_val);
+
+    world.AddSymToSystematic(symbiont_parent);
+    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    symbiont_parent_taxon->GetData().SetHostSwitch(host_switch_count);
+
+    symbiont_parent->SetPoints(repro_points + 10);
+    host_of_parent->AddSymbiont(symbiont_parent);
+
+    world.AddOrgAt(host_of_parent, symbiont_parent_pos.GetPopID());
+    world.AddOrgAt(host_of_offspring, 1);
+
+    symbiont_parent->HorizontalTransmission(symbiont_parent_pos);
+    REQUIRE(host_of_offspring->HasSym());
+
+    emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
+    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    THEN("Its host switch does not increment") {
+      REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
+      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count);
+      REQUIRE(symbiont_parent_taxon->GetID() != symbiont_offspring_taxon->GetID());
+    }
+  }
+}
+
 TEST_CASE( "SetMutationZero", "[default]") {
   GIVEN("World first created with all mutation settings at 1") {
     emp::Random random(17);

@@ -26,14 +26,32 @@ namespace datastruct {
   };
 
   struct SymbiontTaxonData : TaxonDataBase {
-    emp::DataNode<size_t> lineage_host_switch_count;
+    size_t lineage_host_switch_count;
 
-    void RecordHostSwitch() {
-      lineage_host_switch_count.Add(1);
+    void DetermineHostSwitch(emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> host, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>  host_of_parent) {
+
+      // possibilities : 
+    // partner is descended from parent's partner (1)
+    // parent's partner is descended from partner (2)
+    // no lineage association between partners of self and parent (3)
+      /*
+      bool switched_hosts = true;
+      emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> host_taxon = my_host->GetTaxon();
+      emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> parent_host_taxon = sym_parent->GetHost()->GetTaxon();
+
+      switched_hosts = CheckIfInLineage(host, host_of_parent);
+      if (switched_hosts) switched_hosts = CheckIfInLineage(host_of_parent, host);
+
+      if (switched_hosts) lineage_host_switch_count.Add(1);*/
+      lineage_host_switch_count = 1;
     }
 
-    double GetHostSwitch() const {
-      return lineage_host_switch_count.GetTotal();
+    void SetHostSwitch(size_t _in) {
+      lineage_host_switch_count = _in; 
+    }
+
+    size_t GetHostSwitch() const {
+      return lineage_host_switch_count;
     }
   };
 
