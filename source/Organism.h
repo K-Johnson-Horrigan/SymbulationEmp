@@ -26,6 +26,15 @@ namespace datastruct {
   };
 
   struct SymbiontTaxonData : TaxonDataBase {
+    emp::DataNode<size_t> lineage_host_switch_count;
+
+    void RecordHostSwitch() {
+      lineage_host_switch_count.Add(1);
+    }
+
+    double GetHostSwitch() const {
+      return lineage_host_switch_count.GetTotal();
+    }
   };
 
 }
@@ -49,7 +58,7 @@ class Organism {
     throw "Organism method called!";}
 
   virtual double GetIntVal() const {
-    std::cout << "GetIntVal called from Organsim" << std::endl;
+    std::cout << "GetIntVal called from Organism" << std::endl;
     throw "Organism method called!";}
   virtual double GetPoints() {
     std::cout << "GetPoints called from Organism" << std::endl;
