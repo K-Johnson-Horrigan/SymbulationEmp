@@ -149,6 +149,15 @@ public:
           return org.GetIntVal();
           };
       }
+      else if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
+        calc_host_info_fun = [&](Organism& org) {
+          return (long unsigned) host_sys->GetNextID();
+          };
+
+        calc_sym_info_fun = [&](Organism& org) {
+          return (long unsigned) sym_sys->GetNextID();
+          };
+      }
 
       host_sys = emp::NewPtr<emp::Systematics<Organism, taxon_info_t, datastruct::HostTaxonData>>(GetCalcHostInfoFun());
       sym_sys = emp::NewPtr< emp::Systematics<Organism, taxon_info_t, datastruct::TaxonDataBase>>(GetCalcSymInfoFun());
@@ -951,6 +960,11 @@ public:
       graveyard[i].Delete();
     }
     graveyard.clear();
+    
+    if (my_config->PHYLOGENY()) {
+      host_sys->ClearRemoveAfterReproQueue();
+      sym_sys->ClearRemoveAfterReproQueue();
+    }
   } // Update()
 };// SymWorld class
 #endif

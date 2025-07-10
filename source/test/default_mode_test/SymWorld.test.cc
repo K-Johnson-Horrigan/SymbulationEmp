@@ -1505,6 +1505,276 @@ TEST_CASE("Interaction Tracking Phylogeny", "[default]") {
   }
 }
 
+TEST_CASE("Individual-level phylogenies", "[default]") {
+  emp::Random random(17);
+  SymConfigBase config;
+  int repro_points = 100;
+  config.SYM_HORIZ_TRANS_RES(repro_points);
+
+  config.MUTATION_RATE(0); // no phenotypic difference
+
+  config.PHYLOGENY(1);
+  config.PHYLOGENY_TAXON_TYPE(3);
+
+  SymWorld world(random, &config);
+  int int_val = 0;
+  int world_size = 10;
+  world.Resize(world_size);
+  
+  WHEN("Free living symbionts reproduce and die") {
+    config.FREE_LIVING_SYMS(1);
+
+    emp::WorldPosition symbiont_1_pos = emp::WorldPosition(0, 0);
+    emp::Ptr<Organism> symbiont_1 = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+    world.AddSymToSystematic(symbiont_1);
+    world.AddOrgAt(symbiont_1, symbiont_1_pos);
+    world.Update(); // update 1
+
+    emp::Ptr<Organism> symbiont_2 = symbiont_1->Reproduce(); // symbionts are added to systematic on Reproduce()
+    emp::WorldPosition symbiont_2_pos = world.SymDoBirth(symbiont_2, symbiont_1_pos);
+    
+    REQUIRE(world.GetNumOrgs() == 2);
+    REQUIRE(symbiont_2_pos.GetPopID() != symbiont_1_pos.GetPopID());
+      
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_1_taxon = symbiont_1->GetTaxon();
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_2_taxon = symbiont_2->GetTaxon();
+
+    THEN("Symbiont offspring are placed into a new taxon") {
+      REQUIRE(symbiont_2->GetIntVal() == symbiont_1->GetIntVal());
+      REQUIRE(symbiont_1_taxon->GetID() != symbiont_2_taxon->GetID());
+    }
+    
+    THEN("Symbiont taxon origination times are tracked") {
+      REQUIRE(symbiont_1_taxon->GetOriginationTime() == 0);
+      REQUIRE(symbiont_2_taxon->GetOriginationTime() == 1);
+      REQUIRE(symbiont_1_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+      REQUIRE(symbiont_2_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+    }
+
+    THEN("Symbiont taxon destruction times are tracked") {
+      world.Update(); // update 2
+      // birth and overwriting death happen during update 2
+      emp::Ptr<Organism> symbiont_3 = symbiont_2->Reproduce(); // symbionts are added to systematic on Reproduce()
+      world.AddOrgAt(symbiont_3, symbiont_1_pos, symbiont_2_pos);
+      emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_3_taxon = symbiont_3->GetTaxon();
+
+      world.Update(); // update 3
+      world.Update(); // update 4
+      world.Update(); // update 5
+
+      symbiont_2->SetDead(); // symbiont dies during update 6
+      world.Update(); // update 6
+
+      REQUIRE(world.GetNumOrgs() == 1);
+      REQUIRE(symbiont_3_taxon->GetOriginationTime() == 2);
+      REQUIRE(symbiont_1_taxon->GetDestructionTime() == 2);
+      REQUIRE(symbiont_2_taxon->GetDestructionTime() == 6);
+      REQUIRE(symbiont_3_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+    }
+  }
+  
+  WHEN("Hosted symbionts reproduce and die") {
+    config.FREE_LIVING_SYMS(0);
+    config.VERTICAL_TRANSMISSION(1);
+
+    // test:
+    // birth through VT and HT
+    // death through host death, symbiont death, and ousting
+
+    emp::Ptr<Organism> host_1 = emp::NewPtr<Host>(&random, &world, &config, int_val);
+    emp::WorldPosition host_1_pos = emp::WorldPosition(0, 0);
+    world.AddOrgAt(host_1, host_1_pos);
+
+    emp::Ptr<Organism> symbiont_1 = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+    world.AddSymToSystematic(symbiont_1);
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_1_taxon = symbiont_1->GetTaxon();
+    host_1->AddSymbiont(symbiont_1);
+
+    THEN("Origination times are tracked") {
+      REQUIRE(symbiont_1_taxon->GetOriginationTime() == 0);
+      REQUIRE(symbiont_1_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+    }
+
+    world.Update(); // update 1
+    emp::Ptr<Organism> host_2 = host_1->Reproduce();
+    emp::WorldPosition host_2_pos = world.DoBirth(host_2, host_1_pos);
+    symbiont_1->VerticalTransmission(host_2);
+    emp::Ptr<Organism> symbiont_2 = host_2->GetSymbionts().at(0);
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_2_taxon = symbiont_2->GetTaxon();
+
+    WHEN("A symbiont is vertically transmitted") {
+      THEN("It is placed into a new taxon") {
+        REQUIRE(symbiont_2_taxon->GetInfo() != symbiont_1_taxon->GetInfo());
+        REQUIRE(symbiont_2_taxon->GetOriginationTime() == 1);
+      }
+      THEN("Taxon origination/destruction times are tracked") {
+        REQUIRE(symbiont_2_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+        REQUIRE(symbiont_1_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+      }
+    }
+
+    random.ResetSeed(10);
+    world.Update(); // update 2
+    emp::Ptr<Organism> host_3 = host_2->Reproduce();
+    world.DoBirth(host_3, host_2_pos);
+    symbiont_1->SetPoints(repro_points + 10);
+    symbiont_1->HorizontalTransmission(emp::WorldPosition(1, host_1_pos.GetIndex()));
+    emp::Ptr<Organism> symbiont_3 = host_3->GetSymbionts().at(0);
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_3_taxon = symbiont_3->GetTaxon();
+
+    WHEN("A symbiont is horizontally transmitted") {
+      REQUIRE(world.GetNumOrgs() == 3);
+      REQUIRE(host_3->HasSym());
+      THEN("It is placed into a new taxon") {
+        REQUIRE(symbiont_3_taxon->GetInfo() != symbiont_1_taxon->GetInfo());
+        REQUIRE(symbiont_3_taxon->GetInfo() != symbiont_2_taxon->GetInfo());
+
+      }
+      THEN("Taxon origination/destruction times are tracked") {
+        REQUIRE(symbiont_2_taxon->GetOriginationTime() == 1);
+        REQUIRE(symbiont_3_taxon->GetOriginationTime() == 2);
+
+        REQUIRE(symbiont_1_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+        REQUIRE(symbiont_2_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+        REQUIRE(symbiont_3_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+      }
+    }
+
+    world.Update(); // update 3
+    symbiont_1->SetDead(); // dies "during" update 4
+    world.Update(); // update 4
+    WHEN("A symbiont dies within an undying host") {
+      REQUIRE(world.GetNumOrgs() == 3);
+      REQUIRE(!host_1->HasSym());
+      THEN("The symbiont's taxon is marked as destroyed") {
+        REQUIRE(symbiont_1_taxon->GetOriginationTime() == 0);
+        REQUIRE(symbiont_1_taxon->GetDestructionTime() == 4);
+      }
+    }
+
+    config.OUSTING(1);
+    emp::Ptr<Organism> symbiont_4 = symbiont_3->Reproduce(); // reproduce happens "during" update 4
+    host_3->AddSymbiont(symbiont_4); // cleanup of graveyard happens after update increment in Update(), so dest. time is 5
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_4_taxon = symbiont_4->GetTaxon();
+    world.Update(); // update 5
+    WHEN("A symbiont is ousted") {
+      REQUIRE(host_3->GetSymbionts().size() == 1);
+      REQUIRE(host_3->GetSymbionts().at(0) == symbiont_4);
+      THEN("The symbiont's taxon is marked as destroyed") {
+        REQUIRE(symbiont_3_taxon->GetOriginationTime() == 2);
+        REQUIRE(symbiont_3_taxon->GetDestructionTime() == 5);
+
+        REQUIRE(symbiont_4_taxon->GetOriginationTime() == 4);
+        REQUIRE(symbiont_4_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+      }
+    }
+
+    world.Update(); // update 6
+    emp::Ptr<Organism> host_4 = host_2->Reproduce();
+    world.DoBirth(host_4, host_2_pos);
+    symbiont_2->VerticalTransmission(host_4); // vertical transmission happens "during" update 6
+    emp::Ptr<Organism> symbiont_5 = host_4->GetSymbionts().at(0);
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_5_taxon = symbiont_5->GetTaxon();
+
+    host_2->SetDead(); // dies "during" update 7
+    world.Update(); // update 7
+
+    WHEN("A host with symbionts dies") {
+      REQUIRE(world.GetNumOrgs() == 3);
+      THEN("Its symbionts' taxa are marked destroyed") {
+        REQUIRE(symbiont_2_taxon->GetOriginationTime() == 1);
+        REQUIRE(symbiont_2_taxon->GetDestructionTime() == 7);
+        REQUIRE(symbiont_5_taxon->GetOriginationTime() == 6);
+        REQUIRE(symbiont_5_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+      }
+
+    }
+
+    REQUIRE(world.GetSymSys()->GetNumTaxa() == 5);
+    REQUIRE(world.GetSymSys()->GetActive().size() == 2);
+    REQUIRE(world.GetSymSys()->GetAncestors().size() == 3);
+
+    // current lineages: sym 1 -> sym 2 -> sym 5
+    // sym 1 -> sym 3 -> sym 4
+    symbiont_5->SetDead();
+    world.Update(); // update 8
+    WHEN("A symbiont tip dies") {
+      THEN("The phylogeny is pruned") {
+        // sym 2 and sym 5 taxa get removed
+        REQUIRE(world.GetSymSys()->GetNumTaxa() == 3);
+        REQUIRE(world.GetSymSys()->GetActive().size() == 1);
+        REQUIRE(world.GetSymSys()->GetAncestors().size() == 2);
+        
+        REQUIRE((*world.GetSymSys()->GetActive().begin())->GetID() == symbiont_4_taxon->GetID());
+        REQUIRE((*world.GetSymSys()->GetAncestors().begin())->GetID() == symbiont_3_taxon->GetID());
+        REQUIRE((*(++world.GetSymSys()->GetAncestors().begin()))->GetID() == symbiont_1_taxon->GetID());
+      }
+    }
+  }
+  
+  WHEN("Hosts reproduce and die") {
+    emp::WorldPosition host_1_pos = emp::WorldPosition(0, 0);
+    emp::Ptr<Organism> host_1 = emp::NewPtr<Host>(&random, &world, &config, int_val);
+    world.AddOrgAt(host_1, host_1_pos);
+    world.Update(); // update 1
+    
+    emp::Ptr<Organism> host_2 = host_1->Reproduce(  );
+    emp::WorldPosition host_2_pos = world.DoBirth(host_2, host_1_pos);
+
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> host_1_taxon = host_1->GetTaxon();
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> host_2_taxon = host_2->GetTaxon();
+
+    THEN("Host offspring are placed into a new taxon") {
+      REQUIRE(host_2->GetIntVal() == host_1->GetIntVal());
+      REQUIRE(host_1_taxon->GetID() != host_2_taxon->GetID());
+    }
+    THEN("Host taxon origination times are tracked") {
+      REQUIRE(host_1_taxon->GetOriginationTime() == 0);
+      REQUIRE(host_2_taxon->GetOriginationTime() == 1);
+      REQUIRE(host_1_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+      REQUIRE(host_2_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+    }
+    
+    world.Update(); // update 2
+    // birth and overwriting death happen during update 2
+    emp::Ptr<Organism> host_3 = host_2->Reproduce();
+    world.AddOrgAt(host_3, host_1_pos, host_2_pos);
+    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> host_3_taxon = host_3->GetTaxon();
+
+    world.Update(); // update 3
+    world.Update(); // update 4
+    world.Update(); // update 5
+
+    host_2->SetDead(); // host dies during update 6
+    world.Update(); // update 6
+
+    THEN("Host taxon destruction times are tracked") {
+      REQUIRE(world.GetNumOrgs() == 1);
+      REQUIRE(host_3_taxon->GetOriginationTime() == 2);
+      REQUIRE(host_1_taxon->GetDestructionTime() == 2);
+      REQUIRE(host_2_taxon->GetDestructionTime() == 6);
+      REQUIRE(host_3_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
+    }
+
+    
+
+    REQUIRE(world.GetHostSys()->GetNumTaxa() == 3);
+    REQUIRE(world.GetHostSys()->GetActive().size() == 1);
+    REQUIRE(world.GetHostSys()->GetAncestors().size() == 2);
+    // current lineage: host 1 -> host 2 -> host 3
+    host_3->SetDead();
+    world.Update();
+
+    WHEN("Host tips die") {
+      THEN("Pruning occurs") {
+        REQUIRE(world.GetHostSys()->GetNumTaxa() == 0);
+        REQUIRE(world.GetHostSys()->GetActive().size() == 0);
+        REQUIRE(world.GetHostSys()->GetAncestors().size() == 0);
+      }
+    }
+  }
+}
+
 TEST_CASE( "SetMutationZero", "[default]") {
   GIVEN("World first created with all mutation settings at 1") {
     emp::Random random(17);
