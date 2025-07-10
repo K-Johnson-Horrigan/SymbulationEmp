@@ -1304,7 +1304,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
   world.Resize(world_size);
   
   using taxon_info_t = double;
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::TaxonDataBase>> sym_sys = world.GetSymSys();
+  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>> sym_sys = world.GetSymSys();
 
   WHEN("symbionts are added to the world"){
     THEN("they get added to the correct taxonomic bins"){
@@ -1382,7 +1382,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
 
       for(size_t i = 0; i < num_syms; i++){
         std::stringstream result;
-        sym_sys->PrintLineage(syms[i]->GetTaxon(), result);
+        sym_sys->PrintLineage(syms[i]->GetTaxon().Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>(), result);
         REQUIRE(result.str() == lineages[i]);
       }
       syms[0].Delete();
@@ -1427,7 +1427,7 @@ TEST_CASE("Interaction Tracking Phylogeny", "[default]") {
 
   using taxon_info_t = double;
   emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::HostTaxonData>> host_sys = world.GetHostSys();
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::TaxonDataBase>> sym_sys = world.GetSymSys();
+  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>> sym_sys = world.GetSymSys();
 
 
   WHEN("A symbiont is injected into a host (at the beginning of runs)") {
