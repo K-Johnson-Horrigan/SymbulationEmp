@@ -29,21 +29,30 @@ namespace datastruct {
     size_t lineage_host_switch_count;
 
     void DetermineHostSwitch(emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> host, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>  host_of_parent) {
+      // check is one host is descended from the other
+      bool switched_hosts = CheckIfInLineage(host, host_of_parent);
 
-      // possibilities : 
-    // partner is descended from parent's partner (1)
-    // parent's partner is descended from partner (2)
-    // no lineage association between partners of self and parent (3)
-      /*
-      bool switched_hosts = true;
-      emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> host_taxon = my_host->GetTaxon();
-      emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> parent_host_taxon = sym_parent->GetHost()->GetTaxon();
-
-      switched_hosts = CheckIfInLineage(host, host_of_parent);
+      // if not, check it the other way
       if (switched_hosts) switched_hosts = CheckIfInLineage(host_of_parent, host);
 
-      if (switched_hosts) lineage_host_switch_count.Add(1);*/
-      lineage_host_switch_count = 1;
+      // if neither host is descended from the other, increment the host switch count
+      if (switched_hosts) lineage_host_switch_count++;
+    }
+
+    /**
+    * Input: The pointer to two host taxa (a symbiont's host and its parent's host)
+    *
+    * Output: A boolean representing whether either host is in the other's ancestry
+    *
+    * Purpose: To determine whether a host switch occurred.
+    */
+    bool CheckIfInLineage(emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> host, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> possible_ancestor) {
+      emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> cur = host;
+      while (cur != nullptr && cur->GetID() != possible_ancestor->GetID() && cur->GetOriginationTime() >= possible_ancestor->GetOriginationTime()) {
+        cur = cur->GetParent();
+      }
+      // true if no parent found or parent found is not the possible ancestor
+      return (cur == nullptr || !(cur->GetID() == possible_ancestor->GetID()));
     }
 
     void SetHostSwitch(size_t _in) {

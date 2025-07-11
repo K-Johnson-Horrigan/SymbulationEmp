@@ -1791,7 +1791,7 @@ TEST_CASE("Host switch counter", "[default]") {
   int int_val = 0;
   int world_size = 4;
   world.Resize(world_size);
-
+  
   WHEN("A symbiont vertically transmits") {
     config.VERTICAL_TRANSMISSION(1);
 
@@ -1816,7 +1816,7 @@ TEST_CASE("Host switch counter", "[default]") {
     host_parent.Delete();
     host_offspring.Delete();
   }
-
+  
   WHEN("A symbiont horizontally transmits into a host who is descended from the symbiont parent's partner") {
     size_t host_switch_count = 43;
     emp::WorldPosition host_of_parent_pos = emp::WorldPosition(0, 0);
@@ -1842,9 +1842,9 @@ TEST_CASE("Host switch counter", "[default]") {
     emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
     emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
     
-    THEN("Its host switch counter increments") {
+    THEN("Its host switch counter does not") {
       REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
-      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count + 1);
+      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count);
       REQUIRE(symbiont_parent_taxon->GetID() != symbiont_offspring_taxon->GetID());
     }
   }
@@ -1875,13 +1875,13 @@ TEST_CASE("Host switch counter", "[default]") {
     emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
     emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
 
-    THEN("Its host switch counter increments") {
+    THEN("Its host switch counter does not increment") {
       REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
-      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count + 1);
+      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count);
       REQUIRE(symbiont_parent_taxon->GetID() != symbiont_offspring_taxon->GetID());
     }
   }
-
+  
   WHEN("A symbiont horizontally transmits into a host who is an unrelated to the symbiont parent's partner") {
     size_t host_switch_count = 8;
     emp::WorldPosition symbiont_parent_pos = emp::WorldPosition(1, 0);
@@ -1905,9 +1905,9 @@ TEST_CASE("Host switch counter", "[default]") {
 
     emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
     emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
-    THEN("Its host switch does not increment") {
+    THEN("Its host switch increments") {
       REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
-      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count);
+      REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count + 1);
       REQUIRE(symbiont_parent_taxon->GetID() != symbiont_offspring_taxon->GetID());
     }
   }
