@@ -178,7 +178,7 @@ public:
       sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
       host_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::HostTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
 
-      if (my_config->PHYLOGENY_TAXON_TYPE() == 2) {
+      if (my_config->PHYLOGENY_TAXON_TYPE() == 2 || my_config->PHYLOGENY_TAXON_TYPE() == 3) {
         sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>& t) {return std::to_string((t.GetData()).GetIntVal()); }, "mean_int_val");
         host_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::HostTaxonData>& t) {return std::to_string(t.GetData().GetIntVal()); }, "mean_int_val");
       }
