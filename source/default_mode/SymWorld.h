@@ -177,12 +177,17 @@ public:
         });
 
       if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
-        std::function<void(emp::Ptr<emp::Taxon<double, datastruct::SymbiontTaxonData> >, Organism&)> inherit_host_switch =
+        std::function<void(emp::Ptr<emp::Taxon<double, datastruct::SymbiontTaxonData> >, Organism&)> inherit_parental_data =
           [&](emp::Ptr<emp::Taxon<double, datastruct::SymbiontTaxonData> > taxon, Organism& org) {
           if (taxon->GetParent()) taxon->GetData().SetHostSwitch(taxon->GetParent()->GetData().GetHostSwitch());
           else taxon->GetData().SetHostSwitch(0);
           };
-        sym_sys->OnNew(inherit_host_switch);
+        sym_sys->OnNew(inherit_parental_data);
+      }
+
+      if (my_config->STORE_EXTINCT()) {
+        sym_sys->SetStoreOutside(true);
+        host_sys->SetStoreOutside(true);
       }
     }
 
