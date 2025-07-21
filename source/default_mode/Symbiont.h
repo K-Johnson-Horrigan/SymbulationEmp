@@ -191,7 +191,13 @@ public:
    * Purpose: To destruct the symbiont and remove the symbiont from the systematic.
    */
   ~Symbiont() {
-    if(my_config->PHYLOGENY() == 1) {my_world->GetSymSys()->RemoveOrg(my_taxon.Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>());}
+    if(my_config->PHYLOGENY() == 1) {
+      my_world->GetSymSys()->RemoveOrg(my_taxon.Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>());
+      if (my_config->STORE_EXTINCT() && my_taxon->GetOriginationTime() == my_taxon->GetDestructionTime() && my_taxon->GetTotalOffspring() == 0) {
+        my_world->GetSymSys()->outside_taxa.erase(my_taxon.Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>());
+        my_taxon.Delete();
+      }
+    }
   }
 
     /**
