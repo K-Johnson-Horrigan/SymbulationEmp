@@ -126,7 +126,7 @@ protected:
     * Purpose: Tracks the taxon of this organism.
     *
   */
-  emp::Ptr<emp::Taxon<taxon_t::info_t, datastruct::TaxonDataBase>> my_taxon = NULL;
+  emp::Ptr<taxon_t::base_taxon_t> my_taxon = NULL;
 
 public:
 
@@ -314,11 +314,11 @@ public:
   */
   double GetIntVal() const { return interaction_val;}
 
-  emp::Ptr<emp::Taxon<taxon_t::info_t, datastruct::TaxonDataBase>> GetTaxon() {
+  emp::Ptr<taxon_t::base_taxon_t> GetTaxon() {
     return my_taxon;
   }
 
-  virtual void SetTaxon(emp::Ptr<emp::Taxon<taxon_t::info_t, datastruct::TaxonDataBase>> _in) {
+  virtual void SetTaxon(emp::Ptr<taxon_t::base_taxon_t> _in) {
     my_taxon = _in;
   }
 
