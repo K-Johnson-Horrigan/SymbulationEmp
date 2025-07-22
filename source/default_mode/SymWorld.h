@@ -12,12 +12,13 @@
 #include <set>
 #include <math.h>
 
+namespace taxon_t {
+  using info_t = double;
+}
 class SymWorld : public emp::World<Organism>{
-public:
-  using taxon_info_t = double;
 protected:
   // takes an organism (to classify), and returns an int (the org's taxon)
-  using fun_calc_info_t = std::function<taxon_info_t(Organism &)>;
+  using fun_calc_info_t = std::function<taxon_t::info_t(Organism &)>;
 
   /**
     *
@@ -69,14 +70,14 @@ protected:
     * Purpose: Represents the systematics object tracking hosts.
     *
   */
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::HostTaxonData>> host_sys;
+  emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>> host_sys;
 
   /**
     *
     * Purpose: Represents the systematics object tracking symbionts.
     *
   */
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>> sym_sys;
+  emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>> sym_sys;
 
   /**
     *
@@ -159,21 +160,21 @@ public:
           };
       }
 
-      host_sys = emp::NewPtr<emp::Systematics<Organism, taxon_info_t, datastruct::HostTaxonData>>(GetCalcHostInfoFun());
-      sym_sys = emp::NewPtr< emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>>(GetCalcSymInfoFun());
+      host_sys = emp::NewPtr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>>(GetCalcHostInfoFun());
+      sym_sys = emp::NewPtr< emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>>(GetCalcSymInfoFun());
 
       AddSystematics(host_sys);
       sym_sys->SetStorePosition(false);
 
-      sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
-      host_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::HostTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
+      sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_t::info_t, datastruct::SymbiontTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
+      host_sys->AddSnapshotFun([](const emp::Taxon<taxon_t::info_t, datastruct::HostTaxonData>& t) {return std::to_string(t.GetInfo()); }, "info");
 
       if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
-        sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>& t) {return std::to_string(t.GetData().GetHostSwitch()); }, "lineage_host_switch_count");
+        sym_sys->AddSnapshotFun([](const emp::Taxon<taxon_t::info_t, datastruct::SymbiontTaxonData>& t) {return std::to_string(t.GetData().GetHostSwitch()); }, "lineage_host_switch_count");
       }
 
       on_placement_sig.AddAction([this](emp::WorldPosition pos) {
-        GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>());
+        GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<emp::Taxon<taxon_t::info_t, datastruct::TaxonDataBase>>());
         });
 
       if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
@@ -327,7 +328,7 @@ public:
    *
    * Purpose: To retrieve the host systematic
    */
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::HostTaxonData>> GetHostSys(){
+  emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>> GetHostSys(){
     return host_sys;
   }
 
@@ -339,7 +340,7 @@ public:
    *
    * Purpose: To retrieve the symbiont systematic
    */
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>> GetSymSys(){
+  emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>> GetSymSys(){
     return sym_sys;
   }
 
@@ -395,9 +396,9 @@ public:
    *
    * Purpose: To add a symbiont to the systematic and to set it to track its taxon
    */
-  emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> AddSymToSystematic(emp::Ptr<Organism> sym, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> parent_taxon=nullptr){
-    emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> taxon = 
-      sym_sys->AddOrg(*sym, emp::WorldPosition(0, 0), parent_taxon.Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>()).Cast<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>();
+  emp::Ptr<emp::Taxon<taxon_t::info_t, datastruct::TaxonDataBase>> AddSymToSystematic(emp::Ptr<Organism> sym, emp::Ptr<emp::Taxon<taxon_t::info_t, datastruct::TaxonDataBase>> parent_taxon=nullptr){
+    emp::Ptr<emp::Taxon<taxon_t::info_t, datastruct::TaxonDataBase>> taxon = 
+      sym_sys->AddOrg(*sym, emp::WorldPosition(0, 0), parent_taxon.Cast<emp::Taxon<taxon_t::info_t, datastruct::SymbiontTaxonData>>()).Cast<emp::Taxon<taxon_t::info_t, datastruct::TaxonDataBase>>();
     sym->SetTaxon(taxon);
     return taxon;
   }
@@ -564,7 +565,7 @@ public:
    * being recorded.
    */
   void DoDeath(const emp::WorldPosition pos) {
-    emp::Ptr<emp::Taxon<taxon_info_t, datastruct::HostTaxonData>> taxon = host_sys->GetTaxonAt(pos);
+    emp::Ptr<emp::Taxon<taxon_t::info_t, datastruct::HostTaxonData>> taxon = host_sys->GetTaxonAt(pos);
 
     if (my_config->STORE_EXTINCT() && taxon->GetOriginationTime() == taxon->GetDestructionTime() && taxon->GetTotalOffspring() == 0) {
       host_sys->outside_taxa.erase(taxon);
@@ -665,9 +666,9 @@ public:
   void WriteOrgDumpFile(const std::string& filename);
   void WriteTagMatrixFile(const std::string& filename);
   void WriteDominantPhylogenyFiles(const std::string & filename);
-  emp::Ptr<emp::Taxon<taxon_info_t>> GetDominantSymTaxon();
-  emp::Ptr<emp::Taxon<taxon_info_t>> GetDominantHostTaxon();
-  emp::vector<emp::Ptr<emp::Taxon<taxon_info_t>>> GetDominantFreeHostedSymTaxon();
+  emp::Ptr<emp::Taxon<taxon_t::info_t>> GetDominantSymTaxon();
+  emp::Ptr<emp::Taxon<taxon_t::info_t>> GetDominantHostTaxon();
+  emp::vector<emp::Ptr<emp::Taxon<taxon_t::info_t>>> GetDominantFreeHostedSymTaxon();
   emp::DataFile & SetupSymIntValFile(const std::string & filename);
   emp::DataFile & SetupHostIntValFile(const std::string & filename);
   emp::DataFile & SetUpFreeLivingSymFile(const std::string & filename);
@@ -810,10 +811,10 @@ public:
         if(new_index > 0){ //sym successfully infected
           if (my_config->PHYLOGENY()){
             if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
-              sym_baby->GetTaxon().Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>()->GetData().DetermineHostSwitch(pop[new_host_pos]->GetTaxon(), sym_parent->GetHost()->GetTaxon());
+              sym_baby->GetTaxon().Cast<emp::Taxon<taxon_t::info_t, datastruct::SymbiontTaxonData>>()->GetData().DetermineHostSwitch(pop[new_host_pos]->GetTaxon(), sym_parent->GetHost()->GetTaxon());
             }
             if(my_config->TRACK_PHYLOGENY_INTERACTIONS()) {
-              pop[new_host_pos]->GetTaxon().Cast<emp::Taxon<taxon_info_t, datastruct::HostTaxonData>>()->GetData().AddInteraction(sym_baby->GetTaxon());
+              pop[new_host_pos]->GetTaxon().Cast<emp::Taxon<taxon_t::info_t, datastruct::HostTaxonData>>()->GetData().AddInteraction(sym_baby->GetTaxon());
             }
           }
           if (my_config->FREE_HT_FAILURE() || my_config->TAG_MATCHING()) {
