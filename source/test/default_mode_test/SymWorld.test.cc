@@ -1170,9 +1170,8 @@ TEST_CASE( "Host Phylogeny", "[default]" ){
   int world_size = 4;
   world.Resize(world_size);
 
-  using taxon_info_t = double;
   emp::Ptr<Organism> host = emp::NewPtr<Host>(&random, &world, &config, int_val);
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::HostTaxonData>> host_sys = world.GetHostSys();
+  emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>> host_sys = world.GetHostSys();
 
   //ORGANISMS ADDED TO SYSTEMATICS
   WHEN("an organism is added to the world"){
@@ -1302,9 +1301,8 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
   SymWorld world(random, &config);
   int world_size = 20;
   world.Resize(world_size);
-  
-  using taxon_info_t = double;
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>> sym_sys = world.GetSymSys();
+
+  emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>> sym_sys = world.GetSymSys();
 
   WHEN("symbionts are added to the world"){
     THEN("they get added to the correct taxonomic bins"){
@@ -1382,7 +1380,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
 
       for(size_t i = 0; i < num_syms; i++){
         std::stringstream result;
-        sym_sys->PrintLineage(syms[i]->GetTaxon().Cast<emp::Taxon<taxon_info_t, datastruct::SymbiontTaxonData>>(), result);
+        sym_sys->PrintLineage(syms[i]->GetTaxon().Cast<taxon_t::sym_taxon_t>(), result);
         REQUIRE(result.str() == lineages[i]);
       }
       syms[0].Delete();
@@ -1397,7 +1395,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
       world.Update();
 
       //after update, times should now be 1
-      emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> dest_tax = syms[0]->GetTaxon();
+      emp::Ptr<taxon_t::base_taxon_t> dest_tax = syms[0]->GetTaxon();
       syms[0].Delete();
       REQUIRE(dest_tax->GetDestructionTime() == 1);
 
@@ -1425,9 +1423,8 @@ TEST_CASE("Interaction Tracking Phylogeny", "[default]") {
   config.GRID_X(grid_side);
   config.GRID_Y(grid_side);
 
-  using taxon_info_t = double;
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::HostTaxonData>> host_sys = world.GetHostSys();
-  emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::SymbiontTaxonData>> sym_sys = world.GetSymSys();
+  emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>> host_sys = world.GetHostSys();
+  emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>> sym_sys = world.GetSymSys();
 
 
   WHEN("A symbiont is injected into a host (at the beginning of runs)") {
@@ -1536,8 +1533,8 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     REQUIRE(world.GetNumOrgs() == 2);
     REQUIRE(symbiont_2_pos.GetPopID() != symbiont_1_pos.GetPopID());
       
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_1_taxon = symbiont_1->GetTaxon();
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_2_taxon = symbiont_2->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> symbiont_1_taxon = symbiont_1->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> symbiont_2_taxon = symbiont_2->GetTaxon();
 
     THEN("Symbiont offspring are placed into a new taxon") {
       REQUIRE(symbiont_2->GetIntVal() == symbiont_1->GetIntVal());
@@ -1556,7 +1553,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
       // birth and overwriting death happen during update 2
       emp::Ptr<Organism> symbiont_3 = symbiont_2->Reproduce(); // symbionts are added to systematic on Reproduce()
       world.AddOrgAt(symbiont_3, symbiont_1_pos, symbiont_2_pos);
-      emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_3_taxon = symbiont_3->GetTaxon();
+      emp::Ptr< taxon_t::base_taxon_t> symbiont_3_taxon = symbiont_3->GetTaxon();
 
       world.Update(); // update 3
       world.Update(); // update 4
@@ -1587,7 +1584,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
 
     emp::Ptr<Organism> symbiont_1 = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
     world.AddSymToSystematic(symbiont_1);
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_1_taxon = symbiont_1->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> symbiont_1_taxon = symbiont_1->GetTaxon();
     host_1->AddSymbiont(symbiont_1);
 
     THEN("Origination times are tracked") {
@@ -1600,7 +1597,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     emp::WorldPosition host_2_pos = world.DoBirth(host_2, host_1_pos);
     symbiont_1->VerticalTransmission(host_2);
     emp::Ptr<Organism> symbiont_2 = host_2->GetSymbionts().at(0);
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_2_taxon = symbiont_2->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> symbiont_2_taxon = symbiont_2->GetTaxon();
 
     WHEN("A symbiont is vertically transmitted") {
       THEN("It is placed into a new taxon") {
@@ -1620,7 +1617,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     symbiont_1->SetPoints(repro_points + 10);
     symbiont_1->HorizontalTransmission(emp::WorldPosition(1, host_1_pos.GetIndex()));
     emp::Ptr<Organism> symbiont_3 = host_3->GetSymbionts().at(0);
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_3_taxon = symbiont_3->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> symbiont_3_taxon = symbiont_3->GetTaxon();
 
     WHEN("A symbiont is horizontally transmitted") {
       REQUIRE(world.GetNumOrgs() == 3);
@@ -1655,7 +1652,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     config.OUSTING(1);
     emp::Ptr<Organism> symbiont_4 = symbiont_3->Reproduce(); // reproduce happens "during" update 4
     host_3->AddSymbiont(symbiont_4); // cleanup of graveyard happens after update increment in Update(), so dest. time is 5
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_4_taxon = symbiont_4->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> symbiont_4_taxon = symbiont_4->GetTaxon();
     world.Update(); // update 5
     WHEN("A symbiont is ousted") {
       REQUIRE(host_3->GetSymbionts().size() == 1);
@@ -1674,7 +1671,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     world.DoBirth(host_4, host_2_pos);
     symbiont_2->VerticalTransmission(host_4); // vertical transmission happens "during" update 6
     emp::Ptr<Organism> symbiont_5 = host_4->GetSymbionts().at(0);
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> symbiont_5_taxon = symbiont_5->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> symbiont_5_taxon = symbiont_5->GetTaxon();
 
     host_2->SetDead(); // dies "during" update 7
     world.Update(); // update 7
@@ -1721,8 +1718,8 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     emp::Ptr<Organism> host_2 = host_1->Reproduce(  );
     emp::WorldPosition host_2_pos = world.DoBirth(host_2, host_1_pos);
 
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> host_1_taxon = host_1->GetTaxon();
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> host_2_taxon = host_2->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> host_1_taxon = host_1->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> host_2_taxon = host_2->GetTaxon();
 
     THEN("Host offspring are placed into a new taxon") {
       REQUIRE(host_2->GetIntVal() == host_1->GetIntVal());
@@ -1739,7 +1736,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     // birth and overwriting death happen during update 2
     emp::Ptr<Organism> host_3 = host_2->Reproduce();
     world.AddOrgAt(host_3, host_1_pos, host_2_pos);
-    emp::Ptr< emp::Taxon<double, datastruct::TaxonDataBase>> host_3_taxon = host_3->GetTaxon();
+    emp::Ptr< taxon_t::base_taxon_t> host_3_taxon = host_3->GetTaxon();
 
     world.Update(); // update 3
     world.Update(); // update 4
@@ -1805,8 +1802,8 @@ TEST_CASE("Host switch counter", "[default]") {
     REQUIRE(host_offspring->HasSym());
     emp::Ptr<Organism> symbiont_offspring = host_offspring->GetSymbionts().at(0);
 
-    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
-    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    emp::Ptr< taxon_t::sym_taxon_t> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<taxon_t::sym_taxon_t>();
+    emp::Ptr< taxon_t::sym_taxon_t> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<taxon_t::sym_taxon_t>();
     THEN("Its host switch counter does not increment") {
       REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == 0);
       REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == 0);
@@ -1826,7 +1823,7 @@ TEST_CASE("Host switch counter", "[default]") {
     emp::Ptr<Organism> host_of_offspring = host_of_parent->Reproduce(); 
 
     world.AddSymToSystematic(symbiont_parent);
-    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    emp::Ptr< taxon_t::sym_taxon_t> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<taxon_t::sym_taxon_t>();
     symbiont_parent_taxon->GetData().SetHostSwitch(host_switch_count);
 
     symbiont_parent->SetPoints(repro_points + 10);
@@ -1840,7 +1837,7 @@ TEST_CASE("Host switch counter", "[default]") {
     REQUIRE(host_of_offspring->HasSym());
     
     emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
-    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    emp::Ptr< taxon_t::sym_taxon_t> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<taxon_t::sym_taxon_t>();
     
     THEN("Its host switch counter does not") {
       REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
@@ -1859,7 +1856,7 @@ TEST_CASE("Host switch counter", "[default]") {
     emp::Ptr<Organism> host_of_parent = host_of_offspring->Reproduce();
 
     world.AddSymToSystematic(symbiont_parent);
-    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    emp::Ptr< taxon_t::sym_taxon_t> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<taxon_t::sym_taxon_t>();
     symbiont_parent_taxon->GetData().SetHostSwitch(host_switch_count);
 
     symbiont_parent->SetPoints(repro_points + 10);
@@ -1873,7 +1870,7 @@ TEST_CASE("Host switch counter", "[default]") {
     REQUIRE(host_of_offspring->HasSym());
 
     emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
-    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    emp::Ptr< taxon_t::sym_taxon_t> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<taxon_t::sym_taxon_t>();
 
     THEN("Its host switch counter does not increment") {
       REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
@@ -1891,7 +1888,7 @@ TEST_CASE("Host switch counter", "[default]") {
     emp::Ptr<Organism> host_of_offspring = emp::NewPtr<Host>(&random, &world, &config, int_val);
 
     world.AddSymToSystematic(symbiont_parent);
-    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    emp::Ptr< taxon_t::sym_taxon_t> symbiont_parent_taxon = symbiont_parent->GetTaxon().Cast<taxon_t::sym_taxon_t>();
     symbiont_parent_taxon->GetData().SetHostSwitch(host_switch_count);
 
     symbiont_parent->SetPoints(repro_points + 10);
@@ -1904,7 +1901,7 @@ TEST_CASE("Host switch counter", "[default]") {
     REQUIRE(host_of_offspring->HasSym());
 
     emp::Ptr<Organism> symbiont_offspring = host_of_offspring->GetSymbionts().at(0);
-    emp::Ptr< emp::Taxon<double, datastruct::SymbiontTaxonData>> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<emp::Taxon<double, datastruct::SymbiontTaxonData>>();
+    emp::Ptr< taxon_t::sym_taxon_t> symbiont_offspring_taxon = symbiont_offspring->GetTaxon().Cast<taxon_t::sym_taxon_t>();
     THEN("Its host switch increments") {
       REQUIRE(symbiont_parent_taxon->GetData().GetHostSwitch() == host_switch_count);
       REQUIRE(symbiont_offspring_taxon->GetData().GetHostSwitch() == host_switch_count + 1);
