@@ -555,6 +555,26 @@ public:
 
 
   /**
+   * Input: The world position of the host to perform death upon
+   *
+   * Output: None
+   *
+   * Purpose: To overwrite the empirical DoDeath function to permit cleanup
+   * of false-start (<1 update duration) host taxa when unpruned trees are 
+   * being recorded.
+   */
+  void DoDeath(const emp::WorldPosition pos) {
+    emp::Ptr<emp::Taxon<taxon_info_t, datastruct::HostTaxonData>> taxon = host_sys->GetTaxonAt(pos);
+
+    if (my_config->STORE_EXTINCT() && taxon->GetOriginationTime() == taxon->GetDestructionTime() && taxon->GetTotalOffspring() == 0) {
+      host_sys->outside_taxa.erase(taxon);
+      taxon.Delete();
+    }
+    emp::World<Organism>::DoDeath(pos);
+  }
+
+
+  /**
    * Input: The size_t value representing the location whose neighbors
    * are being searched.
    *
