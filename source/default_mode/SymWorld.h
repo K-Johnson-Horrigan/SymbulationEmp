@@ -570,12 +570,15 @@ public:
    * being recorded.
    */
   void DoDeath(const emp::WorldPosition pos) {
-    emp::Ptr<taxon_t::host_taxon_t> taxon = host_sys->GetTaxonAt(pos);
-
-    if (my_config->STORE_EXTINCT() && taxon->GetOriginationTime() == taxon->GetDestructionTime() && taxon->GetTotalOffspring() == 0) {
-      host_sys->outside_taxa.erase(taxon);
-      taxon.Delete();
+    if (my_config->PHYLOGENY()) {
+      emp::Ptr<taxon_t::host_taxon_t> taxon = host_sys->GetTaxonAt(pos);
+      if (my_config->STORE_EXTINCT() && taxon->GetOriginationTime() == taxon->GetDestructionTime() && taxon->GetTotalOffspring() == 0) {
+        host_sys->RemoveOrg(pos);
+        host_sys->outside_taxa.erase(taxon);
+        taxon.Delete();
+      }
     }
+
     emp::World<Organism>::DoDeath(pos);
   }
 
@@ -1010,6 +1013,7 @@ public:
     }
     graveyard.clear();
     
+    // clean up systematics
     if (my_config->PHYLOGENY()) {
       host_sys->ClearRemoveAfterReproQueue();
       sym_sys->ClearRemoveAfterReproQueue();
