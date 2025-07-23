@@ -572,7 +572,7 @@ public:
   void DoDeath(const emp::WorldPosition pos) {
     if (my_config->PHYLOGENY()) {
       emp::Ptr<taxon_t::host_taxon_t> taxon = host_sys->GetTaxonAt(pos);
-      if (my_config->STORE_EXTINCT() && taxon->GetOriginationTime() == taxon->GetDestructionTime() && taxon->GetTotalOffspring() == 0) {
+      if (my_config->STORE_EXTINCT() && taxon->GetOriginationTime() == GetUpdate() && taxon->GetTotalOffspring() == 0) {
         host_sys->RemoveOrg(pos);
         host_sys->outside_taxa.erase(taxon);
         taxon.Delete();

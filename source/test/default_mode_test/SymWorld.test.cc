@@ -1910,6 +1910,140 @@ TEST_CASE("Host switch counter", "[default]") {
   }
 }
 
+TEST_CASE("Unpruned phylogenies", "[default]") {
+
+  emp::Random random(17);
+  SymConfigBase config;
+  int repro_points = 100;
+  config.SYM_HORIZ_TRANS_RES(repro_points);
+
+  config.MUTATION_RATE(0); // no phenotypic difference
+
+  config.PHYLOGENY(1);
+  config.PHYLOGENY_TAXON_TYPE(3);
+  config.STORE_EXTINCT(1);
+
+  SymWorld world(random, &config);
+  int int_val = 0;
+  int world_size = 5;
+  world.Resize(world_size);
+
+  // set up the lineages
+  emp::Ptr<Organism> host_grandparent = emp::NewPtr<Host>(&random, &world, &config, int_val);
+  emp::Ptr<Organism> host_parent = host_grandparent->Reproduce();
+  emp::Ptr<Organism> host = host_parent->Reproduce();
+  
+  emp::WorldPosition grandparent_pos = emp::WorldPosition(0, 0);
+  world.AddOrgAt(host_grandparent, grandparent_pos);
+  emp::WorldPosition parent_pos = world.DoBirth(host_parent, grandparent_pos);
+  emp::WorldPosition pos = world.DoBirth(host, parent_pos);
+
+  REQUIRE(world.GetNumOrgs() == 3);
+  
+  emp::Ptr<Organism> sym_grandparent = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+  host_grandparent->AddSymbiont(sym_grandparent);
+  world.AddSymToSystematic(sym_grandparent);
+  REQUIRE(host_grandparent->HasSym());
+
+  emp::Ptr<Organism> sym_parent = sym_grandparent->Reproduce();
+  host_parent->AddSymbiont(sym_parent);
+  REQUIRE(host_parent->HasSym());
+  REQUIRE(host_parent->GetSymbionts().at(0) == sym_parent);
+
+  emp::Ptr<Organism> sym = sym_parent->Reproduce();
+  host->AddSymbiont(sym);
+  REQUIRE(host->HasSym());
+ 
+  // all organisms should be in their own taxon; all taxa should be active
+  REQUIRE(world.GetSymSys()->GetNumTaxa() == 3);
+  REQUIRE(world.GetHostSys()->GetNumTaxa() == 3);
+  REQUIRE(world.GetSymSys()->GetNumActive() == 3);
+  REQUIRE(world.GetHostSys()->GetNumActive() == 3);
+
+  // collect taxon pointers before we kill organisms
+  emp::Ptr<taxon_t::base_taxon_t> sym_grandparent_taxon = sym_grandparent->GetTaxon();
+  emp::Ptr<taxon_t::base_taxon_t> sym_parent_taxon = sym_parent->GetTaxon();
+  emp::Ptr<taxon_t::base_taxon_t> sym_taxon = sym->GetTaxon();
+
+  emp::Ptr<taxon_t::base_taxon_t> host_grandparent_taxon = host_grandparent->GetTaxon();
+  emp::Ptr<taxon_t::base_taxon_t> host_parent_taxon = host_parent->GetTaxon();
+  emp::Ptr<taxon_t::base_taxon_t> host_taxon = host->GetTaxon();
+
+  // leave only the tip alive for now
+  world.DoDeath(grandparent_pos);
+  world.DoDeath(parent_pos);
+  REQUIRE(world.GetNumOrgs() == 1);
+  
+  WHEN("A symbiont lineage goes extinct") {
+    WHEN("The tip survived for at least one update") {
+      world.Update();
+
+      REQUIRE(world.GetSymSys()->GetNumActive() == 1);
+      REQUIRE(world.GetSymSys()->GetNumAncestors() == 2);
+      REQUIRE(world.GetSymSys()->GetNumOutside() == 0);
+
+      world.DoDeath(pos);
+      world.Update();
+
+      THEN("The tip and its ancestors is stored in the set of outside taxa") {
+        REQUIRE(world.GetSymSys()->GetNumOutside() == 3);
+        REQUIRE(world.GetSymSys()->outside_taxa.contains(sym_grandparent_taxon.Cast<taxon_t::sym_taxon_t>()));
+        REQUIRE(world.GetSymSys()->outside_taxa.contains(sym_parent_taxon.Cast<taxon_t::sym_taxon_t>()));
+        REQUIRE(world.GetSymSys()->outside_taxa.contains(sym_taxon.Cast<taxon_t::sym_taxon_t>()));
+      }
+    }
+    WHEN("The tip survived for 0 updates") {
+      REQUIRE(world.GetSymSys()->GetNumActive() == 1);
+      REQUIRE(world.GetSymSys()->GetNumAncestors() == 2);
+      REQUIRE(world.GetSymSys()->GetNumOutside() == 0);
+
+      world.DoDeath(pos);
+      world.Update();
+
+      THEN("The tip is not stored in the set of outside taxa; the tip's ancestors are stored in the set of outside taxa"){
+        REQUIRE(world.GetSymSys()->GetNumOutside() == 2);
+        REQUIRE(world.GetSymSys()->outside_taxa.contains(sym_grandparent_taxon.Cast<taxon_t::sym_taxon_t>()));
+        REQUIRE(world.GetSymSys()->outside_taxa.contains(sym_parent_taxon.Cast<taxon_t::sym_taxon_t>()));
+      }
+    }
+  }
+
+  WHEN("A host lineage goes extinct") {
+    WHEN("The tip survived for at least one update") {
+      world.Update();
+
+      REQUIRE(world.GetHostSys()->GetNumActive() == 1);
+      REQUIRE(world.GetHostSys()->GetNumAncestors() == 2);
+      REQUIRE(world.GetHostSys()->GetNumOutside() == 0);
+
+      world.DoDeath(pos);
+      world.Update();
+
+      THEN("The tip and its ancestors is stored in the set of outside taxa") {
+        REQUIRE(world.GetHostSys()->GetNumOutside() == 3);
+        REQUIRE(world.GetHostSys()->outside_taxa.contains(host_grandparent_taxon.Cast<taxon_t::host_taxon_t>()));
+        REQUIRE(world.GetHostSys()->outside_taxa.contains(host_parent_taxon.Cast<taxon_t::host_taxon_t>()));
+        REQUIRE(world.GetHostSys()->outside_taxa.contains(host_taxon.Cast<taxon_t::host_taxon_t>()));
+      }
+    }
+
+    WHEN("The tip survived for 0 updates") {
+      // hosts are waiting to be deleted during Update()
+      REQUIRE(world.GetHostSys()->GetNumActive() == 3); 
+      REQUIRE(world.GetHostSys()->GetNumOutside() == 0);
+
+      world.DoDeath(pos);
+      world.Update();
+
+      THEN("The tip is not stored in the set of outside taxa; the tip's ancestors are stored in the set of outside taxa") {
+        REQUIRE(world.GetHostSys()->GetNumOutside() == 2);
+        REQUIRE(world.GetHostSys()->outside_taxa.contains(host_grandparent_taxon.Cast<taxon_t::host_taxon_t>()));
+        REQUIRE(world.GetHostSys()->outside_taxa.contains(host_parent_taxon.Cast<taxon_t::host_taxon_t>()));
+      }
+    }
+  }
+}
+
 TEST_CASE( "SetMutationZero", "[default]") {
   GIVEN("World first created with all mutation settings at 1") {
     emp::Random random(17);
