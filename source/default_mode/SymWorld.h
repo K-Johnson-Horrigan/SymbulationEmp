@@ -176,6 +176,9 @@ public:
 
       if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
         sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string(t.GetData().GetHostSwitch()); }, "lineage_host_switch_count");
+        sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string(t.GetData().GetHorizTrans()); }, "horiz_trans_count");
+        sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string(t.GetData().GetVertTrans()); }, "vert_trans_count");
+
       }
 
       on_placement_sig.AddAction([this](emp::WorldPosition pos) {

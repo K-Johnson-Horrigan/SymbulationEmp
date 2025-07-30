@@ -1772,7 +1772,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
   }
 }
 
-TEST_CASE("Host switch counter", "[default]") {
+TEST_CASE("Host switch counter in sym taxa", "[default]") {
   emp::Random random(17);
   SymConfigBase config;
   int repro_points = 100;

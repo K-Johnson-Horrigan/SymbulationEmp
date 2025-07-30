@@ -697,6 +697,7 @@ public:
       data_node_attempts_verttrans.AddDatum(GetIntVal());
 
       emp::Ptr<Organism> sym_baby = Reproduce();
+      if (my_config->PHYLOGENY() == 1 && my_config->PHYLOGENY_TAXON_TYPE() == 3) sym_baby->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().IncrementVertTrans();
       if (my_config->TAG_MATCHING()) {
         double tag_distance = my_world->GetTagMetric()->calculate(host_baby->GetTag(), sym_baby->GetTag())* TAG_LENGTH;
         double cutoff = random->GetPoisson(my_config->TAG_DISTANCE() * TAG_LENGTH);
@@ -738,6 +739,7 @@ public:
         // now set to 0 in symdobirth
 
         emp::Ptr<Organism> sym_baby = Reproduce();
+        if (my_config->PHYLOGENY() == 1 && my_config->PHYLOGENY_TAXON_TYPE() == 3) sym_baby->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().IncrementHorizTrans();
         if (my_config->TAG_MATCHING() || my_config->FREE_HT_FAILURE()) sym_baby->SetPoints(0);
         emp::WorldPosition new_pos = my_world->SymDoBirth(sym_baby, location);
 

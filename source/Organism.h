@@ -27,6 +27,8 @@ namespace datastruct {
 
   struct SymbiontTaxonData : TaxonDataBase {
     size_t lineage_host_switch_count;
+    size_t horiz_trans_count = 0;
+    size_t vert_trans_count = 0; 
 
     void DetermineHostSwitch(emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> host, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>  host_of_parent) {
       // check is one host is descended from the other
@@ -59,8 +61,24 @@ namespace datastruct {
       lineage_host_switch_count = _in; 
     }
 
+    void IncrementHorizTrans() {
+      horiz_trans_count++;
+    }
+
+    void IncrementVertTrans() {
+      vert_trans_count++;
+    }
+
     size_t GetHostSwitch() const {
       return lineage_host_switch_count;
+    }
+
+    size_t GetHorizTrans() const {
+      return horiz_trans_count;
+    }
+
+    size_t GetVertTrans() const {
+      return vert_trans_count;
     }
   };
 
