@@ -1910,6 +1910,79 @@ TEST_CASE("Host switch counter in sym taxa", "[default]") {
   }
 }
 
+
+TEST_CASE("VT and HT counter in sym taxa", "[default]") {
+  emp::Random random(17);
+  SymConfigBase config;
+  int repro_points = 100;
+  config.SYM_HORIZ_TRANS_RES(repro_points);
+
+  config.MUTATION_RATE(0); // no phenotypic difference
+
+  config.PHYLOGENY(1);
+  config.PHYLOGENY_TAXON_TYPE(3);
+
+  SymWorld world(random, &config);
+  int int_val = 0;
+
+  config.GRID_X(5);
+  config.GRID_Y(5);
+  config.START_MOI(0);
+
+  WHEN("A symbiont lineage vertically and horizontally transmits") {
+    size_t pos_0 = 0;
+    size_t pos_1 = 1;
+    size_t pos_2 = 2;
+    size_t pos_3 = 18;
+    size_t pos_4 = 19;
+    size_t pos_5 = 5;
+    world.Setup();
+
+    emp::Ptr<Organism> symbiont_0 = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+    world.AddSymToSystematic(symbiont_0);
+    world.GetOrg(pos_0).AddSymbiont(symbiont_0);
+    
+    REQUIRE(symbiont_0->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetVertTrans() == 0);
+    REQUIRE(symbiont_0->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetHorizTrans() == 0);
+
+    symbiont_0->VerticalTransmission(world.GetOrgPtr(pos_1));
+
+    emp::Ptr<Organism> symbiont_1 = world.GetOrg(pos_1).GetSymbionts().at(0);
+    REQUIRE(symbiont_1->GetTaxon()->GetParent() == symbiont_0->GetTaxon());
+    REQUIRE(symbiont_1->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetVertTrans() == 1);
+    REQUIRE(symbiont_1->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetHorizTrans() == 0);
+
+    symbiont_1->VerticalTransmission(world.GetOrgPtr(pos_2));
+
+    emp::Ptr<Organism> symbiont_2 = world.GetOrg(pos_2).GetSymbionts().at(0);
+    REQUIRE(symbiont_2->GetTaxon()->GetParent() == symbiont_1->GetTaxon());
+    REQUIRE(symbiont_2->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetVertTrans() == 2);
+    REQUIRE(symbiont_2->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetHorizTrans() == 0);
+    
+    symbiont_2->SetPoints(repro_points + 10);
+    symbiont_2->HorizontalTransmission(emp::WorldPosition(1, pos_2));
+
+    REQUIRE(world.GetOrg(pos_3).HasSym());
+    emp::Ptr<Organism> symbiont_3 = world.GetOrg(pos_3).GetSymbionts().at(0);
+    REQUIRE(symbiont_3->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetVertTrans() == 2);
+    REQUIRE(symbiont_3->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetHorizTrans() == 1);
+    
+    
+    symbiont_3->SetPoints(repro_points + 10); 
+    symbiont_3->HorizontalTransmission(emp::WorldPosition(1, pos_3));
+
+    emp::Ptr<Organism> symbiont_4 = world.GetOrg(pos_4).GetSymbionts().at(0);
+    REQUIRE(symbiont_4->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetVertTrans() == 2);
+    REQUIRE(symbiont_4->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetHorizTrans() == 2);
+    
+    symbiont_4->VerticalTransmission(world.GetOrgPtr(pos_5));
+
+    emp::Ptr<Organism> symbiont_5 = world.GetOrg(pos_5).GetSymbionts().at(0);
+    REQUIRE(symbiont_5->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetVertTrans() == 3);
+    REQUIRE(symbiont_5->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().GetHorizTrans() == 2);
+  }
+}
+
 TEST_CASE("Unpruned phylogenies", "[default]") {
 
   emp::Random random(17);

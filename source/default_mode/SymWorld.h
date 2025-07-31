@@ -188,8 +188,16 @@ public:
       if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
         std::function<void(emp::Ptr<taxon_t::sym_taxon_t >, Organism&)> inherit_parental_data =
           [&](emp::Ptr<taxon_t::sym_taxon_t > taxon, Organism& org) {
-          if (taxon->GetParent()) taxon->GetData().SetHostSwitch(taxon->GetParent()->GetData().GetHostSwitch());
-          else taxon->GetData().SetHostSwitch(0);
+          if (taxon->GetParent()) {
+            taxon->GetData().SetHostSwitch(taxon->GetParent()->GetData().GetHostSwitch());
+            taxon->GetData().SetHorizTrans(taxon->GetParent()->GetData().GetHorizTrans());
+            taxon->GetData().SetVertTrans(taxon->GetParent()->GetData().GetVertTrans());
+          }
+          else { 
+            taxon->GetData().SetHostSwitch(0); 
+            taxon->GetData().SetHorizTrans(0);
+            taxon->GetData().SetVertTrans(0);
+          }
           };
         sym_sys->OnNew(inherit_parental_data);
       }
