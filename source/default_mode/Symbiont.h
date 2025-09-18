@@ -655,10 +655,7 @@ public:
     emp::Ptr<Organism> sym_baby = MakeNew();
     sym_baby->Mutate();
     sym_baby->SetReproCount(reproductions + 1);
-    if(my_config->PHYLOGENY() == 1){
-      my_world->AddSymToSystematic(sym_baby, my_taxon);
-      //baby's taxon will be set in AddSymToSystematic
-    }
+    
 
     if (my_config->TAG_MATCHING() && my_host) {
       // do not xor to get 1 where bits are matching
@@ -706,6 +703,12 @@ public:
 
       emp::DataMonitor<double, emp::data::Histogram>& data_node_successes_verttrans = my_world->GetVerticalTransmissionSuccessCount();
       data_node_successes_verttrans.AddDatum(GetIntVal());
+
+      if (my_config->PHYLOGENY() == 1) {
+        // only add successful children to phylogeny
+        my_world->AddSymToSystematic(sym_baby, my_taxon);
+        //baby's taxon will be set in AddSymToSystematic
+      }
     }
   }
 
@@ -743,6 +746,12 @@ public:
         emp::DataMonitor<double, emp::data::Histogram>& data_node_successes_horiztrans = my_world->GetHorizontalTransmissionSuccessCount();
         if(new_pos.IsValid()){
           data_node_successes_horiztrans.AddDatum(stored_intval);
+
+          // only add successful children to phylogeny
+          if (my_config->PHYLOGENY() == 1) {
+            my_world->AddSymToSystematic(sym_baby, my_taxon);
+            //baby's taxon will be set in AddSymToSystematic
+          }
         }
       }
     }
