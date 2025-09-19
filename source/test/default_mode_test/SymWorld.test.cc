@@ -1325,7 +1325,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
       }
     }
   }
-
+    
   WHEN("symbionts are deleted"){
     THEN("they are no longer tracked by the sym systematic"){
       world_size = 1;
@@ -1352,6 +1352,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
 
       // add a hosted sym to the host
       emp::Ptr<Organism> hosted_sym = symbiont->Reproduce();
+      world.AddSymToSystematic(hosted_sym, symbiont->GetTaxon());
       host->AddSymbiont(hosted_sym);
 
       // check that free living organisms have properly been added to the world
@@ -1371,6 +1372,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
     
     for(size_t i = 1; i < num_syms; i++){
       syms[i] = syms[i-1]->Reproduce();
+      world.AddSymToSystematic(syms[i], syms[i - 1]->GetTaxon());
     }
     
     THEN("Their lineages are tracked"){
@@ -1409,7 +1411,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
     }
 
     syms[2].Delete();
-    syms[3].Delete(); 
+    syms[3].Delete();
   }
 }
 
