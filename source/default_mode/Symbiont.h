@@ -191,7 +191,7 @@ public:
    * Purpose: To destruct the symbiont and remove the symbiont from the systematic.
    */
   ~Symbiont() {
-    if(my_config->PHYLOGENY() == 1) {my_world->GetSymSys()->RemoveOrg(my_taxon);}
+    if(my_config->PHYLOGENY() == 1 && my_taxon) {my_world->GetSymSys()->RemoveOrg(my_taxon);}
   }
 
     /**

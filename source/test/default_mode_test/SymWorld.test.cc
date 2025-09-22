@@ -1290,7 +1290,7 @@ TEST_CASE( "Host Phylogeny", "[default]" ){
   }
 }
 
-TEST_CASE( "Symbiont Phylogeny", "[default]" ){
+TEST_CASE("Symbiont Phylogeny", "[default]") {
   emp::Random random(17);
   SymConfigBase config;
   config.MUTATION_SIZE(0.09);
@@ -1302,10 +1302,10 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
   SymWorld world(random, &config);
   int world_size = 20;
   world.Resize(world_size);
-  
+
   using taxon_info_t = double;
   emp::Ptr<emp::Systematics<Organism, taxon_info_t, datastruct::TaxonDataBase>> sym_sys = world.GetSymSys();
-
+  
   WHEN("symbionts are added to the world"){
     THEN("they get added to the correct taxonomic bins"){
       REQUIRE(sym_sys->GetNumActive() == 0);
@@ -1325,7 +1325,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
       }
     }
   }
-    
+
   WHEN("symbionts are deleted"){
     THEN("they are no longer tracked by the sym systematic"){
       world_size = 1;
@@ -1345,7 +1345,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
       // add a free living sym to the world
       emp::Ptr<Organism> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
       world.InjectSymbiont(symbiont);
-      
+
       // add a host to the world
       emp::Ptr<Organism> host = emp::NewPtr<Host>(&random, &world, &config, int_val);
       world.InjectHost(host);
@@ -1359,7 +1359,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
       REQUIRE(world.GetNumOrgs() == 2);
     }
   }
-  
+
   WHEN("generations pass"){
     config.MUTATION_SIZE(1);
     config.MUTATION_RATE(1);
@@ -1369,12 +1369,12 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
     emp::Ptr<Organism> syms[num_syms];
     syms[0] = emp::NewPtr<Symbiont>(&random, &world, &config, 0);
     world.AddSymToSystematic(syms[0]);
-    
+
     for(size_t i = 1; i < num_syms; i++){
       syms[i] = syms[i-1]->Reproduce();
       world.AddSymToSystematic(syms[i], syms[i - 1]->GetTaxon());
     }
-    
+
     THEN("Their lineages are tracked"){
       char lineages[][30] = {"Lineage:\n10\n",
                              "Lineage:\n16\n10\n",
@@ -1390,7 +1390,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
       syms[0].Delete();
       syms[1].Delete();
     }
-    
+
     THEN("Their birth and destruction dates are tracked"){
       //all curr syms should have orig times of 0
       for(size_t i = 0; i < num_syms; i++){
@@ -1413,8 +1413,139 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
     syms[2].Delete();
     syms[3].Delete();
   }
-}
+  
+  WHEN("a symbiont reproduces") {
+    config.MUTATION_SIZE(1); // force new taxon
+    random.ResetSeed(17);
+    int horiz_trans_points = 10;
+    config.SYM_HORIZ_TRANS_RES(horiz_trans_points);
+    // add to systematic is now only called on successful placement
+    // this happens in horiz trans and vert trans
+    // and injection
+   
+    WHEN("the symbiont is hosted") {
+      config.FREE_LIVING_SYMS(0);
 
+      // add a host to the world
+      emp::Ptr<Organism> source_host = emp::NewPtr<Host>(&random, &world, &config, int_val);
+      world.AddOrgAt(source_host, 20);
+
+      emp::Ptr<Organism> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+      world.InjectSymbiont(symbiont);
+      symbiont->SetPoints(horiz_trans_points);
+
+      REQUIRE(source_host->HasSym());
+      REQUIRE(world.GetSymSys()->GetNumActive() == 1);
+      
+
+      WHEN("reproduction occurs via horizontal transmission") {
+        emp::Ptr<Organism> dest_host = emp::NewPtr<Host>(&random, &world, &config, int_val);
+        world.AddOrgAt(dest_host, 21);
+
+        REQUIRE(world.GetNumOrgs() == 2);
+
+        WHEN("the symbiont offspring is placed successfully") {
+          emp::WorldPosition parent_sym_pos = emp::WorldPosition(1, 20);
+          symbiont->HorizontalTransmission(parent_sym_pos);
+
+          THEN("the symbiont offspring is added to the symbiont systematic") {
+            REQUIRE(dest_host->HasSym());
+            REQUIRE(world.GetSymSys()->GetNumActive() == 2);
+            REQUIRE(dest_host->GetSymbionts().at(0)->GetTaxon()->GetParent() == symbiont->GetTaxon());
+          }
+        }
+        WHEN("the symbiont offspring is not placed successfully") {
+          // note: occupying sym isn't in the sym systematic
+          emp::Ptr<Organism> occupying_sym = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+          dest_host->AddSymbiont(occupying_sym);
+
+          emp::WorldPosition parent_sym_pos = emp::WorldPosition(1, 20);
+          symbiont->HorizontalTransmission(parent_sym_pos);
+
+          THEN("the symbiont offspring is not added to the symbiont systematic") {
+            REQUIRE(dest_host->GetSymbionts().size() == 1);
+            REQUIRE(dest_host->GetSymbionts().at(0) == occupying_sym);
+            REQUIRE(world.GetSymSys()->GetNumActive() == 1);
+            REQUIRE(symbiont->GetTaxon()->GetTotOrgs() == 1);
+          }
+        }
+      }
+      WHEN("reproduction occurs via vertical transmission") {
+        config.TAG_MATCHING(1);
+        config.TAG_MUTATION_SIZE(0.5);
+        emp::Ptr<emp::HammingMetric<TAG_LENGTH>> metric = emp::NewPtr<emp::HammingMetric<TAG_LENGTH>>();
+        world.SetTagMetric(metric);
+
+        emp::BitSet<TAG_LENGTH> bit_set_0 = emp::BitSet<TAG_LENGTH>();
+        symbiont->SetTag(bit_set_0);
+        source_host->SetTag(bit_set_0);
+
+        config.HOST_REPRO_RES(10);
+        source_host->SetPoints(10);
+
+        emp::Ptr<Organism> host_offspring = source_host->Reproduce();
+
+        
+        WHEN("the symbiont offspring is placed successfully") {
+          config.TAG_DISTANCE(0.9);
+          symbiont->VerticalTransmission(host_offspring);
+
+          THEN("the symbiont offspring is added to the symbiont systematic") {
+            REQUIRE(host_offspring->HasSym());
+            REQUIRE(world.GetSymSys()->GetNumActive() == 2);
+            REQUIRE(host_offspring->GetSymbionts().at(0)->GetTaxon()->GetParent() == symbiont->GetTaxon());
+          }
+        }
+        WHEN("the symbiont offspring is not placed successfully") {
+          config.TAG_DISTANCE(0.01);
+          symbiont->VerticalTransmission(host_offspring);
+
+          THEN("the symbiont offspring is not added to the symbiont systematic") {
+            REQUIRE(!host_offspring->HasSym());
+            REQUIRE(world.GetSymSys()->GetNumActive() == 1);
+            REQUIRE(symbiont->GetTaxon()->GetTotOrgs() == 1);
+          }
+        }
+        host_offspring.Delete();
+      }
+    }
+    WHEN("the symbiont is free-living") {
+      config.FREE_LIVING_SYMS(1);
+      
+      // add a free living sym to the world
+      emp::Ptr<Organism> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
+      world.InjectSymbiont(symbiont);
+      symbiont->SetPoints(horiz_trans_points);
+
+      REQUIRE(world.GetNumOrgs() == 1);
+      
+      WHEN("the symbiont offspring is placed successfully"){
+        symbiont->HorizontalTransmission(emp::WorldPosition(0, 2));
+        emp::Ptr<Organism> symbiont_child = world.GetSymAt(15);
+
+        THEN("the symbiont offspring is added to the symbiont systematic") {
+          REQUIRE(world.GetSymSys()->GetTreeSize() == 2);
+          REQUIRE(world.GetSymSys()->GetNumActive() == 2);
+          REQUIRE(symbiont_child->GetTaxon()->GetParent() == symbiont->GetTaxon());
+        }
+      }
+      
+      WHEN("the symbiont offspring is not placed successfully"){
+        world.Resize(0); // force horiz trans to fail
+        symbiont->HorizontalTransmission(emp::WorldPosition(0, 2));
+
+        THEN("the symbiont offspring is not added to the symbiont systematic") {
+          REQUIRE(world.GetNumOrgs() == 1);
+          REQUIRE(symbiont->GetTaxon()->GetInfo() == 10);
+          REQUIRE(world.GetSymSys()->GetTreeSize() == 1);
+          REQUIRE(world.GetSymSys()->GetNumActive() == 1);
+        }
+        // the resize doesn't seem to delete the FLS in the sym_pop vector, so delete it here!
+        symbiont.Delete();
+      }
+    }
+  }
+}
 TEST_CASE("Interaction Tracking Phylogeny", "[default]") {
   emp::Random random(17);
   SymConfigBase config;
