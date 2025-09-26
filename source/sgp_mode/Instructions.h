@@ -81,7 +81,7 @@ INST(Reproduce, {
   double points = state.organism->IsHost()
                       ? state.world->GetConfig()->HOST_REPRO_RES()
                       : state.world->GetConfig()->SYM_HORIZ_TRANS_RES();
-  if (state.organism->GetPoints() > points) {
+  if (state.organism->GetPoints() >= points) {
     state.organism->AddPoints(-points);
     state.in_progress_repro = state.world->to_reproduce.size();
     state.world->to_reproduce.push_back(state.organism);
@@ -142,3 +142,4 @@ INST(Steal, {
 } // namespace inst
 
 #endif
+
