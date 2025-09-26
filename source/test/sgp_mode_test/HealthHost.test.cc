@@ -123,9 +123,9 @@ TEST_CASE("Health host with symbiont loses/gains cycle 50% of time", "[sgp]") {
   }
 }
 
-/*
+
 TEST_CASE("Health hosts evolve less NOT with parasites than without", "[sgp]") {
-  emp::Random random(10);
+  emp::Random random(44);
   //TODO: The random number seed doesn't seem to be working, different values for the same seed
 
   SymConfigSGP config;
@@ -196,7 +196,7 @@ TEST_CASE("Health hosts evolve less NOT with parasites than without", "[sgp]") {
   }
 
 }
-*/
+
 TEST_CASE("Health hosts evolve", "[sgp][integration]") {
   emp::Random random(32);
   SymConfigSGP config;
