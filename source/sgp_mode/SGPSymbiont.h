@@ -191,7 +191,21 @@ public:
     // Save and restore the in-progress reproduction, since Reproduce() will be
     // called but it will still be on the queue for horizontal transmission
     size_t old = cpu.state.in_progress_repro;
-    Symbiont::VerticalTransmission(host_baby);
+
+    if (my_world->WillTransmit()) {
+      // Vertical transmission data nodes
+      // Attempt vs success for vertical transmission is just whether it has enough resources
+      
+      // If the world permits vertical transmission and the sym has enough resources, transmit!
+      if (GetPoints() >= my_config->SYM_VERT_TRANS_RES()) {
+        emp::Ptr<Organism> sym_baby = Reproduce();
+        points -= my_config->SYM_VERT_TRANS_RES();
+        host_baby->AddSymbiont(sym_baby);
+
+        my_world->GetVerticalTransmissionSuccessCount().AddDatum(1);
+      }
+    }
+
     cpu.state.in_progress_repro = old;
   }
 

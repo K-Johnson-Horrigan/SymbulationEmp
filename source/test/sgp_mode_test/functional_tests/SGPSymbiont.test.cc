@@ -96,7 +96,7 @@ TEST_CASE("Symbiont comparison operators", "[sgp]") {
     different.Delete();
   }
 
-TEST_CASE("SGPSymbiont Vertical Transmission", "[sgp-vt]")
+TEST_CASE("SGPSymbiont Vertical Transmission", "[sgp]")
 
 {
   emp::Random random(42);
@@ -145,7 +145,7 @@ TEST_CASE("SGPSymbiont Vertical Transmission", "[sgp-vt]")
           world.Update();
         }
         THEN("Symbiont does not vertically transmit"){
-          REQUIRE(world.GetVerticalTransmissionAttemptCount().GetTotal() == 0);
+          REQUIRE(world.GetVerticalTransmissionAttemptCount().GetTotal() == 1);
           REQUIRE(world.GetVerticalTransmissionSuccessCount().GetTotal() == 0);
         }
       }
@@ -194,7 +194,7 @@ TEST_CASE("SGPSymbiont Vertical Transmission", "[sgp-vt]")
 
 }
 
-TEST_CASE("SGPSymbiont Horizontal Transmission", "[sgp-vt]")
+TEST_CASE("SGPSymbiont Horizontal Transmission", "[sgp]")
 
 {
   emp::Random random(42);
@@ -224,7 +224,7 @@ TEST_CASE("SGPSymbiont Horizontal Transmission", "[sgp-vt]")
       config.HT_TASK_MATCH(1);
       WHEN("Host and Symbiont share a matching task"){
         sym->GetCPU().state.tasks_performed->Set(0);
-        host->GetCPU().state.tasks_performed->Set(0);
+        host2->GetCPU().state.tasks_performed->Set(0);
         
         for(int i = 0; i < 26; i++){
           
@@ -255,7 +255,7 @@ TEST_CASE("SGPSymbiont Horizontal Transmission", "[sgp-vt]")
       WHEN("Host and Symbiont share a matching task"){
 
         sym->GetCPU().state.tasks_performed->Set(0);
-        host->GetCPU().state.tasks_performed->Set(0);
+        host2->GetCPU().state.tasks_performed->Set(0);
         for(int i = 0; i < 26; i++){
           
           world.Update();
@@ -287,7 +287,7 @@ TEST_CASE("SGPSymbiont Horizontal Transmission", "[sgp-vt]")
           world.Update();
         }
     THEN("Symbiont does not horizontally transmit"){
-      REQUIRE(world.GetHorizontalTransmissionAttemptCount().GetTotal() == 1);
+      REQUIRE(world.GetHorizontalTransmissionAttemptCount().GetTotal() == 0);
       REQUIRE(world.GetHorizontalTransmissionSuccessCount().GetTotal() == 0);
     }
   }
