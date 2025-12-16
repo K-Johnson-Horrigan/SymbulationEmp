@@ -220,7 +220,8 @@ TEST_CASE("Preffered Ousting leads to symbionts closer matching Hosts","[sgp][sg
       host->AddSymbiont(sym);
   }
 
-  size_t run_updates = 20000;
+  size_t run_updates = 10000;
+  size_t nand_completions = 35000;
 
   WHEN("Preferntial Ousting is Equivalent or Better"){
     config.PREFERENTIAL_OUSTING(1);
@@ -234,7 +235,7 @@ TEST_CASE("Preffered Ousting leads to symbionts closer matching Hosts","[sgp][sg
       
       
       ++it;
-      REQUIRE((*it).n_succeeds_sym > 20000);
+      REQUIRE((*it).n_succeeds_sym > nand_completions * 3);
     }
   }
 
@@ -250,7 +251,7 @@ TEST_CASE("Preffered Ousting leads to symbionts closer matching Hosts","[sgp][sg
       
       
       ++it;
-      REQUIRE((*it).n_succeeds_sym > 20000);
+      REQUIRE((*it).n_succeeds_sym > nand_completions);
       
     }
   }
@@ -261,13 +262,13 @@ TEST_CASE("Preffered Ousting leads to symbionts closer matching Hosts","[sgp][sg
     for (size_t i = 0; i < run_updates; i++) {
       world.Update();
     }
-    THEN("Syms are completing more host tasks") {
+    THEN("Syms are completing less host tasks") {
       REQUIRE(world.GetNumOrgs() == world_size);
       auto it = world.GetTaskSet().begin();
       
       
       ++it;
-      REQUIRE((*it).n_succeeds_sym < 20000);
+      REQUIRE((*it).n_succeeds_sym < nand_completions);
       
     }
   }

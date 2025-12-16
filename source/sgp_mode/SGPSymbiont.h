@@ -178,6 +178,12 @@ public:
     GrowOlder();
   }
 
+
+
+  bool MeetsRequirements() override{
+    bool task_match_fail = sgp_config->VT_TASK_MATCH() && !my_world->TaskMatchCheck(my_world->fun_get_task_profile(this), my_world->fun_get_task_profile(my_host));
+    return (Symbiont::MeetsRequirements() && !task_match_fail);
+  }
   /**
    * Input: The pointer to the organism that is the new host baby
    *
@@ -191,21 +197,7 @@ public:
     // Save and restore the in-progress reproduction, since Reproduce() will be
     // called but it will still be on the queue for horizontal transmission
     size_t old = cpu.state.in_progress_repro;
-
-    if (my_world->WillTransmit()) {
-      // Vertical transmission data nodes
-      // Attempt vs success for vertical transmission is just whether it has enough resources
-      
-      // If the world permits vertical transmission and the sym has enough resources, transmit!
-      if (GetPoints() >= my_config->SYM_VERT_TRANS_RES()) {
-        emp::Ptr<Organism> sym_baby = Reproduce();
-        points -= my_config->SYM_VERT_TRANS_RES();
-        host_baby->AddSymbiont(sym_baby);
-
-        my_world->GetVerticalTransmissionSuccessCount().AddDatum(1);
-      }
-    }
-
+    Symbiont::VerticalTransmission(host_baby);
     cpu.state.in_progress_repro = old;
   }
 
