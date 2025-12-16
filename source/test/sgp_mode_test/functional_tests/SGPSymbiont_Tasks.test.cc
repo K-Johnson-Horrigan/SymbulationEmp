@@ -3,7 +3,7 @@
 #include "../../../sgp_mode/SGPWorldSetup.cc"
 #include "../../../sgp_mode/SGPDataNodes.h"
 
-TEST_CASE("When SYM_ONLY_FIRST_TASK_CREDIT is 1, the most tasks a symbiont can receive credit for is 1", "[sgp]"){
+TEST_CASE("When SYM_ONLY_FIRST_TASK_CREDIT is 1, the most tasks a symbiont can receive credit for is 1", "[sgp][sgp-functional]"){
   GIVEN("An SGPworld with SYM_ONLY_FIRST_TASK_CREDIT on "){
     emp::Random random(1);
     SymConfigSGP config;
@@ -129,7 +129,7 @@ TEST_CASE("When SYM_ONLY_FIRST_TASK_CREDIT is 1, the most tasks a symbiont can r
   }
 }
 
-TEST_CASE("When SYM_ONLY_FIRST_TASK_CREDIT is 0, symbionts receive credit for all tasks they complete", "[sgp]"){
+TEST_CASE("When SYM_ONLY_FIRST_TASK_CREDIT is 0, symbionts receive credit for all tasks they complete", "[sgp][sgp-functional]"){
   GIVEN("An SGPworld with SYM_ONLY_FIRST_TASK_CREDIT off"){
     emp::Random random(1);
     SymConfigSGP config;

@@ -18,7 +18,7 @@
 //
 
 
-TEST_CASE("Health hosts evolve", "[sgp][integration]") {
+TEST_CASE("Health hosts evolve", "[sgp][sgp-integration]") {
   emp::Random random(32);
   SymConfigSGP config;
   config.INTERACTION_MECHANISM(1); // Health hosts
@@ -70,7 +70,7 @@ TEST_CASE("Health hosts evolve", "[sgp][integration]") {
 } 
 
 
-TEST_CASE("Stress hosts evolve", "[sgp]") {
+TEST_CASE("Stress hosts evolve", "[sgp][sgp-integration]") {
   emp::Random random(32);
   SymConfigSGP config;
   config.INTERACTION_MECHANISM(STRESS);
@@ -123,7 +123,7 @@ TEST_CASE("Stress hosts evolve", "[sgp]") {
 } 
 
 
-TEST_CASE("Organisms, without mutation will only receive credit for NOT operations", "[sgp]") {
+TEST_CASE("Organisms, without mutation will only receive credit for NOT operations", "[sgp][sgp-integration]") {
      
   GIVEN("An SGPWorld with no mutation"){
     emp::Random random(1);
@@ -175,6 +175,106 @@ TEST_CASE("Organisms, without mutation will only receive credit for NOT operatio
 
 
   }
+}
+
+TEST_CASE("Preffered Ousting leads to symbionts closer matching Hosts","[sgp][sgp-integration]"){
+  emp::Random random(32);
+  SymConfigSGP config;
+  config.INTERACTION_MECHANISM(DEFAULT); // Health hosts
+  config.START_MOI(1);
+  config.GRID_X(10);
+  config.GRID_Y(100);
+  config.HOST_REPRO_RES(10);
+  config.SYM_HORIZ_TRANS_RES(0);
+  config.VERTICAL_TRANSMISSION(0);
+  config.SYNERGY(1);
+  config.HOST_ONLY_FIRST_TASK_CREDIT(1);
+  config.SYM_ONLY_FIRST_TASK_CREDIT(1);
+  config.HT_TASK_MATCH(0);
+  config.MUTATION_SIZE(0.0002);
+  config.HOST_MUTATION_RATE(0);
+  config.MUTATION_RATE(1);
+  config.OUSTING(1);
+  size_t world_size = config.GRID_X() * config.GRID_Y();
+
+  SGPWorld world(random, &config, LogicTasks);
+  
+  for(size_t x = 0; x < world_size; x++){
+    
+
+      size_t program_len = 100;
+      ProgramBuilder builder;
+      
+      builder.AddNand();
+      
+      
+      
+      sgpl::Program<Spec> program = builder.Build(program_len);
+      emp::Ptr<SGPHost> host = emp::NewPtr<SGPHost>(&random, &world, &config, program);
+      world.AddOrgAt(host, x);
+
+      ProgramBuilder SymBuilder;
+      SymBuilder.AddEqu();
+      sgpl::Program<Spec> symprogram = SymBuilder.Build(program_len);
+      emp::Ptr<SGPSymbiont> sym = emp::NewPtr<SGPSymbiont>(&random, &world, &config, symprogram);
+      host->AddSymbiont(sym);
+  }
+
+  size_t run_updates = 20000;
+
+  WHEN("Preferntial Ousting is Equivalent or Better"){
+    config.PREFERENTIAL_OUSTING(1);
+
+    for (size_t i = 0; i < run_updates; i++) {
+      world.Update();
+    }
+    THEN("Syms are completing more host tasks") {
+      REQUIRE(world.GetNumOrgs() == world_size);
+      auto it = world.GetTaskSet().begin();
+      
+      
+      ++it;
+      REQUIRE((*it).n_succeeds_sym > 20000);
+    }
+  }
+
+  WHEN("Preferntial Ousting is Strictly Better"){
+    config.PREFERENTIAL_OUSTING(2);
+
+    for (size_t i = 0; i < run_updates; i++) {
+      world.Update();
+    }
+    THEN("Syms are completing more host tasks") {
+      REQUIRE(world.GetNumOrgs() == world_size);
+      auto it = world.GetTaskSet().begin();
+      
+      
+      ++it;
+      REQUIRE((*it).n_succeeds_sym > 20000);
+      
+    }
+  }
+
+  WHEN("Preferntial Ousting is Off"){
+    config.PREFERENTIAL_OUSTING(0);
+
+    for (size_t i = 0; i < run_updates; i++) {
+      world.Update();
+    }
+    THEN("Syms are completing more host tasks") {
+      REQUIRE(world.GetNumOrgs() == world_size);
+      auto it = world.GetTaskSet().begin();
+      
+      
+      ++it;
+      REQUIRE((*it).n_succeeds_sym < 20000);
+      
+    }
+  }
+
+
+
+  
 }
 
 

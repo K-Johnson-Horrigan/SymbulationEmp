@@ -3,7 +3,7 @@
 #include "../../../sgp_mode/SGPWorldSetup.cc"
 #include "../../../sgp_mode/SGPDataNodes.h"
 
-TEST_CASE("SGPSymbiont DoTaskInteraction in nutrient mode", "[sgp]") {
+TEST_CASE("SGPSymbiont DoTaskInteraction in nutrient mode", "[sgp][sgp-unit]") {
   emp::Random random(42);
   SymConfigSGP config;
   config.INTERACTION_MECHANISM(NUTRIENT);
@@ -49,7 +49,7 @@ TEST_CASE("SGPSymbiont DoTaskInteraction in nutrient mode", "[sgp]") {
   }
 }
 
-TEST_CASE("SGPSymbiont destructor cleans up shared pointers and in-progress reproduction", "[sgp]") {
+TEST_CASE("SGPSymbiont destructor cleans up shared pointers and in-progress reproduction", "[sgp][sgp-unit]") {
   emp::Random random(31);
 	SymConfigSGP config;
 	SGPWorld world(random, &config, LogicTasks);

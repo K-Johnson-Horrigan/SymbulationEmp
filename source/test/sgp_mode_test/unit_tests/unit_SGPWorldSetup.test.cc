@@ -1,6 +1,6 @@
 #include "../../../sgp_mode/SGPWorldSetup.cc"
 
-TEST_CASE("SetupTaskProfileFun", "[sgp]") {
+TEST_CASE("SetupTaskProfileFun", "[sgp][sgp-unit]") {
 	emp::Random random(61);
 	SymConfigSGP config;
 

@@ -4,7 +4,7 @@
 
 #include "../../../catch/catch.hpp"
 
-TEST_CASE("Stress parasites can reproduce for free when their host is killed in an extinction event", "[sgp]") {
+TEST_CASE("Stress parasites can reproduce for free when their host is killed in an extinction event", "[sgp][sgp-functional]") {
   GIVEN("Stress is on, parasites are present, and an extinction event occurs") {
     emp::Random random(61);
     SymConfigSGP config;
@@ -71,7 +71,7 @@ TEST_CASE("Stress parasites can reproduce for free when their host is killed in 
   }
 }
 
-TEST_CASE("ProcessStressEscapeeOffspring", "[sgp]") {
+TEST_CASE("ProcessStressEscapeeOffspring", "[sgp][sgp-functional]") {
   WHEN("There are symbionts in the queue") {
     emp::Random random(19);
     SymConfigSGP config;
@@ -187,7 +187,7 @@ TEST_CASE("ProcessStressEscapeeOffspring", "[sgp]") {
   }
 }
 
-TEST_CASE("Task matching required for (stress) symbiotic behavior", "[sgp]") {
+TEST_CASE("Task matching required for (stress) symbiotic behavior", "[sgp][sgp-functional]") {
   
   GIVEN("Stress is the interaction mechanism") {
     emp::Random random(68);
@@ -266,7 +266,7 @@ TEST_CASE("Task matching required for (stress) symbiotic behavior", "[sgp]") {
 }
 
 
-TEST_CASE("Safe time configuration option", "[sgp]") {
+TEST_CASE("Safe time configuration option", "[sgp][sgp-functional]") {
   emp::Random random(62);
   SymConfigSGP config;
   config.INTERACTION_MECHANISM(STRESS);

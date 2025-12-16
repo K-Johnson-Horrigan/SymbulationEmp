@@ -12,7 +12,7 @@
 #include "../../../sgp_mode/SGPDataNodes.h"
 
 
-TEST_CASE("When DONATION_STEAL_INST is 1 then Symbiont with 'Steal' instruction properly takes CPU cycles from HealthHost", "[sgp]"){
+TEST_CASE("When DONATION_STEAL_INST is 1 then Symbiont with 'Steal' instruction properly takes CPU cycles from HealthHost", "[sgp][sgp-functional]"){
  
   emp::Random random(1);
   SymConfigSGP config;
@@ -65,7 +65,7 @@ TEST_CASE("When DONATION_STEAL_INST is 1 then Symbiont with 'Steal' instruction 
 
 }
 
-TEST_CASE("When DONATION_STEAL_INST is 1 then Symbiont with 'Donate' instruction properly gives CPU cycles to HealthHost", "[sgp]"){
+TEST_CASE("When DONATION_STEAL_INST is 1 then Symbiont with 'Donate' instruction properly gives CPU cycles to HealthHost", "[sgp][sgp-functional]"){
  
   emp::Random random(1);
   SymConfigSGP config;

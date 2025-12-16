@@ -12,7 +12,7 @@
 #include "../../../sgp_mode/SGPDataNodes.h"
 
 
-TEST_CASE("Health host with symbiont loses/gains cycle 50% of time", "[sgp]") {
+TEST_CASE("Health host with symbiont loses/gains cycle 50% of time", "[sgp][sgp-unit]") {
   emp::Random random(10);
   
   //TODO: The random number seed doesn't seem to be working, different values for the same seed

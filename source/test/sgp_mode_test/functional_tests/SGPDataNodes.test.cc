@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 
-TEST_CASE("Correct data files are created", "[sgp]") {
+TEST_CASE("Correct data files are created", "[sgp][sgp-functional]") {
   
   GIVEN("A World with no mutation"){
     emp::Random random(1);

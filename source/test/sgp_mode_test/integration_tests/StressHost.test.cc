@@ -1,6 +1,6 @@
 #include "../../../sgp_mode/StressHost.h"
 
-TEST_CASE("Extinction event probabilities", "[sgp]") {
+TEST_CASE("Extinction event probabilities", "[sgp][sgp-integration]") {
   emp::Random random(62);
   SymConfigSGP config;
   config.INTERACTION_MECHANISM(STRESS);

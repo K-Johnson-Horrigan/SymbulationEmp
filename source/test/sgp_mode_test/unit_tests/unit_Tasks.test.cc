@@ -4,7 +4,7 @@
 
 #include "../../../catch/catch.hpp"
 
-TEST_CASE("Only first task credit for hosts vs. symbionts","[sgp]"){
+TEST_CASE("Only first task credit for hosts vs. symbionts","[sgp][sgp-unit]"){
   emp::Random random(1);
   SymConfigSGP config;
   config.SEED(1);
@@ -135,7 +135,7 @@ TEST_CASE("Only first task credit for hosts vs. symbionts","[sgp]"){
   }
 }
 
-TEST_CASE("Task integration scoring and marking", "[sgp]") {
+TEST_CASE("Task integration scoring and marking", "[sgp][sgp-unit]") {
   emp::Random random(1);
   SymConfigSGP config;
   config.SEED(1);
@@ -229,7 +229,7 @@ TEST_CASE("Task integration scoring and marking", "[sgp]") {
   }
 }
 
-TEST_CASE("IsOnlyTask functionality", "[sgp]") {
+TEST_CASE("IsOnlyTask functionality", "[sgp][sgp-unit]") {
   emp::Random random(1);
   SymConfigSGP config;
   config.SEED(1);
@@ -315,7 +315,7 @@ TEST_CASE("IsOnlyTask functionality", "[sgp]") {
   }
 }
 
-TEST_CASE("WhichTaskDone Functionality", "[sgp]"){
+TEST_CASE("WhichTaskDone Functionality", "[sgp][sgp-unit]"){
   emp::Random random(1);
   SymConfigSGP config;
   config.SEED(1);
@@ -423,7 +423,7 @@ TEST_CASE("WhichTaskDone Functionality", "[sgp]"){
   }
 }
 
-TEST_CASE("Task completion edge cases", "[sgp]") { // IsSolved Edge casses documentation
+TEST_CASE("Task completion edge cases", "[sgp][sgp-unit]") { // IsSolved Edge casses documentation
   emp::Random random(1);
   SymConfigSGP config;
   config.SEED(1);

@@ -5,7 +5,7 @@
 #include "../../../sgp_mode/SGPDataNodes.h"
 
 
-TEST_CASE("When HOST_ONLY_FIRST_TASK_CREDIT is 1, the most tasks a Host can receive credit for is 1", "[sgp]"){
+TEST_CASE("When HOST_ONLY_FIRST_TASK_CREDIT is 1, the most tasks a Host can receive credit for is 1", "[sgp][sgp-functional]"){
 
   GIVEN("An SGPworld with HOST_ONLY_FIRST_TASK_CREDIT on"){
     emp::Random random(1);
@@ -126,7 +126,7 @@ TEST_CASE("When HOST_ONLY_FIRST_TASK_CREDIT is 1, the most tasks a Host can rece
   }
 }
 
-TEST_CASE("When HOST_ONLY_FIRST_TASK_CREDIT is 0, hosts receive credit for all tasks they complete", "[sgp]"){
+TEST_CASE("When HOST_ONLY_FIRST_TASK_CREDIT is 0, hosts receive credit for all tasks they complete", "[sgp][sgp-functional]"){
 
   GIVEN("An SGPWorld with HOST_ONLY_FIRST_TASK_CREDIT off"){
     emp::Random random(1);

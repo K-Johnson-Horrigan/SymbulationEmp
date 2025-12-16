@@ -4,7 +4,7 @@
 
 #include "../../../catch/catch.hpp"
 
-TEST_CASE("ProcessOutput Functionality with LogicTasks", "[sgp]"){
+TEST_CASE("ProcessOutput Functionality with LogicTasks", "[sgp][sgp-functional]"){
   emp::Random random(1);
   SymConfigSGP config;
   config.SEED(1);
@@ -305,7 +305,7 @@ TEST_CASE("ProcessOutput Functionality with LogicTasks", "[sgp]"){
   }
 }
 
-TEST_CASE("ProcessOutput Functionality with LogicTasksDiff", "[sgp]"){
+TEST_CASE("ProcessOutput Functionality with LogicTasksDiff", "[sgp][sgp-functional]"){
   emp::Random random(1);
   SymConfigSGP config;
   config.SEED(1);

@@ -4,7 +4,7 @@
 
 #include "../../../catch/catch.hpp"
 
-TEST_CASE("GetDominantInfo", "[sgp]") {
+TEST_CASE("GetDominantInfo", "[sgp][sgp-functional]") {
   emp::Random random(61);
   SymConfigSGP config;
   config.DOMINANT_COUNT(10);
@@ -40,7 +40,7 @@ TEST_CASE("GetDominantInfo", "[sgp]") {
   }
 }
 
-TEST_CASE("Baseline function", "[sgp]") {
+TEST_CASE("Baseline function", "[sgp][sgp-functional]") {
   emp::Random random(61);
   SymConfigSGP config;
   config.GRID_X(2);
@@ -71,7 +71,7 @@ TEST_CASE("Baseline function", "[sgp]") {
   }
 }
 
-TEST_CASE("Ousting is permitted", "[sgp]") {
+TEST_CASE("Ousting is permitted", "[sgp][sgp-functional]") {
   emp::Random random(61);
   SymConfigSGP config;
   config.GRID_X(2);

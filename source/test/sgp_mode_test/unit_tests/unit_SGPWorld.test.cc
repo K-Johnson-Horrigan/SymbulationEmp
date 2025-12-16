@@ -4,7 +4,7 @@
 
 #include "../../../catch/catch.hpp"
 
-TEST_CASE("Host Setup", "[sgp]") {
+TEST_CASE("Host Setup", "[sgp][sgp-unit]") {
    emp::Random random(1);
   SymConfigSGP config;
   config.SEED(2);
@@ -64,7 +64,7 @@ TEST_CASE("Host Setup", "[sgp]") {
   
 }
 
-TEST_CASE("TaskMaskCheck Unit Test", "[sgp]") {
+TEST_CASE("TaskMaskCheck Unit Test", "[sgp][sgp-unit]") {
 
   emp::Random random(1);
   SymConfigSGP config;
@@ -191,7 +191,7 @@ TEST_CASE("TaskMaskCheck Unit Test", "[sgp]") {
   }
 }
 
-TEST_CASE("TaskMatchCheck for parents", "[sgp]") {
+TEST_CASE("TaskMatchCheck for parents", "[sgp][sgp-unit]") {
   
   GIVEN("An SGPWorld with no mutation"){
     emp::Random random(1);
@@ -247,7 +247,7 @@ TEST_CASE("TaskMatchCheck for parents", "[sgp]") {
   }
 }
 
-TEST_CASE("TaskMatchCheck when HOST_ONLY_FIRST_TASK_CREDIT and SYM_ONLY_FIRST_TASK_CREDIT is 1", "[sgp]") {
+TEST_CASE("TaskMatchCheck when HOST_ONLY_FIRST_TASK_CREDIT and SYM_ONLY_FIRST_TASK_CREDIT is 1", "[sgp][sgp-unit]") {
   GIVEN("An SGPWorld where HOST_ONLY_FIRST_TASK_CREDIT and SYM_ONLY_FIRST_TASK_CREDIT is on and there is no mutation"){
     emp::Random random(1);
     SymConfigSGP config;
@@ -306,7 +306,7 @@ TEST_CASE("TaskMatchCheck when HOST_ONLY_FIRST_TASK_CREDIT and SYM_ONLY_FIRST_TA
 
   }
 }
-TEST_CASE("SGP SymDoBirth", "[sgp]") {
+TEST_CASE("SGP SymDoBirth", "[sgp][sgp-unit]") {
   emp::Random random(1);
   SymConfigSGP config;
   config.SEED(2);
@@ -364,7 +364,7 @@ TEST_CASE("SGP SymDoBirth", "[sgp]") {
   }
 }
 
-TEST_CASE("Preferential ousting", "[sgp]"){
+TEST_CASE("Preferential ousting", "[sgp][sgp-unit]"){
   // pref ousting settings
   // 0 = no preferential ousting, 
   // 1 = the incoming symbiont must have an equal or better match than the current symbiont in order to oust
@@ -562,7 +562,7 @@ TEST_CASE("Preferential ousting", "[sgp]"){
   host.Delete();
 }
 
-TEST_CASE("GetNeighborHost", "[sgp]") {
+TEST_CASE("GetNeighborHost", "[sgp][sgp-unit]") {
   emp::Random random(13);
   SymConfigSGP config;
   config.SYM_LIMIT(1);
@@ -624,4 +624,18 @@ TEST_CASE("GetNeighborHost", "[sgp]") {
       REQUIRE(world.GetNeighborHost(source_index, *symbiont->GetCPU().state.tasks_performed) == -1);
     }
   }
+}
+
+TEST_CASE("GetConfig returns correct config","[sgp][sgp-unit]"){
+  emp::Random random(1);
+  SymConfigSGP config;
+  config.SEED(12);
+  config.INTERACTION_MECHANISM(HEALTH);
+  config.SYMBIONT_TYPE(PARASITE);
+  config.MUTATION_RATE(0.0);
+  config.MUTATION_SIZE(0.000);
+  config.TRACK_PARENT_TASKS(0);
+  SGPWorld world(random, &config, LogicTasks);
+  emp::Ptr<SymConfigSGP> WorldConfig = world.GetConfig();
+  REQUIRE(&config == WorldConfig);
 }

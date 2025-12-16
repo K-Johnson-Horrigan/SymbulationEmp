@@ -30,35 +30,35 @@ void TestGenome(emp::Ptr<Task> task, void (ProgramBuilder::*method)()) {
   REQUIRE((*world.GetTaskSet().begin()).n_succeeds_host > 0);
 }
 
-TEST_CASE("Generate NOT program", "[sgp]") {
+TEST_CASE("Generate NOT program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(NOT), &ProgramBuilder::AddNot);
 }
-TEST_CASE("Generate NAND program", "[sgp]") {
+TEST_CASE("Generate NAND program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(NAND), &ProgramBuilder::AddNand);
 }
-TEST_CASE("Generate AND program", "[sgp]") {
+TEST_CASE("Generate AND program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(AND), &ProgramBuilder::AddAnd);
 }
-TEST_CASE("Generate ORN program", "[sgp]") {
+TEST_CASE("Generate ORN program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(ORN), &ProgramBuilder::AddOrn);
 }
-TEST_CASE("Generate OR program", "[sgp]") {
+TEST_CASE("Generate OR program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(OR), &ProgramBuilder::AddOr);
 }
-TEST_CASE("Generate ANDN program", "[sgp]") {
+TEST_CASE("Generate ANDN program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(ANDN), &ProgramBuilder::AddAndn);
 }
-TEST_CASE("Generate NOR program", "[sgp]") {
+TEST_CASE("Generate NOR program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(NOR), &ProgramBuilder::AddNor);
 }
-TEST_CASE("Generate XOR program", "[sgp]") {
+TEST_CASE("Generate XOR program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(XOR), &ProgramBuilder::AddXor);
 }
-TEST_CASE("Generate EQU program", "[sgp]") {
+TEST_CASE("Generate EQU program", "[sgp][sgp-functional]") {
   TestGenome(emp::NewPtr<Task>(EQU), &ProgramBuilder::AddEqu);
 }
 
-TEST_CASE("Empty ProgramBuilder can't do tasks", "[sgp]") {
+TEST_CASE("Empty ProgramBuilder can't do tasks", "[sgp][sgp-functional]") {
   emp::Random random(61);
   SymConfigSGP config;
   config.SYM_HORIZ_TRANS_RES(100);

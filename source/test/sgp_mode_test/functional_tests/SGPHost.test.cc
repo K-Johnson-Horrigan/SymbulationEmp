@@ -4,7 +4,7 @@
 #include "../../../sgp_mode/SGPWorldSetup.cc"
 #include "../../../sgp_mode/SGPDataNodes.h"
 
-TEST_CASE("SGPHost Reproduce parental task tracking", "[sgp]") {
+TEST_CASE("SGPHost Reproduce parental task tracking", "[sgp][sgp-functional]") {
   emp::Random random(31);
   SymConfigSGP config;
   SGPWorld world(random, &config, LogicTasks);
@@ -77,7 +77,7 @@ TEST_CASE("SGPHost Reproduce parental task tracking", "[sgp]") {
   }
 }
 
-TEST_CASE("SGPHost Reproduce", "[sgp]") {
+TEST_CASE("SGPHost Reproduce", "[sgp][sgp-functional]") {
   emp::Random random(31);
   SymConfigSGP config;
   SGPWorld world(random, &config, LogicTasks);

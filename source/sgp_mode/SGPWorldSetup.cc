@@ -127,8 +127,10 @@ void SGPWorld::ProcessReproductionQueue() {
       // Host::Reproduce() doesn't take care of vertical transmission, that
       // happens here 
       for (auto& sym : org->GetSymbionts()) {
+        
+        if(sgp_config->VERTICAL_TRANSMISSION() != 0) GetVerticalTransmissionAttemptCount().AddDatum(1);
+
         // don't vertically transmit if they must task match but don't
-        if(sgp_config->VERTICAL_TRANSMISSION() > 0) GetVerticalTransmissionAttemptCount().AddDatum(1);
         if (sgp_config->VT_TASK_MATCH() && !TaskMatchCheck(fun_get_task_profile(sym), fun_get_task_profile(org))) continue;
         sym->VerticalTransmission(child);
       }

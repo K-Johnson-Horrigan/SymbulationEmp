@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 
-TEST_CASE("GetStressEscapeeOffspringAttemptCount", "[sgp]") {
+TEST_CASE("GetStressEscapeeOffspringAttemptCount", "[sgp][sgp-functional]") {
   GIVEN("Stress is on, parasites are present, and an extinction event occurs") {
     emp::Random random(32);
     SymConfigSGP config;
@@ -39,7 +39,7 @@ TEST_CASE("GetStressEscapeeOffspringAttemptCount", "[sgp]") {
   }
 }
 
-TEST_CASE("GetStressEscapeeOffspringSuccessCount", "[sgp]") {
+TEST_CASE("GetStressEscapeeOffspringSuccessCount", "[sgp][sgp-functional]") {
   GIVEN("Stress is on, parasites are present, and an extinction event occurs") {
     emp::Random random(32);
     SymConfigSGP config;
