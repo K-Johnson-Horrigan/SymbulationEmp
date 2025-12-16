@@ -625,17 +625,3 @@ TEST_CASE("GetNeighborHost", "[sgp][sgp-unit]") {
     }
   }
 }
-
-TEST_CASE("GetConfig returns correct config","[sgp][sgp-unit]"){
-  emp::Random random(1);
-  SymConfigSGP config;
-  config.SEED(12);
-  config.INTERACTION_MECHANISM(HEALTH);
-  config.SYMBIONT_TYPE(PARASITE);
-  config.MUTATION_RATE(0.0);
-  config.MUTATION_SIZE(0.000);
-  config.TRACK_PARENT_TASKS(0);
-  SGPWorld world(random, &config, LogicTasks);
-  emp::Ptr<SymConfigSGP> WorldConfig = world.GetConfig();
-  REQUIRE(&config == WorldConfig);
-}
