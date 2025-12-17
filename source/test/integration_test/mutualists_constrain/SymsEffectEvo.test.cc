@@ -13,7 +13,7 @@
 #include "../../../sgp_mode/StressHost.h"
 
 
-TEST_CASE("Health hosts evolve less NOT with parasites than without", "[sgp][sgp-integration]") {
+TEST_CASE("Health hosts evolve less NOT with parasites than without", "[sgp][integration]") {
   emp::Random random(10);
   //TODO: The random number seed doesn't seem to be working, different values for the same seed
 
