@@ -269,23 +269,23 @@ TEST_CASE("Death proportion file is created", "[sgp]") {
       THEN("The StressDeathProportion file should contain 5 lines") {
         std::getline(file, str);
         THEN("The first should be a header") {
-          REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count");
+          REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,dead_hosts");
         }
         std::getline(file, str);
         THEN("The second should be (around) half the host population dying at update 25") {
-          REQUIRE(str == "25,100,50");
+          REQUIRE(str == "25,100,50,50");
         }
         std::getline(file, str);
         THEN("The third should be (around) half the host population dying at update 50") {
-          REQUIRE(str == "50,50,22");
+          REQUIRE(str == "50,50,22,28");
         }
         std::getline(file, str);
         THEN("The fourth should be (around) half the host population dying at update 75") {
-          REQUIRE(str == "75,22,12");
+          REQUIRE(str == "75,22,12,10");
         }
         std::getline(file, str);
         THEN("The fifth should be (around) half the host population dying at update 100") {
-          REQUIRE(str == "100,12,6");
+          REQUIRE(str == "100,12,6,6");
         }
       }
     }
@@ -301,23 +301,23 @@ TEST_CASE("Death proportion file is created", "[sgp]") {
       THEN("The StressDeathProportion file should contain 5 lines") {
         std::getline(file, str);
         THEN("The first should be a header") {
-          REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count");
+          REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,dead_hosts");
         }
         std::getline(file, str);
         THEN("The second should be (around) half the host population dying at update 25") {
-          REQUIRE(str == "25,100,50");
+          REQUIRE(str == "25,100,50,50");
         }
         std::getline(file, str);
         THEN("The third should be none of the host population dying at update 50") {
-          REQUIRE(str == "50,50,50");
+          REQUIRE(str == "50,50,50,0");
         }
         std::getline(file, str);
         THEN("The fourth should be none of the host population dying at update 75") {
-          REQUIRE(str == "75,50,50");
+          REQUIRE(str == "75,50,50,0");
         }
         std::getline(file, str);
         THEN("The fifth should be none of the host population dying at update 100") {
-          REQUIRE(str == "100,50,50");
+          REQUIRE(str == "100,50,50,0");
         }
       }
     }
@@ -359,23 +359,23 @@ TEST_CASE("Death proportion file is used to run manual extinction experiment", "
     THEN("The StressDeathProportion file should contain 5 lines") {
       std::getline(file, str);
       THEN("The first should be a header") {
-        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count");
+        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,dead_hosts");
       }
       std::getline(file, str);
       THEN("The second should be (around) half the host population dying at update 25") {
-        REQUIRE(str == "25,100,50");
+        REQUIRE(str == "25,100,50,50");
       }
       std::getline(file, str);
       THEN("The third should be (around) half the host population dying at update 50") {
-        REQUIRE(str == "50,50,22");
+        REQUIRE(str == "50,50,22,28");
       }
       std::getline(file, str);
       THEN("The fourth should be (around) half the host population dying at update 75") {
-        REQUIRE(str == "75,22,12");
+        REQUIRE(str == "75,22,12,10");
       }
       std::getline(file, str);
       THEN("The fifth should be (around) half the host population dying at update 100") {
-        REQUIRE(str == "100,12,6");
+        REQUIRE(str == "100,12,6,6");
       }
     }
   }
@@ -401,23 +401,23 @@ TEST_CASE("Death proportion file is used to run manual extinction experiment", "
     THEN("The manual extinction StressDeathProportion file should contain 5 lines") {
       std::getline(file, str);
       THEN("The first should be a header") {
-        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count");
+        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,dead_hosts");
       }
       std::getline(file, str);
       THEN("The second should be (around) half the host population dying at update 25") {
-        REQUIRE(str == "25,100,50");
+        REQUIRE(str == "25,100,50,50");
       }
       std::getline(file, str);
       THEN("The third should be (around) half the host population dying at update 50") {
-        REQUIRE(str == "50,50,22");
+        REQUIRE(str == "50,50,22,28");
       }
       std::getline(file, str);
       THEN("The fourth should be (around) half the host population dying at update 75") {
-        REQUIRE(str == "75,22,12");
+        REQUIRE(str == "75,22,12,10");
       }
       std::getline(file, str);
       THEN("The fifth should be (around) half the host population dying at update 100") {
-        REQUIRE(str == "100,12,6");
+        REQUIRE(str == "100,12,6,6");
       }
     }
   }
