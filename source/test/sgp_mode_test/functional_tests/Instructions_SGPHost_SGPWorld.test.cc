@@ -1,5 +1,5 @@
 
-TEST_CASE("Reproduce instruction", "[sgp]") {
+TEST_CASE("Reproduce instruction", "[sgp][sgp-functional]") {
     // reproduce fails if:
     // pos is invalid
     // repro happened once this update already
