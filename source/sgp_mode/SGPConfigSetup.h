@@ -3,7 +3,7 @@
 #include "../../Empirical/include/emp/config/config.hpp"
 #include "../ConfigSetup.h"
 
-enum SGPInteractionMechanism {DEFAULT = 0, HEALTH, STRESS, NUTRIENT};
+enum SGPInteractionMechanism {DEFAULT = 0, HEALTH, STRESS, NUTRIENT, STRESS_MANUAL_KILL};
 enum SymbiontType { MUTUALIST = 0, PARASITE, NEUTRAL };
 
 EMP_EXTEND_CONFIG(SymConfigSGP, SymConfigBase,
@@ -30,6 +30,8 @@ EMP_EXTEND_CONFIG(SymConfigSGP, SymConfigBase,
   VALUE(SAFE_TIME, size_t, 0, "How many updates at the beginning of the experiment should we wait before starting extinction events?"),
   VALUE(PARASITE_NUM_OFFSPRING_ON_STRESS_INTERACTION, size_t, 0, "How many offspring can stress parasite produce for free (no points or cycles required) when host dies during stress event?"),
   VALUE(TRACK_EXTINCTION_DEATH_PROPORTION, bool, 0, "Should death proportion of hosts during each extinction event be tracked and written to a data file? (0  for no, 1 for yes)"),
+  VALUE(KILL_HOSTS_PER_EXTINCTION_FILE, bool, 0, "Should a predetermined number of hosts be killed per extinction event? Count of hosts to kill per extinction event will be pulled from SOURCE_EXTINCTION_FILE_NAME. (0  for no, 1 for yes)"),
+  VALUE(SOURCE_EXTINCTION_PROPORTION_FILE_NAME, std::string, "", "What is the name of the extinction proportion file to pull host death counts from? "),
 
   GROUP(NUTRIENT, "Nutrient Settings"),
   VALUE(NUTRIENT_DONATE_STEAL_PROP, double, 0.5, "What proportion of points should a symbiont donate to its host and what proportion of points should a symbiont steal from its host during nutrient type interactions"),

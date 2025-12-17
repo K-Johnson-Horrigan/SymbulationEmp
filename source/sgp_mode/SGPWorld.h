@@ -1,6 +1,7 @@
 #ifndef SGPWORLD_H
 #define SGPWORLD_H
 
+#include <filesystem> 
 #include "../default_mode/SymWorld.h"
 #include "Tasks.h"
 #include "emp/Evolve/World_structure.hpp"
@@ -31,7 +32,6 @@ private:
   size_t data_var_pre_extinction_host_count;
   double data_var_extinction_death_proportion;
 
-
   emp::Ptr<emp::DataMonitor<int>> data_node_steal_count;
   emp::Ptr<emp::DataMonitor<int>> data_node_donate_count;
   emp::Ptr<emp::DataMonitor<size_t>> data_node_stress_escapee_offspring_attempt_count;
@@ -40,6 +40,7 @@ private:
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
   
   emp::Ptr<emp::DataFile> death_proportion_data_file;
+  emp::Ptr<std::ifstream> source_extinction_proportion_file;
 
   /**
   *
@@ -61,6 +62,11 @@ public:
     sgp_config = _config;
 
     SetupTaskProfileFun();
+
+    if (sgp_config->KILL_HOSTS_PER_EXTINCTION_FILE()) {
+      emp_assert(std::filesystem::exists(sgp_config->SOURCE_EXTINCTION_PROPORTION_FILE_NAME()));
+      source_extinction_proportion_file = emp::NewPtr<std::ifstream>(sgp_config->SOURCE_EXTINCTION_PROPORTION_FILE_NAME());
+    }
   }
 
   ~SGPWorld() {
@@ -75,6 +81,7 @@ public:
       escapee_data.escapee_offspring.Delete();
     }
     if (death_proportion_data_file) death_proportion_data_file.Delete();
+    if (source_extinction_proportion_file) source_extinction_proportion_file.Delete();
   }
 
   /**
@@ -95,6 +102,28 @@ public:
    */
   const emp::Ptr<SymConfigSGP> GetConfig() const { return sgp_config; }
 
+  void DoManualExtinctionEvent() {
+    std::string str;
+    size_t extinction_survivor_count;
+    for (int i = 0; i < 3; i++) {
+      std::getline(*source_extinction_proportion_file, str, ',');
+      if (i == 2) {
+        std::stringstream sstream(str);
+        sstream >> extinction_survivor_count;
+      }
+    }
+    std::getline(*source_extinction_proportion_file, str, '\n');
+
+    // leave extinction_survivor_count random hosts alive, kill the rest
+    if (GetNumOrgs() > extinction_survivor_count && GetUpdate() > 0) {
+      size_t kill_count = GetNumOrgs() - extinction_survivor_count;
+      emp::vector<size_t> occupied_cells = GetValidOrgIDs();
+      emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), occupied_cells.size());
+      for (size_t i = 0; i < kill_count; i++) {
+        DoDeath(occupied_cells[schedule[i]]);
+      }
+    }
+  }
 
   /**
    * Input: None
@@ -105,11 +134,16 @@ public:
    * process functions for hosts and symbionts and updating the data nodes.
    */
   void Update() override {
-    if (sgp_config->INTERACTION_MECHANISM() == STRESS && sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
+    if ((sgp_config->INTERACTION_MECHANISM() == STRESS || sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL) && 
+      sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
       GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
       data_var_pre_extinction_host_count = GetNumOrgs(); // assumes no free living syms
     }
     
+    if (sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL && GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
+      DoManualExtinctionEvent();
+    }
+
     // These must be done here because we don't call SymWorld::Update()
     // That may change in the future
     emp::World<Organism>::Update();
@@ -143,7 +177,8 @@ public:
     
     CleanupGraveyard();
 
-    if (sgp_config->INTERACTION_MECHANISM() == STRESS && sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
+    if ((sgp_config->INTERACTION_MECHANISM() == STRESS || sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL) &&
+      sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
       GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
       data_var_extinction_death_proportion = 1 - ((double)GetNumOrgs() / (double)data_var_pre_extinction_host_count);
       death_proportion_data_file->Update();

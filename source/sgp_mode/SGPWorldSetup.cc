@@ -21,6 +21,7 @@ void SGPWorld::SetupHosts(unsigned long *POP_SIZE) {
     emp::Ptr<SGPHost> new_org;
     switch (sgp_config->INTERACTION_MECHANISM()) {
       case DEFAULT:
+      case STRESS_MANUAL_KILL:
         new_org = emp::NewPtr<SGPHost>(
           &GetRandom(), this, sgp_config, CreateNandProgram(PROGRAM_LENGTH), sgp_config->HOST_INT());
         break;
