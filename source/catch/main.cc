@@ -45,9 +45,9 @@
 #include "../test/sgp_mode_test/functional_tests/SGPSymbiont_Tasks.test.cc"
 #include "../test/sgp_mode_test/functional_tests/SGPSymbiont_Reproduce.test.cc"
 #include "../test/sgp_mode_test/functional_tests/SGPWorld_StressHost.test.cc"
-#include "../test/sgp_mode_test/functional_tests/SGPWorld.test.cc"
+#include "../test/sgp_mode_test/functional_tests/SGPWorld_SGPConfig.test.cc"
 #include "../test/sgp_mode_test/functional_tests/StressHost_SGPDataNodes.test.cc"
-#include "../test/sgp_mode_test/functional_tests/Tasks.test.cc"
+#include "../test/sgp_mode_test/functional_tests/Tasks_ProcessOutput.test.cc"
 
 #include "../test/sgp_mode_test/integration_tests/EvolutionOccurs.test.cc"
 #include "../test/sgp_mode_test/integration_tests/SymsEffectEvo.test.cc"
