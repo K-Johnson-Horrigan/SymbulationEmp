@@ -122,7 +122,7 @@ TEST_CASE("Host Setup", "[sgp]") {
 
   
   WHEN("INTERACTION_MECHANISM Config is set to an option that does not exist"){
-    config.INTERACTION_MECHANISM(4);
+    config.INTERACTION_MECHANISM(5);
     SGPWorld world(random, &config, LogicTasks);
     THEN("An exception should be thrown"){
       REQUIRE_THROWS(world.SetupHosts(&setupCount));
