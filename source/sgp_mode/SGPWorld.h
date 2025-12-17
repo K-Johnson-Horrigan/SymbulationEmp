@@ -28,12 +28,18 @@ class SGPWorld : public SymWorld {
 private:
   TaskSet task_set;
 
+  size_t data_var_pre_extinction_host_count;
+  double data_var_extinction_death_proportion;
+
+
   emp::Ptr<emp::DataMonitor<int>> data_node_steal_count;
   emp::Ptr<emp::DataMonitor<int>> data_node_donate_count;
   emp::Ptr<emp::DataMonitor<size_t>> data_node_stress_escapee_offspring_attempt_count;
   emp::Ptr<emp::DataMonitor<size_t>> data_node_stress_escapee_offspring_success_count;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
+  
+  emp::Ptr<emp::DataFile> death_rate_data_file;
 
   /**
   *
@@ -68,6 +74,7 @@ public:
     for (auto escapee_data : symbiont_stress_escapee_offspring) {
       escapee_data.escapee_offspring.Delete();
     }
+    if (death_rate_data_file) death_rate_data_file.Delete();
   }
 
   /**
@@ -98,6 +105,11 @@ public:
    * process functions for hosts and symbionts and updating the data nodes.
    */
   void Update() override {
+    if (sgp_config->INTERACTION_MECHANISM() == STRESS && sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
+      GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
+      data_var_pre_extinction_host_count = GetNumOrgs(); // assumes no free living syms
+    }
+    
     // These must be done here because we don't call SymWorld::Update()
     // That may change in the future
     emp::World<Organism>::Update();
@@ -130,6 +142,12 @@ public:
     ProcessStressEscapeeOffspring();
     
     CleanupGraveyard();
+
+    if (sgp_config->INTERACTION_MECHANISM() == STRESS && sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
+      GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
+      data_var_extinction_death_proportion = 1 - ((double)GetNumOrgs() / (double)data_var_pre_extinction_host_count);
+      death_rate_data_file->Update();
+    }
   }
 
   // Prototypes for setup methods
@@ -170,6 +188,7 @@ public:
   void SetupTransmissionFileColumns(emp::DataFile& file);
   void WriteTaskCombinationsFile(const std::string& filename);
   void WriteOrgReproHistFile(const std::string& filename);
+  void SetupDeathRateFile(const std::string& filename);
 
   void CreateDataFiles() override;
 };
