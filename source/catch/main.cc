@@ -29,12 +29,12 @@
 #include "../test/pgg_mode_test/PGGWorld.test.cc"
 
 
-#include "../test/sgp_mode_test/unit_tests/unit_GenomeLibrary.test.cc"
-#include "../test/sgp_mode_test/unit_tests/unit_HealthHost.test.cc"
-#include "../test/sgp_mode_test/unit_tests/unit_SGPSymbiont.test.cc"
-#include "../test/sgp_mode_test/unit_tests/unit_SGPWorld.test.cc"
-#include "../test/sgp_mode_test/unit_tests/unit_SGPWorldSetup.test.cc"
-#include "../test/sgp_mode_test/unit_tests/unit_Tasks.test.cc"
+#include "../test/sgp_mode_test/unit_tests/GenomeLibrary.test.cc"
+#include "../test/sgp_mode_test/unit_tests/HealthHost.test.cc"
+#include "../test/sgp_mode_test/unit_tests/SGPSymbiont.test.cc"
+#include "../test/sgp_mode_test/unit_tests/SGPWorld.test.cc"
+#include "../test/sgp_mode_test/unit_tests/SGPWorldSetup.test.cc"
+#include "../test/sgp_mode_test/unit_tests/Tasks.test.cc"
 
 
 #include "../test/sgp_mode_test/functional_tests/GenomeLibrary_SGPWorld.test.cc"
