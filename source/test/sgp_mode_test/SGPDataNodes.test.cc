@@ -273,19 +273,19 @@ TEST_CASE("Death proportion file is created", "[sgp]") {
         }
         std::getline(file, str);
         THEN("The second should be (around) half the host population dying at update 25") {
-          REQUIRE(str == "25,100,50,0.5");
+          REQUIRE(str == "25,100,50");
         }
         std::getline(file, str);
         THEN("The third should be (around) half the host population dying at update 50") {
-          REQUIRE(str == "50,50,22,0.56");
+          REQUIRE(str == "50,50,22");
         }
         std::getline(file, str);
         THEN("The fourth should be (around) half the host population dying at update 75") {
-          REQUIRE(str == "75,22,12,0.454545");
+          REQUIRE(str == "75,22,12");
         }
         std::getline(file, str);
         THEN("The fifth should be (around) half the host population dying at update 100") {
-          REQUIRE(str == "100,12,6,0.5");
+          REQUIRE(str == "100,12,6");
         }
       }
     }
@@ -305,19 +305,19 @@ TEST_CASE("Death proportion file is created", "[sgp]") {
         }
         std::getline(file, str);
         THEN("The second should be (around) half the host population dying at update 25") {
-          REQUIRE(str == "25,100,50,0.5");
+          REQUIRE(str == "25,100,50");
         }
         std::getline(file, str);
         THEN("The third should be none of the host population dying at update 50") {
-          REQUIRE(str == "50,50,50,0");
+          REQUIRE(str == "50,50,50");
         }
         std::getline(file, str);
         THEN("The fourth should be none of the host population dying at update 75") {
-          REQUIRE(str == "75,50,50,0");
+          REQUIRE(str == "75,50,50");
         }
         std::getline(file, str);
         THEN("The fifth should be none of the host population dying at update 100") {
-          REQUIRE(str == "100,50,50,0");
+          REQUIRE(str == "100,50,50");
         }
       }
     }
@@ -363,19 +363,19 @@ TEST_CASE("Death proportion file is used to run manual extinction experiment", "
       }
       std::getline(file, str);
       THEN("The second should be (around) half the host population dying at update 25") {
-        REQUIRE(str == "25,100,50,0.5");
+        REQUIRE(str == "25,100,50");
       }
       std::getline(file, str);
       THEN("The third should be (around) half the host population dying at update 50") {
-        REQUIRE(str == "50,50,22,0.56");
+        REQUIRE(str == "50,50,22");
       }
       std::getline(file, str);
       THEN("The fourth should be (around) half the host population dying at update 75") {
-        REQUIRE(str == "75,22,12,0.454545");
+        REQUIRE(str == "75,22,12");
       }
       std::getline(file, str);
       THEN("The fifth should be (around) half the host population dying at update 100") {
-        REQUIRE(str == "100,12,6,0.5");
+        REQUIRE(str == "100,12,6");
       }
     }
   }
@@ -405,19 +405,19 @@ TEST_CASE("Death proportion file is used to run manual extinction experiment", "
       }
       std::getline(file, str);
       THEN("The second should be (around) half the host population dying at update 25") {
-        REQUIRE(str == "25,100,50,0.5");
+        REQUIRE(str == "25,100,50");
       }
       std::getline(file, str);
       THEN("The third should be (around) half the host population dying at update 50") {
-        REQUIRE(str == "50,50,22,0.56");
+        REQUIRE(str == "50,50,22");
       }
       std::getline(file, str);
       THEN("The fourth should be (around) half the host population dying at update 75") {
-        REQUIRE(str == "75,22,12,0.454545");
+        REQUIRE(str == "75,22,12");
       }
       std::getline(file, str);
       THEN("The fifth should be (around) half the host population dying at update 100") {
-        REQUIRE(str == "100,12,6,0.5");
+        REQUIRE(str == "100,12,6");
       }
     }
   }
