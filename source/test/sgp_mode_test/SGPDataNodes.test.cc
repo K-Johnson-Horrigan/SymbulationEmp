@@ -269,7 +269,7 @@ TEST_CASE("Death proportion file is created", "[sgp]") {
       THEN("The StressDeathProportion file should contain 5 lines") {
         std::getline(file, str);
         THEN("The first should be a header") {
-          REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,death_proportion");
+          REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count");
         }
         std::getline(file, str);
         THEN("The second should be (around) half the host population dying at update 25") {
@@ -301,7 +301,7 @@ TEST_CASE("Death proportion file is created", "[sgp]") {
       THEN("The StressDeathProportion file should contain 5 lines") {
         std::getline(file, str);
         THEN("The first should be a header") {
-          REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,death_proportion");
+          REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count");
         }
         std::getline(file, str);
         THEN("The second should be (around) half the host population dying at update 25") {
@@ -359,7 +359,7 @@ TEST_CASE("Death proportion file is used to run manual extinction experiment", "
     THEN("The StressDeathProportion file should contain 5 lines") {
       std::getline(file, str);
       THEN("The first should be a header") {
-        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,death_proportion");
+        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count");
       }
       std::getline(file, str);
       THEN("The second should be (around) half the host population dying at update 25") {
@@ -401,7 +401,7 @@ TEST_CASE("Death proportion file is used to run manual extinction experiment", "
     THEN("The manual extinction StressDeathProportion file should contain 5 lines") {
       std::getline(file, str);
       THEN("The first should be a header") {
-        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,death_proportion");
+        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count");
       }
       std::getline(file, str);
       THEN("The second should be (around) half the host population dying at update 25") {
