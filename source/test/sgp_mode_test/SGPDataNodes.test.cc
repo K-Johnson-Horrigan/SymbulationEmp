@@ -329,6 +329,108 @@ TEST_CASE("Death proportion file is created", "[sgp]") {
   } 
 }
 
+TEST_CASE("Death proportion file is used to run manual extinction experiment", "[sgp]") {
+  emp::Random random(2);
+  SymConfigSGP config;
+  config.GRID_X(10);
+  config.GRID_Y(10);
+  config.DATA_INT(100);
+  config.INTERACTION_MECHANISM(STRESS);
+  config.SYMBIONT_TYPE(0);
+  config.EXTINCTION_FREQUENCY(25);
+  config.BASE_DEATH_CHANCE(0.5);
+  config.MUTUALIST_DEATH_CHANCE(0);
+  config.TRACK_EXTINCTION_DEATH_PROPORTION(1);
+
+  SGPWorld world(random, &config, LogicTasks);
+
+  std::string filename = "DataTest_StressDeathProportion.data";
+  world.SetupDeathProportionFile(filename);
+  THEN("The death proportion file is created") {
+    REQUIRE(std::filesystem::exists(filename));
+  }
+
+  config.START_MOI(0);
+  world.Setup();
+  world.RunExperiment(false);
+  THEN("Hosts die at consistent proportions") {
+    std::ifstream file(filename);
+    std::string str;
+    THEN("The StressDeathProportion file should contain 5 lines") {
+      std::getline(file, str);
+      THEN("The first should be a header") {
+        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,death_proportion");
+      }
+      std::getline(file, str);
+      THEN("The second should be (around) half the host population dying at update 25") {
+        REQUIRE(str == "25,100,50,0.5");
+      }
+      std::getline(file, str);
+      THEN("The third should be (around) half the host population dying at update 50") {
+        REQUIRE(str == "50,50,22,0.56");
+      }
+      std::getline(file, str);
+      THEN("The fourth should be (around) half the host population dying at update 75") {
+        REQUIRE(str == "75,22,12,0.454545");
+      }
+      std::getline(file, str);
+      THEN("The fifth should be (around) half the host population dying at update 100") {
+        REQUIRE(str == "100,12,6,0.5");
+      }
+    }
+  }
+  
+  
+  config.INTERACTION_MECHANISM(STRESS_MANUAL_KILL);
+  config.KILL_HOSTS_PER_EXTINCTION_FILE(1);
+  config.SOURCE_EXTINCTION_PROPORTION_FILE_NAME(filename);
+
+  // SOURCE_EXTINCTION_PROPORTION_FILE_NAME gets assigned to file pointer in SGPWorld constructor
+  SGPWorld manual_extinction_world(random, &config, LogicTasks);
+  
+  
+  
+  std::string manual_extinction_filename = "DataTest_StressDeathProportion_manual_extinction_data.data";
+  manual_extinction_world.SetupDeathProportionFile(manual_extinction_filename);
+    
+  manual_extinction_world.Setup();
+  manual_extinction_world.RunExperiment(false);
+  
+  THEN("Survivor host counts are the exact same in the manual extinction experiment as they were in the stress experiment") {
+    std::ifstream file(manual_extinction_filename);
+    std::string str;
+    THEN("The manual extinction StressDeathProportion file should contain 5 lines") {
+      std::getline(file, str);
+      THEN("The first should be a header") {
+        REQUIRE(str == "update,pre_ex_host_count,post_ex_host_count,death_proportion");
+      }
+      std::getline(file, str);
+      THEN("The second should be (around) half the host population dying at update 25") {
+        REQUIRE(str == "25,100,50,0.5");
+      }
+      std::getline(file, str);
+      THEN("The third should be (around) half the host population dying at update 50") {
+        REQUIRE(str == "50,50,22,0.56");
+      }
+      std::getline(file, str);
+      THEN("The fourth should be (around) half the host population dying at update 75") {
+        REQUIRE(str == "75,22,12,0.454545");
+      }
+      std::getline(file, str);
+      THEN("The fifth should be (around) half the host population dying at update 100") {
+        REQUIRE(str == "100,12,6,0.5");
+      }
+    }
+  }
+  
+  std::filesystem::remove(manual_extinction_filename);  
+  std::filesystem::remove(filename);
+  THEN("The death proportion file is removed") {
+    REQUIRE(!std::filesystem::exists(filename));
+    REQUIRE(!std::filesystem::exists(manual_extinction_filename));
+  }
+}
+
 TEST_CASE("GetStressEscapeeOffspringAttemptCount", "[sgp]") {
   GIVEN("Stress is on, parasites are present, and an extinction event occurs") {
     emp::Random random(32);
