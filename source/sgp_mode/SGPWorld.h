@@ -33,6 +33,7 @@ private:
 
   emp::Ptr<emp::DataMonitor<int>> data_node_steal_count;
   emp::Ptr<emp::DataMonitor<int>> data_node_donate_count;
+  emp::Ptr<emp::DataMonitor<size_t>> data_node_extinction_dead_host_count;
   emp::Ptr<emp::DataMonitor<size_t>> data_node_stress_escapee_offspring_attempt_count;
   emp::Ptr<emp::DataMonitor<size_t>> data_node_stress_escapee_offspring_success_count;
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
@@ -74,6 +75,7 @@ public:
     // data node deletes 
     if (data_node_steal_count) data_node_steal_count.Delete();
     if (data_node_donate_count) data_node_donate_count.Delete();
+    if (data_node_extinction_dead_host_count) data_node_extinction_dead_host_count.Delete();
     if (data_node_stress_escapee_offspring_attempt_count) data_node_stress_escapee_offspring_attempt_count.Delete();
     if (data_node_stress_escapee_offspring_success_count) data_node_stress_escapee_offspring_success_count.Delete();
 
@@ -103,22 +105,44 @@ public:
    */
   const emp::Ptr<SymConfigSGP> GetConfig() const { return sgp_config; }
 
+  /**
+   * Input: None
+   *
+   * Output: None
+   *
+   * Purpose: Runs manual extinctions, killing a number of hosts
+   * as determined by an input file set up on construction
+   */
   void DoManualExtinctionEvent() {
-    std::string str;
-    size_t extinction_survivor_count;
-    for (int i = 0; i < 2; i++) {
+    // it is possible for some hosts to be born in an extinction update,
+    // so the count of post-extinction hosts neq pre - dead 
+    // in this method, we want to set our population size to 
+    // the number of host - the dead hosts (i.e. our population will then be 
+    // the same "pre-birth" size) 
+    // 650,9994,8064,1933 <- e.g. here, it looks like 3 hosts were born 
+
+    std::string str; 
+    size_t dead_count;
+    size_t pre_extinction_count; 
+    for (int i = 0; i < 3; i++) {
       std::getline(*source_extinction_proportion_file, str, ',');
+      if (i == 1) {
+        std::stringstream sstream(str);
+        sstream >> pre_extinction_count;
+      }
     }
     std::getline(*source_extinction_proportion_file, str, '\n');
     std::stringstream sstream(str);
-    sstream >> extinction_survivor_count;
+    sstream >> dead_count;
     
-    // leave extinction_survivor_count random hosts alive, kill the rest
-    if (GetNumOrgs() > extinction_survivor_count) {
-      size_t dead_count = GetNumOrgs() - extinction_survivor_count;
+    size_t target_pop_size = pre_extinction_count - dead_count;
+    // leave target_pop_size random hosts alive, kill the rest
+    if (GetNumOrgs() > target_pop_size) {
+      size_t to_make_dead_count = GetNumOrgs() - target_pop_size;
+      GetExtinctionDeadHostCount().AddDatum(to_make_dead_count);
       emp::vector<size_t> occupied_cells = GetValidOrgIDs();
       emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), occupied_cells.size());
-      for (size_t i = 0; i < dead_count; i++) {
+      for (size_t i = 0; i < to_make_dead_count; i++) {
         DoDeath(occupied_cells[schedule[i]]);
       }
     }
@@ -210,6 +234,7 @@ public:
   // Prototypes for data node methods
   emp::DataMonitor<int> &GetStealCount();
   emp::DataMonitor<int> &GetDonateCount();
+  emp::DataMonitor<size_t>& GetExtinctionDeadHostCount();
   emp::DataMonitor<size_t>& GetStressEscapeeOffspringAttemptCount();
   emp::DataMonitor<size_t>& GetStressEscapeeOffspringSuccessCount();
 

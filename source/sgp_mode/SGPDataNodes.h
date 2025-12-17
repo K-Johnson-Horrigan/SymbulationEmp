@@ -259,10 +259,11 @@ void SGPWorld::WriteOrgReproHistFile(const std::string& filename) {
  */
 void SGPWorld::SetupDeathProportionFile(const std::string& filename) {
   death_proportion_data_file = emp::NewPtr<emp::DataFile>(filename);
-  
+  auto& dead_count = GetExtinctionDeadHostCount();
   death_proportion_data_file->AddVar(update, "update", "Update");
   death_proportion_data_file->AddVar(data_var_pre_extinction_host_count, "pre_ex_host_count", "Total number of hosts prior to the extinction event");
   death_proportion_data_file->AddVar(num_orgs, "post_ex_host_count", "Total number of hosts after the extinction event");
+  death_proportion_data_file->AddTotal(dead_count, "dead_hosts", "Total number of hosts killed by the extinction event", true);
   
   death_proportion_data_file->PrintHeaderKeys();
 } 
@@ -349,5 +350,21 @@ emp::DataMonitor<size_t>& SGPWorld::GetStressEscapeeOffspringSuccessCount() {
     data_node_stress_escapee_offspring_success_count.New();
   }
   return *data_node_stress_escapee_offspring_success_count;
+}
+
+/**
+ * Input: None
+ *
+ * Output: A reference to the data node storing the count of hosts
+ * killed by stress
+ *
+ * Purpose: To set up and return the data node storing the count
+ * of hosts killed by stress
+ */
+emp::DataMonitor<size_t>& SGPWorld::GetExtinctionDeadHostCount() {
+  if (!data_node_extinction_dead_host_count) {
+    data_node_extinction_dead_host_count.New();
+  }
+  return *data_node_extinction_dead_host_count;
 }
 #endif

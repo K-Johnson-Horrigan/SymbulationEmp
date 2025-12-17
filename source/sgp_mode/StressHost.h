@@ -92,6 +92,9 @@ public:
         else if (sgp_config->SYMBIONT_TYPE() == PARASITE && tasks_satisfactory) death_chance = sgp_config->PARASITE_DEATH_CHANCE();
       }
       if (random->P(death_chance)) {
+        if (sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION()) {
+          my_world->GetExtinctionDeadHostCount().AddDatum(1);
+        }
         // escapee offspring go first (so that parent sym is not removed before they can use it!)
         if (sgp_config->SYMBIONT_TYPE() == PARASITE && sgp_config->PARASITE_NUM_OFFSPRING_ON_STRESS_INTERACTION() > 0) {
           for (size_t j = 0; j < syms.size(); j++) {
