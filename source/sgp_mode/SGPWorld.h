@@ -30,7 +30,6 @@ private:
   TaskSet task_set;
 
   size_t data_var_pre_extinction_host_count;
-  double data_var_extinction_death_proportion;
 
   emp::Ptr<emp::DataMonitor<int>> data_node_steal_count;
   emp::Ptr<emp::DataMonitor<int>> data_node_donate_count;
@@ -107,15 +106,13 @@ public:
   void DoManualExtinctionEvent() {
     std::string str;
     size_t extinction_survivor_count;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 2; i++) {
       std::getline(*source_extinction_proportion_file, str, ',');
-      if (i == 2) {
-        std::stringstream sstream(str);
-        sstream >> extinction_survivor_count;
-      }
     }
     std::getline(*source_extinction_proportion_file, str, '\n');
-
+    std::stringstream sstream(str);
+    sstream >> extinction_survivor_count;
+    
     // leave extinction_survivor_count random hosts alive, kill the rest
     if (GetNumOrgs() > extinction_survivor_count) {
       size_t dead_count = GetNumOrgs() - extinction_survivor_count;
@@ -182,7 +179,6 @@ public:
     if ((sgp_config->INTERACTION_MECHANISM() == STRESS || sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL) &&
       sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
       GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
-      data_var_extinction_death_proportion = 1 - ((double)GetNumOrgs() / (double)data_var_pre_extinction_host_count);
       death_proportion_data_file->Update();
     }
   }
