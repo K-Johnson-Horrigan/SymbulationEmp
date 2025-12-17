@@ -63,7 +63,7 @@ public:
 
     SetupTaskProfileFun();
 
-    if (sgp_config->KILL_HOSTS_PER_EXTINCTION_FILE()) {
+    if (sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL) {
       emp_assert(std::filesystem::exists(sgp_config->SOURCE_EXTINCTION_PROPORTION_FILE_NAME()));
       source_extinction_proportion_file = emp::NewPtr<std::ifstream>(sgp_config->SOURCE_EXTINCTION_PROPORTION_FILE_NAME());
       std::string str;
@@ -118,10 +118,10 @@ public:
 
     // leave extinction_survivor_count random hosts alive, kill the rest
     if (GetNumOrgs() > extinction_survivor_count) {
-      size_t kill_count = GetNumOrgs() - extinction_survivor_count;
+      size_t dead_count = GetNumOrgs() - extinction_survivor_count;
       emp::vector<size_t> occupied_cells = GetValidOrgIDs();
       emp::vector<size_t> schedule = emp::GetPermutation(GetRandom(), occupied_cells.size());
-      for (size_t i = 0; i < kill_count; i++) {
+      for (size_t i = 0; i < dead_count; i++) {
         DoDeath(occupied_cells[schedule[i]]);
       }
     }

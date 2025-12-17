@@ -382,7 +382,6 @@ TEST_CASE("Death proportion file is used to run manual extinction experiment", "
   
   
   config.INTERACTION_MECHANISM(STRESS_MANUAL_KILL);
-  config.KILL_HOSTS_PER_EXTINCTION_FILE(1);
   config.SOURCE_EXTINCTION_PROPORTION_FILE_NAME(filename);
 
   // SOURCE_EXTINCTION_PROPORTION_FILE_NAME gets assigned to file pointer in SGPWorld constructor
