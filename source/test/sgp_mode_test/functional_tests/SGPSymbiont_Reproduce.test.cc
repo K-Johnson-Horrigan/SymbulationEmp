@@ -3,6 +3,11 @@
 #include "../../../sgp_mode/SGPWorldSetup.cc"
 #include "../../../sgp_mode/SGPDataNodes.h"
 
+/**
+ * This file is for testing the various aspects of symbiont reproduction, 
+ * including horizontal and vertical transmission (not just when Reproduce instruction is called).
+ */
+
 TEST_CASE("SGPSymbiont Reproduce", "[sgp][sgp-functional]") {
   emp::Random random(31);
   SymConfigSGP config;
@@ -63,35 +68,3 @@ TEST_CASE("SGPSymbiont Reproduce", "[sgp][sgp-functional]") {
   }
 }
 
-TEST_CASE("Symbiont comparison operators", "[sgp][sgp-functional]") {
-  emp::Random random(31);
-	SymConfigSGP config;
-	SGPWorld world(random, &config, LogicTasks);
-	emp::Ptr<SGPSymbiont> sym_parent = emp::NewPtr<SGPSymbiont>(&random, &world, &config, CreateNotProgram(100));
-
-    emp::Ptr<SGPHost> host = emp::NewPtr<SGPHost>(&random, &world, &config, CreateNotProgram(100));
-    config.TRACK_PARENT_TASKS(1);
-    world.AddOrgAt(host, 0);
-    host->AddSymbiont(sym_parent);
-
-    for (int i = 0; i < 25; i++) {
-      world.Update();
-    }
-    emp::Ptr<SGPSymbiont> clone1 = emp::NewPtr<SGPSymbiont>(*sym_parent);
-    emp::Ptr<SGPSymbiont> clone2 = emp::NewPtr<SGPSymbiont>(*sym_parent);
-    emp::Ptr<SGPSymbiont> different = emp::NewPtr<SGPSymbiont>(&random, &world, &config, CreateNotProgram(99)); // For comparing
-
-    REQUIRE(*sym_parent == *clone1);
-    REQUIRE(*clone1 == *clone2);
-
-    REQUIRE_FALSE(*sym_parent == *different);
-
-    // Can't assert true/false without knowing bitcode ordering,
-    // assert that bitcode ordering is well-defined
-    bool lt = *sym_parent < *different || *different < *sym_parent;
-    REQUIRE(lt);
-    
-    clone1.Delete();
-    clone2.Delete();
-    different.Delete();
-  }

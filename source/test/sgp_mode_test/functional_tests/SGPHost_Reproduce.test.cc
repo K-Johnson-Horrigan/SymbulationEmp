@@ -4,6 +4,11 @@
 #include "../../../sgp_mode/SGPWorldSetup.cc"
 #include "../../../sgp_mode/SGPDataNodes.h"
 
+/**
+ * This file is dedicated to tests related to SGPHost reproduction, including checking that task tracking 
+ * is working correctly.
+ */
+
 TEST_CASE("SGPHost Reproduce parental task tracking", "[sgp][sgp-functional]") {
   emp::Random random(31);
   SymConfigSGP config;
