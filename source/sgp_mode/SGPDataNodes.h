@@ -29,9 +29,9 @@ void SGPWorld::CreateDataFiles() {
       .SetTimingRepeat(sgp_config->DATA_INT());
 
   if (sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION()) {
-    SetupDeathRateFile(sgp_config->FILE_PATH() + "StressDeathRate" +
+    SetupDeathProportionFile(sgp_config->FILE_PATH() + "StressDeathProportion" +
       sgp_config->FILE_NAME() + file_ending);
-    death_rate_data_file->SetTimingRepeat(sgp_config->EXTINCTION_FREQUENCY());
+    death_proportion_data_file->SetTimingRepeat(sgp_config->EXTINCTION_FREQUENCY());
   }
   
 }
@@ -257,15 +257,15 @@ void SGPWorld::WriteOrgReproHistFile(const std::string& filename) {
  * the number of hosts and symbionts directly before and after
  * each extinction event
  */
-void SGPWorld::SetupDeathRateFile(const std::string& filename) {
-  death_rate_data_file = emp::NewPtr<emp::DataFile>(filename);
+void SGPWorld::SetupDeathProportionFile(const std::string& filename) {
+  death_proportion_data_file = emp::NewPtr<emp::DataFile>(filename);
   
-  death_rate_data_file->AddVar(update, "update", "Update");
-  death_rate_data_file->AddVar(data_var_pre_extinction_host_count, "pre_ex_host_count", "Total number of hosts prior to the extinction event");
-  death_rate_data_file->AddVar(num_orgs, "post_ex_host_count", "Total number of hosts after the extinction event");
-  death_rate_data_file->AddVar(data_var_extinction_death_proportion, "death_proportion", "Proportion of hosts which died during the extinction event");
+  death_proportion_data_file->AddVar(update, "update", "Update");
+  death_proportion_data_file->AddVar(data_var_pre_extinction_host_count, "pre_ex_host_count", "Total number of hosts prior to the extinction event");
+  death_proportion_data_file->AddVar(num_orgs, "post_ex_host_count", "Total number of hosts after the extinction event");
+  death_proportion_data_file->AddVar(data_var_extinction_death_proportion, "death_proportion", "Proportion of hosts which died during the extinction event");
 
-  death_rate_data_file->PrintHeaderKeys();
+  death_proportion_data_file->PrintHeaderKeys();
 } 
 
 /**

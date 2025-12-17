@@ -39,7 +39,7 @@ private:
   emp::vector<emp::DataMonitor<size_t>> data_node_host_tasks;
   emp::vector<emp::DataMonitor<size_t>> data_node_sym_tasks;
   
-  emp::Ptr<emp::DataFile> death_rate_data_file;
+  emp::Ptr<emp::DataFile> death_proportion_data_file;
 
   /**
   *
@@ -74,7 +74,7 @@ public:
     for (auto escapee_data : symbiont_stress_escapee_offspring) {
       escapee_data.escapee_offspring.Delete();
     }
-    if (death_rate_data_file) death_rate_data_file.Delete();
+    if (death_proportion_data_file) death_proportion_data_file.Delete();
   }
 
   /**
@@ -146,7 +146,7 @@ public:
     if (sgp_config->INTERACTION_MECHANISM() == STRESS && sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
       GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
       data_var_extinction_death_proportion = 1 - ((double)GetNumOrgs() / (double)data_var_pre_extinction_host_count);
-      death_rate_data_file->Update();
+      death_proportion_data_file->Update();
     }
   }
 
@@ -188,7 +188,7 @@ public:
   void SetupTransmissionFileColumns(emp::DataFile& file);
   void WriteTaskCombinationsFile(const std::string& filename);
   void WriteOrgReproHistFile(const std::string& filename);
-  void SetupDeathRateFile(const std::string& filename);
+  void SetupDeathProportionFile(const std::string& filename);
 
   void CreateDataFiles() override;
 };
