@@ -11,7 +11,7 @@ CFLAGS_all := -Wall -Wno-unused-function -std=c++20 -I$(EMP_DIR)/ -I$(SGP_DIR)/ 
 CXX_nat := g++
 CFLAGS_nat := -O3 -DNDEBUG -pthread $(CFLAGS_all)
 CFLAGS_nat_debug := -g -DEMP_TRACK_MEM -pthread $(CFLAGS_all)
-CFLAGS_nat_coverage := --coverage -pthread $(CFLAGS_all)
+CFLAGS_nat_coverage := --coverage -DEMP_TRACK_MEM -pthread $(CFLAGS_all)
 
 # Emscripten compiler information
 CXX_web := emcc
