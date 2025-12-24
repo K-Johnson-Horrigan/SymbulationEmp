@@ -10,11 +10,11 @@ TEST_CASE("Multi-infection results", "[integration]") {
   config.PGG(1);
   config.MUTATION_SIZE(0.05);
   config.UPDATES(2000);
-  world.Setup();
 
   config.GRID_X(5);
   config.GRID_Y(5);
-  
+  world.Setup();
+
   emp::DataMonitor<double, emp::data::Histogram>& sym_val_node = world.GetHostedSymIntValDataNode();
   emp::DataMonitor<double, emp::data::Histogram>& host_val_node = world.GetHostIntValDataNode();
 
