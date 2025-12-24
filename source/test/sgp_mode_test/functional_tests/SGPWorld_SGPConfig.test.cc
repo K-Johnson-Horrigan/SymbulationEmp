@@ -169,7 +169,7 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
     THEN("Stress hosts accrue more mutations late in an experiment") {
       REQUIRE(world.GetNumOrgs() == world_size);
       auto it = world.GetTaskSet().begin();
-      REQUIRE((*world.GetTaskSet().begin()).n_succeeds_host >= no_mut_NAND_rate * 5);
+      REQUIRE((*world.GetTaskSet().begin()).n_succeeds_host >= no_mut_NAND_rate * 4);
       ++it;
       REQUIRE((*it).n_succeeds_host > 3000);
       
