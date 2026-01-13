@@ -163,7 +163,7 @@ public:
       data_var_pre_extinction_host_count = GetNumOrgs(); // assumes no free living syms
     }
 
-    if (sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL && GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
+    if (sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL && (GetUpdate()+1) % sgp_config->EXTINCTION_FREQUENCY() == 0) {
       DoManualExtinctionEvent();
     }
 
