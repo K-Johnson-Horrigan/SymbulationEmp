@@ -159,10 +159,10 @@ public:
   void Update() override {
     if ((sgp_config->INTERACTION_MECHANISM() == STRESS || sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL) && 
       sgp_config->TRACK_EXTINCTION_DEATH_PROPORTION() &&
-      GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
+      (GetUpdate()+1) % sgp_config->EXTINCTION_FREQUENCY() == 0) { // have to do +1 because update is unincremented here (happens in empWorld update)
       data_var_pre_extinction_host_count = GetNumOrgs(); // assumes no free living syms
     }
-    
+
     if (sgp_config->INTERACTION_MECHANISM() == STRESS_MANUAL_KILL && GetUpdate() % sgp_config->EXTINCTION_FREQUENCY() == 0) {
       DoManualExtinctionEvent();
     }
