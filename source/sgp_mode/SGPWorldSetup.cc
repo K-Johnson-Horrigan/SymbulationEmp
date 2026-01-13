@@ -66,7 +66,7 @@ void SGPWorld::SetupSymbionts(unsigned long *total_syms) {
   * Purpose: Setup the task profile retriever function.
   */
 void SGPWorld::SetupTaskProfileFun() {
-  if (sgp_config->TRACK_PARENT_TASKS() == 2) {
+  if (sgp_config->TRACK_PARENT_TASKS() == CURRENTORPARENT) {
     fun_get_task_profile = [](const emp::Ptr<Organism> org) ->  const emp::BitSet<CPU_BITSET_LENGTH>&{
       if (org->IsHost()) {
         return (*org.DynamicCast<SGPHost>()->GetCPU().state.parent_or_current_tasks_performed).OR_SELF(*org.DynamicCast<SGPHost>()->GetCPU().state.tasks_performed);
@@ -76,7 +76,7 @@ void SGPWorld::SetupTaskProfileFun() {
       }
     };
   }
-  else if (sgp_config->TRACK_PARENT_TASKS() == 1) {
+  else if (sgp_config->TRACK_PARENT_TASKS() == PARENTONLY) {
     fun_get_task_profile = [](const emp::Ptr<Organism> org) ->  const emp::BitSet<CPU_BITSET_LENGTH>&{
       if (org->IsHost()) {
         return *org.DynamicCast<SGPHost>()->GetCPU().state.parent_tasks_performed;
@@ -86,7 +86,7 @@ void SGPWorld::SetupTaskProfileFun() {
       }
       };
   }
-  else if (sgp_config->TRACK_PARENT_TASKS() == 0) {
+  else if (sgp_config->TRACK_PARENT_TASKS() == CURRENTONLY) {
     fun_get_task_profile = [](const emp::Ptr<Organism> org) ->  const emp::BitSet<CPU_BITSET_LENGTH>&{
       if (org->IsHost()) {
         return *org.DynamicCast<SGPHost>()->GetCPU().state.tasks_performed;
@@ -125,27 +125,26 @@ void SGPWorld::ProcessReproductionQueue() {
       continue;
     emp::Ptr<Organism> child = org->Reproduce();
     if (child->IsHost()) {
-      // Host::Reproduce() doesn't take care of vertical transmission, that
-      // happens here
+      // Host::Reproduce() doesn't take care of vertical transmission, that happens here 
       for (auto& sym : org->GetSymbionts()) {
-        // don't vertically transmit if they must task match but don't
-        if (sgp_config->VT_TASK_MATCH() && !TaskMatchCheck(fun_get_task_profile(sym), fun_get_task_profile(org))) continue;
         sym->VerticalTransmission(child);
       }
       DoBirth(child, org->GetLocation());
     }
     else {
-      emp::WorldPosition new_pos = SymDoBirth(child, org->GetLocation());
-      // Because we're not calling HorizontalTransmission, we need to adjust
-      // these data nodes here
-      emp::DataMonitor<int>& data_node_attempts_horiztrans =
-        GetHorizontalTransmissionAttemptCount();
-      data_node_attempts_horiztrans.AddDatum(1);
+      if(sgp_config->HORIZ_TRANS()){
+        emp::WorldPosition new_pos = SymDoBirth(child, org->GetLocation());
+        // Because we're not calling HorizontalTransmission, we need to adjust
+        // these data nodes here
+        emp::DataMonitor<int>& data_node_attempts_horiztrans =
+          GetHorizontalTransmissionAttemptCount();
+        data_node_attempts_horiztrans.AddDatum(1);
 
-      emp::DataMonitor<int>& data_node_successes_horiztrans =
-        GetHorizontalTransmissionSuccessCount();
-      if (new_pos.IsValid()) {
-        data_node_successes_horiztrans.AddDatum(1);
+        emp::DataMonitor<int>& data_node_successes_horiztrans =
+          GetHorizontalTransmissionSuccessCount();
+        if (new_pos.IsValid()) {
+          data_node_successes_horiztrans.AddDatum(1);
+        }
       }
     }
   }
@@ -264,13 +263,13 @@ emp::WorldPosition SGPWorld::SymDoBirth(emp::Ptr<Organism> sym_baby, emp::WorldP
     for(emp::Ptr<Organism> sym : host->GetSymbionts()){
       const emp::BitSet<CPU_BITSET_LENGTH>& target_sym_tasks = fun_get_task_profile(sym);
 
-      if(sgp_config->PREFERENTIAL_OUSTING() == 1){
+      if(sgp_config->PREFERENTIAL_OUSTING() == EQUALMATCH){
         // if has worse task match with any hosted sym, fail
         if(host_tasks.AND(incoming_sym_tasks).CountOnes() < host_tasks.AND(target_sym_tasks).CountOnes()){
           return false;
         }
       }
-      else if(sgp_config->PREFERENTIAL_OUSTING() == 2){
+      else if(sgp_config->PREFERENTIAL_OUSTING() == BETTERMATCH){
         // if has equal or worse task match with any hosted sym, fail
         if(host_tasks.AND(incoming_sym_tasks).CountOnes() <= host_tasks.AND(target_sym_tasks).CountOnes()){
           return false;

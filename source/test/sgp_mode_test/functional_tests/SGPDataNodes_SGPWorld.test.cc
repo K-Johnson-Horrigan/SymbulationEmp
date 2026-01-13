@@ -2,9 +2,12 @@
 #include <fstream>
 #include <string>
 
-TEST_CASE("Correct data files are created", "[sgp]") {
-  
-  GIVEN("A World with no mutation"){
+/**
+ * This file is dedicated to ensuring that SGPDataNodes create the correct files and track data correctly 
+ */
+
+TEST_CASE("Correct data files are created", "[sgp][sgp-functional]") {
+  GIVEN("An SGPWorld with no mutation that is configured to create data files"){
     emp::Random random(1);
     SymConfigSGP config;
     config.SEED(2);
@@ -15,8 +18,6 @@ TEST_CASE("Correct data files are created", "[sgp]") {
     config.FILE_NAME("DataTest");
     config.CPU_TRANSFER_CHANCE(0.8);
     config.SYM_HORIZ_TRANS_RES(0);
-
-
 
     WHEN("The World is ran for 200 Updates with 1 host"){
     SGPWorld world(random, &config, LogicTasks);
@@ -238,7 +239,7 @@ TEST_CASE("Correct data files are created", "[sgp]") {
   }
 }
 
-TEST_CASE("Death proportion file is created", "[sgp]") {
+TEST_CASE("Death proportion file is created", "[sgp][sgp-functional]") {
   emp::Random random(2);
   SymConfigSGP config;
   config.GRID_X(10);
@@ -329,7 +330,7 @@ TEST_CASE("Death proportion file is created", "[sgp]") {
   } 
 }
 
-TEST_CASE("Death proportion file is used to run manual extinction experiment", "[sgp]") {
+TEST_CASE("Death proportion file is used to run manual extinction experiment", "[sgp][sgp-functional]") {
   emp::Random random(2);
   SymConfigSGP config;
   config.GRID_X(10);
@@ -430,7 +431,7 @@ TEST_CASE("Death proportion file is used to run manual extinction experiment", "
   }
 }
 
-TEST_CASE("GetStressEscapeeOffspringAttemptCount", "[sgp]") {
+TEST_CASE("GetStressEscapeeOffspringAttemptCount", "[sgp][sgp-functional]") {
   GIVEN("Stress is on, parasites are present, and an extinction event occurs") {
     emp::Random random(32);
     SymConfigSGP config;
@@ -467,7 +468,7 @@ TEST_CASE("GetStressEscapeeOffspringAttemptCount", "[sgp]") {
   }
 }
 
-TEST_CASE("GetStressEscapeeOffspringSuccessCount", "[sgp]") {
+TEST_CASE("GetStressEscapeeOffspringSuccessCount", "[sgp][sgp-functional]") {
   GIVEN("Stress is on, parasites are present, and an extinction event occurs") {
     emp::Random random(32);
     SymConfigSGP config;

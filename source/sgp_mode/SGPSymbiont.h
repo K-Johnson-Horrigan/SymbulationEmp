@@ -179,6 +179,25 @@ public:
   }
 
   /**
+   * Input: None
+   *
+   * Output: Whether the symbiont is able to vertically transmit
+   *
+   * Purpose: To answer if this symbiont has enough points to vertically transmit
+   * and if required, matches tasks with the host
+   */
+  bool MeetsVTRequirements() override{
+    if(sgp_config->VT_TASK_MATCH()){
+      bool task_match_success = my_world->TaskMatchCheck(my_world->fun_get_task_profile(this), my_world->fun_get_task_profile(my_host));
+      if(!task_match_success){
+        return false;
+      }
+    }
+    
+    return Symbiont::MeetsVTRequirements();
+  }
+
+  /**
    * Input: The pointer to the organism that is the new host baby
    *
    * Output: None
@@ -209,7 +228,7 @@ public:
     // This organism is reproducing, so it must have gotten off the queue
     cpu.state.in_progress_repro = -1;
     sym_baby->GetCPU().state.parent_tasks_performed->Import(*GetCPU().state.tasks_performed);
-    if (sgp_config->TRACK_PARENT_TASKS() == 2) {
+    if (sgp_config->TRACK_PARENT_TASKS() == CURRENTORPARENT) {
       sym_baby->GetCPU().state.parent_or_current_tasks_performed->Import(*GetCPU().state.tasks_performed);
     }
     if (sgp_config->TRACK_PARENT_TASKS()) {
