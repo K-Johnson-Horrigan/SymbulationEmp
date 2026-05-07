@@ -364,12 +364,12 @@ public:
   /**
    * Input: None
    *
-   * Output: The standard function object that determines which bin hosts
-   * should belong to depending on their interaction value
+   * Output: The standard function object that determines which taxon hosts
+   * belong to.
    *
-   * Purpose: To classify hosts based on their interaction value.
+   * Purpose: To classify hosts into phylogenetic taxa.
    */
-  fun_calc_info_t GetCalcHostInfoFun() {
+  virtual fun_calc_info_t GetCalcHostInfoFun() {
     if (!calc_host_info_fun) {
       if (my_config->PHYLOGENY_TAXON_TYPE() == 0) { // binned genotype
         calc_host_info_fun = [&](Organism& org) {
@@ -407,12 +407,12 @@ public:
   /**
    * Input: None
    *
-   * Output: The standard function object that determines which bin symbionts
-   * should belong to depending on their interaction value
+   * Output: The standard function object that determines which taxon symbionts
+   * belong to.
    *
-   * Purpose: To classify symbionts based on their interaction value.
+   * Purpose: To classify symbionts into phylogenetic taxa.
    */
-  fun_calc_info_t GetCalcSymInfoFun() {
+  virtual fun_calc_info_t GetCalcSymInfoFun() {
     // By default the sym info function is the same as the host one,
     // but separating them allows us to change the sym info function
     // to something else if we need to.

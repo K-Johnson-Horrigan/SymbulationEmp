@@ -158,3 +158,11 @@ TEST_CASE("TaskMatchCheck", "[sgp]") {
     }
   }
 }
+
+TEST_CASE("Task based phylogenies", "[sgp]") {
+  REQUIRE(1 == 0);
+}
+
+TEST_CASE("Individual phylogenies when SGP mode is used", "[sgp]") {
+  REQUIRE(1 == 0);
+}

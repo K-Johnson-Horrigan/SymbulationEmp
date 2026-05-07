@@ -7,6 +7,25 @@
 #include "utils.h"
 
 namespace sgpmode {
+SGPWorld::fun_calc_info_t SGPWorld::GetCalcHostInfoFun() {
+  // Calculate host taxon. Overwrites base for cases when task completions are used. 
+  if (!calc_host_info_fun && my_config->PHYLOGENY_TAXON_TYPE() == 4) {
+    calc_host_info_fun = [&](Organism& org) {
+      return fun_get_host_task_profile(static_cast<sgp_host_t&>(org)).GetValue();
+      };
+  }
+  return SymWorld::GetCalcHostInfoFun();
+}
+
+SGPWorld::fun_calc_info_t SGPWorld::GetCalcSymInfoFun() {
+  // Calculate symbiont taxon. Overwrites base for cases when task completions are used. 
+  if (!calc_host_info_fun && my_config->PHYLOGENY_TAXON_TYPE() == 4) {
+    calc_host_info_fun = [&](Organism& org) {
+      return fun_get_sym_task_profile(static_cast<sgp_sym_t&>(org)).GetValue();
+      };
+  }
+  return SymWorld::GetCalcSymInfoFun();
+}
 
 // TODO - Make clear that this will process host and free-living symbiont
 //        ProcessOrgsAt?
@@ -22,7 +41,7 @@ void SGPWorld::ProcessOrgsAt(size_t pop_id) {
     );
   }
   // TODO - double check that my interpretation is correct here
-  // TODO - can we condiitonally tack this onto processing only
+  // TODO - can we conditionally tack this onto processing only
   //        when free-living syms are turned on
   // Process free-living symbiont at this location (if any)
   if (IsSymPopOccupied(pop_id)) {

@@ -683,6 +683,12 @@ public:
     }
   }
 
+  // Calculate host taxon. 
+  fun_calc_info_t GetCalcHostInfoFun() override;
+
+  // Calculate symbiont taxon. 
+  fun_calc_info_t GetCalcSymInfoFun() override;
+
   // Process hosts at given position in world pop vector and free-living symbionts in world syms vector.
   void ProcessOrgsAt(size_t pop_id);
 
