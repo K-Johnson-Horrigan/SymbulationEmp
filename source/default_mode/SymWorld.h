@@ -150,34 +150,6 @@ public:
     emp_assert(!(my_config->TAG_MATCHING() && my_config->FREE_LIVING_SYMS()));
 
     if (my_config->PHYLOGENY() == true) {
-      if (my_config->PHYLOGENY_TAXON_TYPE() == 1) {
-        calc_host_info_fun = [&](Organism& org) {
-          return org.GetIntVal();
-          };
-
-        calc_sym_info_fun = [&](Organism& org) {
-          return org.GetIntVal();
-          };
-      }
-      else if (my_config->PHYLOGENY_TAXON_TYPE() == 2) {
-        calc_host_info_fun = [&](Organism& org) {
-          return org.GetTag().GetValue();
-          };
-
-        calc_sym_info_fun = [&](Organism& org) {
-          return org.GetTag().GetValue();
- 	  };
-      }
-      else if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
-        calc_host_info_fun = [&](Organism& org) {
-          return (long unsigned) host_sys->GetNextID();
-          };
-
-        calc_sym_info_fun = [&](Organism& org) {
-          return (long unsigned) sym_sys->GetNextID();
-          };
-      }
-
       host_sys = emp::NewPtr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>>(GetCalcHostInfoFun());
       sym_sys = emp::NewPtr< emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>>(GetCalcSymInfoFun());
 
@@ -399,18 +371,35 @@ public:
    */
   fun_calc_info_t GetCalcHostInfoFun() {
     if (!calc_host_info_fun) {
-      calc_host_info_fun = [&](Organism & org){
-        size_t num_phylo_bins = my_config->NUM_PHYLO_BINS();
-        //classify orgs into bins base on interaction values,
-        //inclusive of lower bound, exclusive of upper
-        float size_of_bin = 2.0 / num_phylo_bins;
-        double int_val = org.GetIntVal();
-        float prog = (int_val + 1);
-        prog = (prog/size_of_bin) + (0.0000000000001);
-        size_t bin = (size_t) prog;
-        if (bin >= num_phylo_bins) bin = num_phylo_bins - 1;
-        return bin;
-      };
+      if (my_config->PHYLOGENY_TAXON_TYPE() == 0) { // binned genotype
+        calc_host_info_fun = [&](Organism& org) {
+          size_t num_phylo_bins = my_config->NUM_PHYLO_BINS();
+          //classify orgs into bins base on interaction values,
+          //inclusive of lower bound, exclusive of upper
+          float size_of_bin = 2.0 / num_phylo_bins;
+          double int_val = org.GetIntVal();
+          float prog = (int_val + 1);
+          prog = (prog / size_of_bin) + (0.0000000000001);
+          size_t bin = (size_t)prog;
+          if (bin >= num_phylo_bins) bin = num_phylo_bins - 1;
+          return bin;
+          };
+      }
+      else if (my_config->PHYLOGENY_TAXON_TYPE() == 1) { // phenotype
+        calc_host_info_fun = [&](Organism& org) {
+          return org.GetIntVal();
+          };
+      }
+      else if (my_config->PHYLOGENY_TAXON_TYPE() == 2) { // tag 
+        calc_host_info_fun = [&](Organism& org) {
+          return org.GetTag().GetValue();
+          };
+      }
+      else if (my_config->PHYLOGENY_TAXON_TYPE() == 3) { // individual
+        calc_host_info_fun = [&](Organism& org) {
+          return (long unsigned)host_sys->GetNextID();
+          };
+      }
     }
     return calc_host_info_fun;
   }
@@ -428,7 +417,14 @@ public:
     // but separating them allows us to change the sym info function
     // to something else if we need to.
     if (!calc_sym_info_fun) {
-      calc_sym_info_fun = GetCalcHostInfoFun();
+      if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
+        calc_sym_info_fun = [&](Organism& org) { // individual
+          return (long unsigned)sym_sys->GetNextID();
+          };
+      }
+      else {
+        calc_sym_info_fun = GetCalcHostInfoFun();
+      }
     }
     return calc_sym_info_fun;
   }
