@@ -60,11 +60,13 @@
 #include "../test/sgp_mode_test/unit_tests/Stacks.test.cc"
 #include "../test/sgp_mode_test/unit_tests/utils.test.cc"
 #include "../test/sgp_mode_test/unit_tests/SGPCureHosts.test.cc"
+#include "../test/sgp_mode_test/unit_tests/SGPPhylogenies.test.cc"
 #include "../test/sgp_mode_test/unit_tests/SGPWorldData.test.cc"
 
 #include "../test/sgp_mode_test/functional_tests/SenseTask_Tasks.test.cc"
 #include "../test/sgp_mode_test/functional_tests/NutrientMode.test.cc"
 #include "../test/sgp_mode_test/functional_tests/SGPHost_SGPSymbiont.test.cc"
+#include "../test/sgp_mode_test/functional_tests/SGPPhylogenies.test.cc"
 #include "../test/sgp_mode_test/functional_tests/SGPSymbiont_Reproduce.test.cc"
 #include "../test/sgp_mode_test/functional_tests/TempChangingEnvironments.test.cc"
 #include "../test/sgp_mode_test/functional_tests/SGPWorld.test.cc"

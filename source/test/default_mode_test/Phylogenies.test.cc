@@ -14,6 +14,7 @@ TEST_CASE( "Host Phylogeny", "[default]" ){
   SymWorld world(random, &config);
   int world_size = 4;
   world.Resize(world_size);
+  world.SetupSystematics();
 
   emp::Ptr<Organism> host = emp::NewPtr<Host>(&random, &world, &config, int_val);
   emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>> host_sys = world.GetHostSys();
@@ -146,6 +147,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ){
   SymWorld world(random, &config);
   int world_size = 20;
   world.Resize(world_size);
+  world.SetupSystematics();
 
   emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>> sym_sys = world.GetSymSys();
 
@@ -268,6 +270,7 @@ TEST_CASE("Interaction Tracking Phylogeny", "[default]") {
   size_t grid_side = 4;
   config.GRID_X(grid_side);
   config.GRID_Y(grid_side);
+  world.SetupSystematics();
 
   emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>> host_sys = world.GetHostSys();
   emp::Ptr<emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>> sym_sys = world.GetSymSys();
@@ -366,6 +369,7 @@ TEST_CASE("Tag-based Phylogeny", "[default]") {
   using h_taxon_t = emp::Taxon<taxon_info_t, datastruct::HostTaxonData>;
 
   SymWorld world(random, &config);
+  world.SetupSystematics();
 
   emp::HammingMetric<TAG_LENGTH> tag_metric = emp::HammingMetric<TAG_LENGTH>();
 
@@ -566,7 +570,8 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
   int int_val = 0;
   int world_size = 10;
   world.Resize(world_size);
-  
+  world.SetupSystematics();
+
   WHEN("Free living symbionts reproduce and die") {
     config.FREE_LIVING_SYMS(1);
 
@@ -843,6 +848,7 @@ TEST_CASE("Host switch counter", "[default]") {
   int int_val = 0;
   int world_size = 4;
   world.Resize(world_size);
+  world.SetupSystematics();
   
   WHEN("A symbiont vertically transmits") {
     config.VERTICAL_TRANSMISSION(1);
@@ -982,6 +988,7 @@ TEST_CASE("Unpruned phylogenies", "[default]") {
   int int_val = 0;
   int world_size = 5;
   world.Resize(world_size);
+  world.SetupSystematics();
 
   // set up the lineages
   emp::Ptr<Organism> host_grandparent = emp::NewPtr<Host>(&random, &world, &config, int_val);

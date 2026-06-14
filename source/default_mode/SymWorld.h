@@ -149,73 +149,6 @@ public:
 
     emp_assert(!(my_config->TAG_MATCHING() && my_config->FREE_LIVING_SYMS()));
 
-    if (my_config->PHYLOGENY() == true) {
-      if (my_config->PHYLOGENY_TAXON_TYPE() == 1) {
-        calc_host_info_fun = [&](Organism& org) {
-          return org.GetIntVal();
-          };
-
-        calc_sym_info_fun = [&](Organism& org) {
-          return org.GetIntVal();
-          };
-      }
-      else if (my_config->PHYLOGENY_TAXON_TYPE() == 2) {
-        calc_host_info_fun = [&](Organism& org) {
-          return org.GetTag().GetValue();
-          };
-
-        calc_sym_info_fun = [&](Organism& org) {
-          return org.GetTag().GetValue();
- 	  };
-      }
-      else if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
-        calc_host_info_fun = [&](Organism& org) {
-          return (long unsigned) host_sys->GetNextID();
-          };
-
-        calc_sym_info_fun = [&](Organism& org) {
-          return (long unsigned) sym_sys->GetNextID();
-          };
-      }
-
-      host_sys = emp::NewPtr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>>(GetCalcHostInfoFun());
-      sym_sys = emp::NewPtr< emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>>(GetCalcSymInfoFun());
-
-      AddSystematics(host_sys);
-      sym_sys->SetStorePosition(false);
-
-      sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string(t.GetInfo()); }, "info");
-      host_sys->AddSnapshotFun([](const taxon_t::host_taxon_t& t) {return std::to_string(t.GetInfo()); }, "info");
-
-      if (my_config->PHYLOGENY_TAXON_TYPE() == 2 || my_config->PHYLOGENY_TAXON_TYPE() == 3) {
-        sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string((t.GetData()).GetIntVal()); }, "mean_int_val");
-        host_sys->AddSnapshotFun([](const taxon_t::host_taxon_t& t) {return std::to_string(t.GetData().GetIntVal()); }, "mean_int_val");
-      }
-      if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
-        sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string(t.GetData().GetHostSwitch()); }, "lineage_host_switch_count");
-      }
-
-      on_placement_sig.AddAction([this](emp::WorldPosition pos) {
-	GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<taxon_t::base_taxon_t>());
-        if(my_config->PHYLOGENY_TAXON_TYPE()==3)GetOrgPtr(pos.GetIndex())->GetTaxon()->GetData().RecordIntVal(GetOrgPtr(pos.GetIndex())->GetIntVal());
-        });
-
-      if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
-        std::function<void(emp::Ptr<taxon_t::sym_taxon_t >, Organism&)> inherit_parental_data =
-          [&](emp::Ptr<taxon_t::sym_taxon_t > taxon, Organism& org) {
-          if (taxon->GetParent()) taxon->GetData().SetHostSwitch(taxon->GetParent()->GetData().GetHostSwitch());
-          else taxon->GetData().SetHostSwitch(0);
-          taxon->GetData().RecordIntVal(org.GetIntVal());
-          };
-        sym_sys->OnNew(inherit_parental_data);
-      }
-
-      if (my_config->STORE_EXTINCT()) {
-        sym_sys->SetStoreOutside(true);
-        host_sys->SetStoreOutside(true);
-      }
-    }
-
     if (my_config->TAG_MATCHING()) {
       if (my_config->NORMALIZE_TAG_DISTANCES()) {
         if (my_config->TAG_METRIC() == 0) tag_metric = emp::NewPtr<emp::UnifMod<emp::HammingMetric<TAG_LENGTH>>>();
@@ -393,42 +326,71 @@ public:
    * Input: None
    *
    * Output: The standard function object that determines which bin hosts
-   * should belong to depending on their interaction value
+   * should belong to.
    *
-   * Purpose: To classify hosts based on their interaction value.
+   * Purpose: To classify hosts.
    */
-  fun_calc_info_t GetCalcHostInfoFun() {
+  virtual fun_calc_info_t GetCalcHostInfoFun() {
     if (!calc_host_info_fun) {
-      calc_host_info_fun = [&](Organism & org){
-        size_t num_phylo_bins = my_config->NUM_PHYLO_BINS();
-        //classify orgs into bins base on interaction values,
-        //inclusive of lower bound, exclusive of upper
-        float size_of_bin = 2.0 / num_phylo_bins;
-        double int_val = org.GetIntVal();
-        float prog = (int_val + 1);
-        prog = (prog/size_of_bin) + (0.0000000000001);
-        size_t bin = (size_t) prog;
-        if (bin >= num_phylo_bins) bin = num_phylo_bins - 1;
-        return bin;
-      };
+      if (my_config->PHYLOGENY_TAXON_TYPE() == 0) {
+        calc_host_info_fun = [&](Organism & org){ // binned interaction value
+          size_t num_phylo_bins = my_config->NUM_PHYLO_BINS();
+          //classify orgs into bins base on interaction values,
+          //inclusive of lower bound, exclusive of upper
+          float size_of_bin = 2.0 / num_phylo_bins;
+          double int_val = org.GetIntVal();
+          float prog = (int_val + 1);
+          prog = (prog/size_of_bin) + (0.0000000000001);
+          size_t bin = (size_t) prog;
+          if (bin >= num_phylo_bins) bin = num_phylo_bins - 1;
+          return bin;
+        };
+      }
+      else if (my_config->PHYLOGENY_TAXON_TYPE() == 1) { // raw interaction value
+        calc_host_info_fun = [&](Organism& org) {
+          return org.GetIntVal();
+        };
+      }
+      else if (my_config->PHYLOGENY_TAXON_TYPE() == 2) { // tag
+        calc_host_info_fun = [&](Organism& org) {
+          return org.GetTag().GetValue();
+        };
+      }
+      else if (my_config->PHYLOGENY_TAXON_TYPE() == 3) { // individual
+        calc_host_info_fun = [&](Organism& org) {
+          return (long unsigned) host_sys->GetNextID();
+        };
+      }
+      else{
+        std::cout << "Unknown PHYLOGENY_TAXON_TYPE option: " << my_config->PHYLOGENY_TAXON_TYPE() << std::endl;
+         exit(-1);
+      }
     }
     return calc_host_info_fun;
   }
+
 
   /**
    * Input: None
    *
    * Output: The standard function object that determines which bin symbionts
-   * should belong to depending on their interaction value
+   * should belong to.
    *
-   * Purpose: To classify symbionts based on their interaction value.
+   * Purpose: To classify symbionts based.
    */
-  fun_calc_info_t GetCalcSymInfoFun() {
+  virtual fun_calc_info_t GetCalcSymInfoFun() {
     // By default the sym info function is the same as the host one,
     // but separating them allows us to change the sym info function
     // to something else if we need to.
     if (!calc_sym_info_fun) {
-      calc_sym_info_fun = GetCalcHostInfoFun();
+      if (my_config->PHYLOGENY_TAXON_TYPE() == 3) { // individual
+        calc_sym_info_fun = [&](Organism& org) {
+          return (long unsigned) sym_sys->GetNextID();
+        };
+      }
+      else{
+        calc_sym_info_fun = GetCalcHostInfoFun();
+      }
     }
     return calc_sym_info_fun;
   }
@@ -782,6 +744,7 @@ public:
   virtual void Setup();
   virtual void SetupHosts(long unsigned int* POP_SIZE);
   virtual void SetupSymbionts(long unsigned int* total_syms);
+  void SetupSystematics();
 
   /**
    * Input: The pointer to the symbiont that is moving, the WorldPosition of its

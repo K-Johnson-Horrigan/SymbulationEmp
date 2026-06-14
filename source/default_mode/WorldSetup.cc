@@ -5,6 +5,54 @@
 #include "Host.h"
 #include "Symbiont.h"
 
+
+/**
+ * Input: None.
+ *
+ * Output: None.
+ *
+ * Purpose: To set up systematics (phylogenies).
+ */
+void SymWorld::SetupSystematics(){ 
+  host_sys = emp::NewPtr<emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>>(GetCalcHostInfoFun());
+  sym_sys = emp::NewPtr< emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>>(GetCalcSymInfoFun());
+
+  AddSystematics(host_sys);
+  sym_sys->SetStorePosition(false);
+
+  sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string(t.GetInfo()); }, "info");
+  host_sys->AddSnapshotFun([](const taxon_t::host_taxon_t& t) {return std::to_string(t.GetInfo()); }, "info");
+
+  if (my_config->PHYLOGENY_TAXON_TYPE() == 2 || my_config->PHYLOGENY_TAXON_TYPE() == 3) {
+    sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string((t.GetData()).GetIntVal()); }, "mean_int_val");
+    host_sys->AddSnapshotFun([](const taxon_t::host_taxon_t& t) {return std::to_string(t.GetData().GetIntVal()); }, "mean_int_val");
+  }
+  if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
+    sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string(t.GetData().GetHostSwitch()); }, "lineage_host_switch_count");
+  }
+
+  on_placement_sig.AddAction([this](emp::WorldPosition pos) {
+    GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<taxon_t::base_taxon_t>());
+    if(my_config->PHYLOGENY_TAXON_TYPE()==3)GetOrgPtr(pos.GetIndex())->GetTaxon()->GetData().RecordIntVal(GetOrgPtr(pos.GetIndex())->GetIntVal());
+  });
+
+  if (my_config->PHYLOGENY_TAXON_TYPE() == 3) {
+    std::function<void(emp::Ptr<taxon_t::sym_taxon_t >, Organism&)> inherit_parental_data =
+      [&](emp::Ptr<taxon_t::sym_taxon_t > taxon, Organism& org) {
+      if (taxon->GetParent()) taxon->GetData().SetHostSwitch(taxon->GetParent()->GetData().GetHostSwitch());
+      else taxon->GetData().SetHostSwitch(0);
+      taxon->GetData().RecordIntVal(org.GetIntVal());
+      };
+    sym_sys->OnNew(inherit_parental_data);
+  }
+
+  if (my_config->STORE_EXTINCT()) {
+    sym_sys->SetStoreOutside(true);
+    host_sys->SetStoreOutside(true);
+  }
+}
+
+
 /**
  * Input: The number of hosts.
  *
@@ -53,6 +101,10 @@ void SymWorld::SetupSymbionts(long unsigned int *total_syms) {
  * and populating the world with hosts and symbionts.
  */
 void SymWorld::Setup() {
+  if(my_config->PHYLOGENY() == true){
+    SetupSystematics();
+  }
+
   double start_moi = my_config->START_MOI();
   long unsigned int POP_SIZE;
   if (my_config->POP_SIZE() == -1) {

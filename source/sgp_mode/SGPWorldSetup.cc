@@ -42,6 +42,11 @@ void SGPWorld::Setup() {
   // TODO - print out mapper after all deletes, hand-check
   // TODO - add tests for rectifier inst removals
 
+  // Create systematics
+  if(sgp_config.PHYLOGENY() == true){
+    SetupSystematics();
+  }
+
   // Configure SGP organism type
   SetupOrgMode();
 
@@ -1361,6 +1366,10 @@ void SGPWorld::SetupHosts(long unsigned int* POP_SIZE) {
       }
       // NOTE - Do we need to set location in cpu state here?
       new_host->AddSymbiont(new_sym);
+
+      // add symbiont to systematic, if necessary
+      // TODO now that organisms track location, update sym_sys to handle loc?
+      if (my_config->PHYLOGENY()) AddSymToSystematic(new_sym);
     }
     // TODO - Add SGPWorld function to wrap inject host function
     // AssignNewEnvIO(new_host->GetHardware().GetCPUState()); // This is in OnPlacement now, so should be fine

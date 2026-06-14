@@ -7,6 +7,43 @@
 #include "utils.h"
 
 namespace sgpmode {
+/**
+* Input: None
+*
+* Output: The standard function object that determines which bin hosts
+* should belong to (SGP overwrite to enable SGP phenotype/genotype bin).
+*
+* Purpose: To classify hosts.
+*/
+SGPWorld::fun_calc_info_t SGPWorld::GetCalcHostInfoFun() {
+  // Calculate host taxon. Overwrites base for cases when task completions are used. 
+  if (!calc_host_info_fun && my_config->PHYLOGENY_TAXON_TYPE() == 4) {
+    calc_host_info_fun = [&](Organism& org) {
+      return fun_get_host_task_profile(static_cast<sgp_host_t&>(org)).GetValue();
+    };
+  }
+  return SymWorld::GetCalcHostInfoFun();
+}
+
+
+/**
+* Input: None
+*
+* Output: The standard function object that determines which bin symbionts
+* should belong to (SGP overwrite to enable SGP phenotype/genotype bin).
+*
+* Purpose: To classify symbionts.
+*/
+SGPWorld::fun_calc_info_t SGPWorld::GetCalcSymInfoFun() {
+  // Calculate symbiont taxon. Overwrites base for cases when task completions are used. 
+  if (!calc_sym_info_fun && my_config->PHYLOGENY_TAXON_TYPE() == 4) {
+    calc_sym_info_fun = [&](Organism& org) {
+      return fun_get_sym_task_profile(static_cast<sgp_sym_t&>(org)).GetValue();
+    };
+  }
+  return SymWorld::GetCalcSymInfoFun();
+}
+
 
 // TODO - Make clear that this will process host and free-living symbiont
 //        ProcessOrgsAt?

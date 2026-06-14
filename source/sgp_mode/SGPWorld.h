@@ -677,18 +677,6 @@ public:
     fun_apply_host_points(host,task_value_before, task_id);
   }
 
-  const emp::BitVector& GetSymTaskProfile(
-    sgp_sym_t& sym
-  ){
-    return fun_get_sym_task_profile(sym);
-  }
-
-  const emp::BitVector& GetHostTaskProfile(
-    sgp_host_t& host
-  ){
-    return fun_get_host_task_profile(host);
-  }
-
   bool TaskProfileCompatibilityCheck(
     const emp::BitVector& host_task_profile,
     const emp::BitVector& sym_task_profile
@@ -814,8 +802,13 @@ public:
     // These must be done here because we don't call SymWorld::Update()
     // That may change in the future
     emp::World<Organism>::Update();
+
+    // TODO put phylo calls in method?
     if (sgp_config.PHYLOGENY()) {
       sym_sys->Update();
+      
+      host_sys->ClearRemoveAfterReproQueue();
+      sym_sys->ClearRemoveAfterReproQueue();
     }
   }
   
@@ -831,6 +824,12 @@ public:
       }
     }
   }
+
+  // Calculate host taxon. 
+  fun_calc_info_t GetCalcHostInfoFun() override;
+
+  // Calculate symbiont taxon. 
+  fun_calc_info_t GetCalcSymInfoFun() override;
 
   // Process hosts at given position in world pop vector and free-living symbionts in world syms vector.
   void ProcessOrgsAt(size_t pop_id);

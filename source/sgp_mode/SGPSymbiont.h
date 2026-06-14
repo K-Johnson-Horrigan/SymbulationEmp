@@ -337,6 +337,13 @@ public:
   emp::Ptr<Organism> Reproduce() {
     // NOTE - should be able to static cast here
     emp::Ptr<SGPSymbiont> sym_offspring = static_cast<SGPSymbiont*>(Symbiont::Reproduce().Raw());
+    if(my_config->PHYLOGENY()) {
+      emp::Ptr<taxon_t::base_taxon_t> off_taxon = sym_offspring->GetTaxon();
+      my_world->GetSymSys()->RemoveOrg(
+        off_taxon.Cast<taxon_t::sym_taxon_t>() 
+      ); // remove sym offspring from systematic
+    }
+
     sym_offspring->SetReproCount(reproductions + 1); // QUESTION - why does child have +1 repro count? (is repro count lineage length?)
     auto& offspring_hw = sym_offspring->GetHardware();
     auto& offspring_cpu_state = offspring_hw.GetCPUState();
@@ -348,6 +355,11 @@ public:
     offspring_cpu_state.SetParentFirstTaskPerformed(
       hardware.GetCPUState().GetFirstTaskPerformed()
     );
+    if(my_config->PHYLOGENY() == 1){
+      my_world->AddSymToSystematic(sym_offspring, my_taxon);
+      // add to systematic now that task profile is set
+    }
+
     // Update "lineage" information
     // NOTE - This functionality is shared across symbiont/hosts.
     //        Could move into its own struct that manages/centralizes this logic.
