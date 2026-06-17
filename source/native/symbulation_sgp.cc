@@ -40,7 +40,9 @@ int symbulation_main(int argc, char *argv[]) {
   world.Run(true);
 
   world.OutputDominantDataFile();
-
+  if(config.PHYLOGENY() == 1){
+    world.WritePhylogenyFile("Phylogeny_"+config.FILE_NAME()+".csv");
+  }
   return 0;
 }
 

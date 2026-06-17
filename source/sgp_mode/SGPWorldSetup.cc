@@ -1493,6 +1493,20 @@ void SGPWorld::SetupMutator() {
 
 void SGPWorld::SetupSystematics(){ 
   SymWorld::SetupSystematics();
+
+  // write the phylogeny files on a time
+  on_update_sig.AddAction([this](size_t update) {
+    if (update % my_config->PHYLOGENY_SNAPSHOT_INTERVAL() == 0) {
+        // MapPhylogenyInteractions();
+        std::string file_ending = "_UPDATE" + std::to_string(update) + ".csv";
+        WritePhylogenyFile("Phylogeny_"+my_config->FILE_NAME()+file_ending);
+        // TODO take a file prefix into WritePhylogenyFile so that we can put phylogeny files in directory
+      }
+    }
+  );
+
+
+  // additional tracking for individual-level task phylogenies
   if(sgp_config.PHYLOGENY_TAXON_TYPE() == 5){ // individual + track tasks 
 
     // snapshot data columns
