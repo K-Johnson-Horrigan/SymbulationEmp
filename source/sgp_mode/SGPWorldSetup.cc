@@ -1491,6 +1491,72 @@ void SGPWorld::SetupMutator() {
   //        same with endosymbionts / etc
 }
 
+void SGPWorld::SetupSystematics(){ 
+  SymWorld::SetupSystematics();
+  if(sgp_config.PHYLOGENY_TAXON_TYPE() == 5){ // individual + track tasks 
+
+    // snapshot data columns
+    sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string((t.GetData()).GetIntVal()); }, "task_profile");
+    host_sys->AddSnapshotFun([](const taxon_t::host_taxon_t& t) {return std::to_string(t.GetData().GetIntVal()); }, "task_profile");
+    sym_sys->AddSnapshotFun([](const taxon_t::sym_taxon_t& t) {return std::to_string(t.GetData().GetHostSwitch()); }, "lineage_host_switch_count");
+
+
+    // host placement
+    on_placement_sig.AddAction([this](emp::WorldPosition pos) {
+      GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<taxon_t::base_taxon_t>());
+      if(my_config->PHYLOGENY_TAXON_TYPE() == 5) {
+        GetOrgPtr(pos.GetIndex())->GetTaxon()->GetData().SetIntVal( 
+          GetHostTaskProfile(
+            static_cast<sgp_host_t&>(GetOrg(pos.GetIndex()))
+          ).GetValue()
+        );
+      }
+    });
+
+    // new sym taxon 
+    std::function<void(emp::Ptr<taxon_t::sym_taxon_t >, Organism&)> inherit_parental_data =
+      [this](emp::Ptr<taxon_t::sym_taxon_t > taxon, Organism& org) {
+      if (taxon->GetParent()) taxon->GetData().SetHostSwitch(taxon->GetParent()->GetData().GetHostSwitch());
+      else taxon->GetData().SetHostSwitch(0);
+
+      taxon->GetData().SetIntVal(
+        GetSymbiontTaskProfile(static_cast<sgp_sym_t&>(org)).GetValue()
+      );
+    };
+    sym_sys->OnNew(inherit_parental_data);
+    
+
+    // each process, organisms update the task profile tracked by their phylogeny
+    after_host_process_sig.AddAction(
+      [this](sgp_host_t& host) {
+        host.GetTaxon()->GetData().SetIntVal(
+          GetHostTaskProfile(host).GetValue()
+        );
+      }
+    );
+
+    after_endosym_process_sig.AddAction(
+      [this](
+        const emp::WorldPosition& sym_pos,
+        sgp_sym_t& sym,
+        sgp_host_t& host
+      ) {
+        sym.GetTaxon()->GetData().SetIntVal(
+          GetSymbiontTaskProfile(sym).GetValue()
+        );
+      }
+    );
+
+    after_freeliving_sym_process_sig.AddAction(
+    [this](sgp_sym_t& sym) {
+      sym.GetTaxon()->GetData().SetIntVal(
+          GetSymbiontTaskProfile(sym).GetValue()
+        );
+      }
+    );
+  }
+}
+
 }
 
 #endif

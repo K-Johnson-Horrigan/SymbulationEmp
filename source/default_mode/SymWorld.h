@@ -356,7 +356,7 @@ public:
           return org.GetTag().GetValue();
         };
       }
-      else if (my_config->PHYLOGENY_TAXON_TYPE() == 3) { // individual
+      else if (my_config->PHYLOGENY_TAXON_TYPE() == 3 || my_config->PHYLOGENY_TAXON_TYPE() == 5) { // individual
         calc_host_info_fun = [&](Organism& org) {
           return (long unsigned) host_sys->GetNextID();
         };
@@ -383,7 +383,7 @@ public:
     // but separating them allows us to change the sym info function
     // to something else if we need to.
     if (!calc_sym_info_fun) {
-      if (my_config->PHYLOGENY_TAXON_TYPE() == 3) { // individual
+      if (my_config->PHYLOGENY_TAXON_TYPE() == 3 || my_config->PHYLOGENY_TAXON_TYPE() == 5) { // individual
         calc_sym_info_fun = [&](Organism& org) {
           return (long unsigned) sym_sys->GetNextID();
         };
@@ -744,7 +744,7 @@ public:
   virtual void Setup();
   virtual void SetupHosts(long unsigned int* POP_SIZE);
   virtual void SetupSymbionts(long unsigned int* total_syms);
-  void SetupSystematics();
+  virtual void SetupSystematics();
 
   /**
    * Input: The pointer to the symbiont that is moving, the WorldPosition of its

@@ -868,6 +868,7 @@ public:
   // NOTE - Can we get rid of passing these values in as pointers?
   void SetupHosts(long unsigned int* POP_SIZE) override;
   void SetupSymbionts(long unsigned int* total_syms) override;
+  void SetupSystematics() override;
 
   // Prototypes for reproduction handling methods
   // SymDoBirth is for horizontal transmission and birthing free-living symbionts.

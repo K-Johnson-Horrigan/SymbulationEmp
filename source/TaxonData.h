@@ -15,6 +15,11 @@ namespace datastruct {
         int_val.Add(_iv);
       }
 
+      void SetIntVal(double _iv) {
+        int_val.Reset();
+        int_val.Add(_iv);
+      }
+
       double GetIntVal() const {
         return int_val.GetMean();
       }
