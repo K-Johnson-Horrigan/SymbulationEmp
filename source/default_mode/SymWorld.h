@@ -1235,6 +1235,7 @@ public:
    * Purpose: Run the number of updates and non-mutation updates specified in the configuration settings.
    */
   void RunExperiment(bool verbose=true) {
+    emp_assert(setup_spatial_structure);
     //Loop through updates
     const int num_updates = my_config->UPDATES();
     for (int i = 0; i < num_updates; i++) {

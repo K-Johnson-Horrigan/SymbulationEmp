@@ -854,6 +854,7 @@ public:
   void Run(bool verbose = false) {
     emp_assert(setup);
     emp_assert(sgp_config.UPDATES() >= 0);
+    emp_assert(setup_spatial_structure);
     const size_t updates = sgp_config.UPDATES();
     for (size_t u = 0; u <= updates; ++u) {
       Update();
