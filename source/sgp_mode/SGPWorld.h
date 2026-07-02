@@ -537,7 +537,6 @@ protected:
   void SetupSymbionts(long unsigned int* total_syms) override;
   void SetupOrgTypeVariables();
   void DisableConfigurableInstructions();
-  void SetupPopStructure();
   void SetupScheduler();
   void SetupChangingEnvironment();
   void SetupReproduction();

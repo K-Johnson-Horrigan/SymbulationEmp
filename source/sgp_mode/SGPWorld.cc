@@ -212,7 +212,7 @@ emp::WorldPosition SGPWorld::SymAttemptHorizontalInfection(
   emp::Ptr<sgp_sym_t> sym_parent = static_cast<sgp_sym_t*>(parent.Raw());
   // hew_host_pos is an optional<emp::WorldPosition>
   const auto new_host_pos = FindHostForHorizontalTrans(parent_pop_idx, sym_parent);
-
+  // std::cout << "New position: {"<<new_host_pos.value().GetIndex()<<"," << new_host_pos.value().GetPopID() << "}" << std::endl;
   if (new_host_pos) {
     const size_t host_id = new_host_pos.value().GetIndex();
     int new_index = pop[host_id]->AddSymbiont(sym_baby_ptr);

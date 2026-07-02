@@ -25,6 +25,7 @@ public:
   using hw_t = SGPHardware<hw_spec_t>;
   using program_t = typename hw_t::program_t;
 
+  size_t matching_syms_to_interact_with = 0;
 protected:
   // CPU cpu;
   hw_t hardware;
@@ -172,9 +173,7 @@ public:
 
   void SetLocation(emp::WorldPosition pos) {
     hardware.GetCPUState().SetLocation(pos);
-  }
-  emp::WorldPosition GetLocation() const {
-    return hardware.GetCPUState().GetLocation();
+    Host::SetLocation(pos);
   }
 
   void DecPoints(double amt) {
@@ -183,8 +182,6 @@ public:
   void AddPoints(double amt) {
     points += amt;
   }
-
-  size_t matching_syms_to_interact_with = 0;
 
   size_t GetCountofMatchingSymsToInteractWith(){
     return matching_syms_to_interact_with;

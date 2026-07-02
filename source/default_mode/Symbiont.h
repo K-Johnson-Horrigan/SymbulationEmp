@@ -482,7 +482,7 @@ public:
    *
    * Purpose: To set a symbiont's host
    */
-  void SetHost(emp::Ptr<Organism> _in) {my_host = _in;}
+  void SetHost(emp::Ptr<Organism> _in) { my_host = _in; }
 
   /**
    * Input: The double that will be the symbiont's infection chance
@@ -850,7 +850,7 @@ public:
    * Purpose: To check and allow for independent reproduction to occur (eiter horizontal transmission or free-living reproduction)
    */
   void IndependentReproduction(emp::WorldPosition location) {
-    if(AttemptIndependentReproduction(location)) {
+    if (AttemptIndependentReproduction(location)) {
       emp::Ptr<Organism> sym_baby = Reproduce();
       if (my_config->TAG_MATCHING() || my_config->FREE_HT_FAILURE()) sym_baby->SetPoints(0);
       emp::WorldPosition new_pos = my_world->SymDoBirth(sym_baby, location);
