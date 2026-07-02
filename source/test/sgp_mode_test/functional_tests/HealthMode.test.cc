@@ -639,7 +639,6 @@ TEST_CASE("Matching mutualists do not donate cycles to health hosts when HEALTH_
 
 TEST_CASE("Health hosts evolve", "[sgp][sgp-functional][health-mode-evolution]") {
   using world_t = sgpmode::SGPWorld;
-  using cpu_state_t = sgpmode::CPUState<world_t>;
   sgpmode::SymConfigSGP config;
   config.SEED(32);
   config.START_MOI(0);

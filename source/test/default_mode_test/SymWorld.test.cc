@@ -1110,7 +1110,7 @@ TEST_CASE( "No mutation updates", "[default] ") {
     int world_size = 100;
     test_utils::SetWellMixed(config, world_size, 0);
     sym_world_t world(random, &config);
-    world.Setup();
+    world.SetupSpatialStructure();
     emp::Ptr<Organism> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
     emp::Ptr<Organism> host = emp::NewPtr<Host>(&random, &world, &config, int_val);
 

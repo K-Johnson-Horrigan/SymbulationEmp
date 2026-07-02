@@ -417,7 +417,7 @@ TEST_CASE("World uses custom spatial structure (sgp mode)", "[sgp][spatial-struc
       REQUIRE(world.GetCustomPopStructure().IsConnected(1, 0));
       REQUIRE(!world.GetCustomPopStructure().IsConnected(1, 3));
       // Parent sym should be set to: emp::WorldPosition(syms.size(), location.GetIndex())
-      const int sym_loc = host_parent->AddSymbiont(sym_parent);
+      host_parent->AddSymbiont(sym_parent);
       THEN("offspring only enter the neighboring host, never the distant host") {
         REQUIRE(neighboring_host->GetSymbionts().size() == 0);
         REQUIRE(distant_host->GetSymbionts().size() == 0);
