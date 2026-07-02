@@ -16,6 +16,7 @@
 #include "../test/default_mode_test/Phylogenies.test.cc"
 #include "../test/default_mode_test/TagMatching.test.cc"
 #include "../test/default_mode_test/SpatialStructure.test.cc"
+#include "../test/default_mode_test/PopulationStructure.test.cc"
 
 #include "../test/efficient_mode_test/EfficientSymbiont.test.cc"
 #include "../test/efficient_mode_test/EfficientHost.test.cc"
@@ -69,6 +70,7 @@
 #include "../test/sgp_mode_test/functional_tests/SGPSymbiont_Reproduce.test.cc"
 #include "../test/sgp_mode_test/functional_tests/TempChangingEnvironments.test.cc"
 #include "../test/sgp_mode_test/functional_tests/SGPWorld.test.cc"
+#include "../test/sgp_mode_test/functional_tests/PopulationStructure.test.cc"
 
 // Anya's tests
 #include "../test/sgp_mode_test/unit_tests/SGPWorld.test.cc"
