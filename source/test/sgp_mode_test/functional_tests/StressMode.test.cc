@@ -145,11 +145,11 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
     config.SGP_MUT_PER_BIT_RATE(0);
     config.FILE_PATH("SGPStressMode_hosts_evolve_mut0_test_output");
     world.Setup();
-    size_t not_task_id = world.GetTaskEnv().GetTaskSet().GetID("NOT");
-    size_t total_NOTs = 0;
-    for (size_t i = 0; i <= run_updates; i++) {
+    size_t nand_task_id = world.GetTaskEnv().GetTaskSet().GetID("NAND");
+    size_t total_NANDs = 0;
+    for (size_t i = 0; i < run_updates; i++) {
       world.Update();
-      total_NOTs += world.GetHostTaskSuccesses().at(not_task_id);
+      total_NANDs += world.GetHostTaskSuccesses().at(nand_task_id);
     }
     THEN("Stress hosts do not accrue mutations late in an experiment") {
       REQUIRE(world.GetNumOrgs() == world_size);
@@ -162,15 +162,15 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
     config.SGP_MUT_PER_BIT_RATE(0.01);
     config.FILE_PATH("SGPStressMode_hosts_evolve_mut01_test_output");
     world.Setup();
-    size_t not_task_id = world.GetTaskEnv().GetTaskSet().GetID("NOT");
-    size_t total_NOTs = 0;
-    for (size_t i = 0; i <= run_updates; i++) {
+    size_t nand_task_id = world.GetTaskEnv().GetTaskSet().GetID("NAND");
+    size_t total_NANDs = 0;
+    for (size_t i = 0; i < run_updates; i++) {
       world.Update();
-      total_NOTs += world.GetHostTaskSuccesses().at(not_task_id);
+      total_NANDs += world.GetHostTaskSuccesses().at(nand_task_id);
     }
     THEN("Stress hosts accrue more mutations late in an experiment") {
       REQUIRE(world.GetNumOrgs() == world_size);
-      REQUIRE(total_NOTs > no_mut_NOT_rate * 3);
+      REQUIRE(total_NANDs > no_mut_NAND_rate);
     }
   }
 }

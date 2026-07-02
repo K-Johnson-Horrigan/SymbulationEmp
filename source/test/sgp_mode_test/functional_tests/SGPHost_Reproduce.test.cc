@@ -141,10 +141,10 @@ TEST_CASE("SGPHost Reproduce function results in correct parental task tracking"
   // Assert that added host is what we expect
   REQUIRE(hw.GetCPUState().GetNumTasks() == 9);
 
-  REQUIRE(world.GetTaskEnv().GetTaskSet().HasTask("NOT"));
-  const size_t not_task_id = world.GetTaskEnv().GetTaskSet().GetID("NOT");
+  REQUIRE(world.GetTaskEnv().GetTaskSet().HasTask("NAND"));
+  const size_t start_task_id = world.GetTaskEnv().GetTaskSet().GetID("NAND");
 
-  WHEN("A host can only perform NOT") {
+  WHEN("A host can only perform NAND") {
     WHEN("It is one of the first generation (does not have parents)") {
 
       auto& host_parent_tasks = hw.GetCPUState().GetParentTasksPerformed();
@@ -155,7 +155,7 @@ TEST_CASE("SGPHost Reproduce function results in correct parental task tracking"
       }
 
       THEN("Its parent's tasks are marked with initial not task") {
-        REQUIRE(host_parent_tasks.Get(not_task_id));
+        REQUIRE(host_parent_tasks.Get(start_task_id));
       }
 
       // Run world for enough updates to evaluate full genome
@@ -163,10 +163,10 @@ TEST_CASE("SGPHost Reproduce function results in correct parental task tracking"
         world.Update();
       }
 
-      THEN("After running for 25 updates, host tasks should show NOT completed") {
-        REQUIRE(host_tasks.Get(not_task_id));
+      THEN("After running for 25 updates, host tasks should show NAND completed") {
+        REQUIRE(host_tasks.Get(start_task_id));
         REQUIRE(host_tasks.CountOnes() == 1);
-        // REQUIRE(hw.GetCPUState().GetTaskPerformanceCount(not_task_id) == 1);
+        // REQUIRE(hw.GetCPUState().GetTaskPerformanceCount(start_task_id) == 1);
       }
 
       THEN("Offspring should have correct parent tasks marked as completed") {
@@ -176,7 +176,7 @@ TEST_CASE("SGPHost Reproduce function results in correct parental task tracking"
         auto& offspring_tasks = offspring_hw.GetCPUState().GetTasksPerformed();
         REQUIRE(offspring_tasks.None());
         REQUIRE(offspring_parent_tasks.CountOnes() == 1);
-        REQUIRE(offspring_parent_tasks.Get(not_task_id));
+        REQUIRE(offspring_parent_tasks.Get(start_task_id));
         offspring.Delete();
       }
     }
