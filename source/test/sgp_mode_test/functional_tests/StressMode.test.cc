@@ -138,7 +138,7 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
   emp::Random random(config.SEED());
   world_t world(random, &config);
 
-  size_t no_mut_NOT_rate = 40000;
+  size_t no_mut_NAND_rate = 40000;
   size_t run_updates = 1500;
 
   WHEN("Mutation size is 0") {
@@ -153,8 +153,8 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
     }
     THEN("Stress hosts do not accrue mutations late in an experiment") {
       REQUIRE(world.GetNumOrgs() == world_size);
-      REQUIRE(total_NOTs > no_mut_NOT_rate - (no_mut_NOT_rate * 0.30));
-      REQUIRE(total_NOTs < no_mut_NOT_rate + (no_mut_NOT_rate * 0.30));
+      REQUIRE(total_NANDs > no_mut_NAND_rate - (no_mut_NAND_rate * 0.30));
+      REQUIRE(total_NANDs < no_mut_NAND_rate + (no_mut_NAND_rate * 0.30));
     }
   }
 
