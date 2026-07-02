@@ -497,11 +497,7 @@ TEST_CASE("CreateNandProgram()", "[sgp][sgp-unit]") {
         REQUIRE(program[0].op_code == sgpmode::Library::GetOpCode("Global Anchor"));
       }
 
-<<<<<<< HEAD
-      THEN("The program contains IO, IO, Nand") {
-=======
       THEN("The program contains IO, IO, IO, Nand"){
->>>>>>> main
         REQUIRE(program[1].op_code == sgpmode::Library::GetOpCode("IO"));
         REQUIRE(program[2].op_code == sgpmode::Library::GetOpCode("IO"));
         REQUIRE(program[3].op_code == sgpmode::Library::GetOpCode("IO"));
