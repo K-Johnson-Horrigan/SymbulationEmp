@@ -58,16 +58,16 @@ TEST_CASE("Ancestor hardware can attempt reproduction and do NOT", "[sgp]") {
 
     REQUIRE(sgp_host.GetPoints() == 0);
     sgp_host.ProcessOutputBuffer();
-    // Hardware should also have completed NOT task seven times, which is also checking that they 
+    // Hardware should also have completed NAND task seven times, which is also checking that they 
     // are able to fully cycle through all possible inputs (they don't do the last one because they need to go back to their first IO to get it)
-    const size_t not_task_id = world.GetTaskEnv().GetTaskSet().GetID("NOT");
-    REQUIRE(hw.GetCPUState().GetTaskPerformed(not_task_id));
+    const size_t start_task_id = world.GetTaskEnv().GetTaskSet().GetID("NAND");
+    REQUIRE(hw.GetCPUState().GetTaskPerformed(start_task_id));
     REQUIRE(output_buffer.size() == 0);
-    REQUIRE(sgp_host.GetPoints() == 5); // should have done NOT 1 time for 5 points
+    REQUIRE(sgp_host.GetPoints() == 5); // should have done NAND 1 time for 5 points
 
     // Reset should clear CPU state, etc
     hw.Reset();
-    REQUIRE(!hw.GetCPUState().GetTaskPerformed(not_task_id));
+    REQUIRE(!hw.GetCPUState().GetTaskPerformed(start_task_id));
   }
 
 
