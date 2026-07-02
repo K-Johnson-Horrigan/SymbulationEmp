@@ -82,4 +82,69 @@ public:
 
 };
 
+namespace spatial {
+
+emp::vector<emp::vector<size_t>> AdjListFromMatrix(
+  const emp::vector< emp::vector<bool> >& matrix
+) {
+  const size_t num_nodes = matrix.size();
+  emp::vector<emp::vector<size_t>> adj_list(num_nodes, {});
+  for (size_t from = 0; from < num_nodes; ++from) {
+    emp_assert(matrix[from].size() == num_nodes);
+    for (size_t to = 0; to < num_nodes; ++to) {
+      if (matrix[from][to]) {
+        adj_list[from].emplace_back(to);
+      }
+    }
+  }
+  return adj_list;
 }
+
+emp::vector<emp::vector<bool>> MatrixFromAdjList(
+  const emp::vector< emp::vector<size_t> >& adj_list
+) {
+  const size_t num_nodes = adj_list.size();
+  // Initialize matrix with no connections
+  emp::vector<emp::vector<bool>> matrix(
+    num_nodes,
+    emp::vector<bool>(num_nodes, false)
+  );
+  for (size_t from = 0; from < num_nodes; ++from) {
+    for (size_t to : adj_list[from]) {
+      emp_assert(to < num_nodes);
+      matrix[from][to] = true;
+    }
+  }
+  return matrix;
+}
+
+bool VerifyStructure(
+  const emp::vector< emp::vector<bool> >& matrix,
+  const SpatialStructure& structure
+) {
+  emp_assert(matrix.size() == structure.GetNumPositions());
+  // (1) Check that everything in the given matrix is connected
+  const size_t num_nodes = structure.GetNumPositions();
+  for (size_t from = 0; from < num_nodes; ++from) {
+    for (size_t to = 0; to < num_nodes; ++to) {
+      const bool conn_in_matrix = matrix[from][to];
+      const bool conn_in_structure = structure.IsConnected(from, to);
+      if (conn_in_matrix != conn_in_structure) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool VerifyStructure(
+  const emp::vector< emp::vector<size_t> >& adj_list,
+  const SpatialStructure& structure
+) {
+  emp_assert(adj_list.size() == structure.GetNumPositions());
+  return VerifyStructure(MatrixFromAdjList(adj_list), structure);
+}
+
+} // end spatial
+
+} // end test_utils

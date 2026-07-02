@@ -479,6 +479,10 @@ public:
   bool IsGridPopStruct() { return spatial_struct_mode == SPATIAL_STRUCT_MODE::GRID; }
   bool IsCustomPopStruct() { return spatial_struct_mode == SPATIAL_STRUCT_MODE::LOAD; }
 
+  const SpatialStructure& GetCustomPopStructure() const {
+    return spatial_structure;
+  }
+
   TAG_METRIC_TYPE GetTagMetricType() const { return tag_metric_type; }
   PHYLO_TAXON_TYPE GetPhylogenyTaxonType() const { return phylo_taxon_type; }
 
