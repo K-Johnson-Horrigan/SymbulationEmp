@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-TEST_CASE("Can define spatial structure from a connection mapping", "[spatial-structure]") {
+TEST_CASE("Can define spatial structure from a connection mapping", "[spatial-structure],[default]") {
   SpatialStructure ring_structure;
 
   emp::vector< emp::vector<size_t> > ring_map = {
@@ -34,7 +34,7 @@ TEST_CASE("Can define spatial structure from a connection mapping", "[spatial-st
 
 }
 
-TEST_CASE("Can define spatial structure from a connection matrix", "[spatial-structure]") {
+TEST_CASE("Can define spatial structure from a connection matrix", "[spatial-structure],[default]") {
   SpatialStructure ring_structure;
 
   emp::vector< emp::vector<bool> > ring_matrix = {
@@ -59,7 +59,7 @@ TEST_CASE("Can define spatial structure from a connection matrix", "[spatial-str
 }
 
 
-TEST_CASE("Can make new connections and remove existing connections", "[spatial-structure]") {
+TEST_CASE("Can make new connections and remove existing connections", "[spatial-structure],[default]") {
   SpatialStructure ring_structure;
   emp::vector< emp::vector<bool> > ring_matrix = {
     { 0, 1, 0 },
@@ -100,7 +100,7 @@ TEST_CASE("Can make new connections and remove existing connections", "[spatial-
   REQUIRE(!ring_structure.IsConnected(2, 2));
 }
 
-TEST_CASE("Can make new bi-directional connections and remove existing connections bi-directionally", "[spatial-structure]") {
+TEST_CASE("Can make new bi-directional connections and remove existing connections bi-directionally", "[spatial-structure],[default]") {
   SpatialStructure structure;
   emp::vector< emp::vector<bool> > matrix = {
     { 0, 0, 0 },
@@ -155,7 +155,7 @@ TEST_CASE("Can make new bi-directional connections and remove existing connectio
   REQUIRE(structure.IsConnected(1, 0));
 }
 
-TEST_CASE("Can get a random neighbor", "[spatial-structure]") {
+TEST_CASE("Can get a random neighbor", "[spatial-structure],[default]") {
   SpatialStructure structure;
   emp::Random rnd(5);
 
@@ -182,7 +182,7 @@ TEST_CASE("Can get a random neighbor", "[spatial-structure]") {
 
 }
 
-TEST_CASE("Can read structure from csv that lists edges", "[spatial-structure]") {
+TEST_CASE("Can read structure from csv that lists edges", "[spatial-structure],[default]") {
   const std::string csv_path = "source/test/data/spatial-structure-edges.csv";
 
   SpatialStructure structure;
@@ -198,7 +198,7 @@ TEST_CASE("Can read structure from csv that lists edges", "[spatial-structure]")
 
 }
 
-TEST_CASE("Can read structure from matrix file", "[spatial-structure]") {
+TEST_CASE("Can read structure from matrix file", "[spatial-structure],[default]") {
   const std::string mat_path = "source/test/data/spatial-structure-matrix.dat";
 
   SpatialStructure structure;
@@ -215,7 +215,7 @@ TEST_CASE("Can read structure from matrix file", "[spatial-structure]") {
 
 }
 
-TEST_CASE("Can configure toroidal grid structure", "[spatial-structure]") {
+TEST_CASE("Can configure toroidal grid structure", "[spatial-structure],[default]") {
   SpatialStructure structure;
   ConfigureToroidalGrid(structure, 2, 2);
   REQUIRE(structure.GetNeighbors(0) == emp::vector<size_t>{1, 2});
@@ -244,7 +244,7 @@ TEST_CASE("Can configure toroidal grid structure", "[spatial-structure]") {
   // structure.Print(std::cout);
 }
 
-TEST_CASE("Can configure fully connected structure", "[spatial-structure]") {
+TEST_CASE("Can configure fully connected structure", "[spatial-structure],[default]") {
   SpatialStructure structure;
 
   ConfigureFullyConnected(structure, 1);
