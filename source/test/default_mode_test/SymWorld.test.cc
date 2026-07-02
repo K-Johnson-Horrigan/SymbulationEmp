@@ -1106,10 +1106,11 @@ TEST_CASE( "No mutation updates", "[default] ") {
     config.MUTATION_RATE(1);
     config.UPDATES(1);
     config.NO_MUT_UPDATES(1);
-    sym_world_t world(random, &config);
     double int_val = 0.4;
     int world_size = 100;
-    world.Resize(world_size);
+    test_utils::SetWellMixed(config, world_size, 0);
+    sym_world_t world(random, &config);
+    world.Setup();
     emp::Ptr<Organism> symbiont = emp::NewPtr<Symbiont>(&random, &world, &config, int_val);
     emp::Ptr<Organism> host = emp::NewPtr<Host>(&random, &world, &config, int_val);
 

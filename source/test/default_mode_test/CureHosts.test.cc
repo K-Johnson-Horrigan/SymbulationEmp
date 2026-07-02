@@ -72,7 +72,7 @@ TEST_CASE("Cure Hosts tests", "[default]") {
         //can't check if syms are set to dead due to segmentation violation signal (syms are deleted nothing to point to)
       } // WHEN (run update)
       world.CleanupGraveyard();
-      } // WHEN(Hosts are cured)
+    } // WHEN(Hosts are cured)
 
     WHEN("Host are cured while experiment is running") {
       config.CURE(1);
