@@ -22,7 +22,7 @@
 #include "../../../catch/catch.hpp"
 
 
-TEST_CASE( "Spatial structure grid mode", "[sgp][spatial-structure]" ) {
+TEST_CASE( "Spatial structure grid mode (sgp mode)", "[sgp][spatial-structure]" ) {
   using world_t = sgpmode::SGPWorld;
   using cpu_state_t = sgpmode::CPUState<world_t>;
   using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
@@ -264,7 +264,7 @@ TEST_CASE( "Spatial structure grid mode", "[sgp][spatial-structure]" ) {
   }
 }
 
-TEST_CASE("Spatial structure loaded from files", "[default][spatial-structure]") {
+TEST_CASE("Spatial structure loaded from files (sgp mode)", "[sgp][spatial-structure]") {
   emp::Random random(17);
   sgpmode::SymConfigSGP config;
   // NOTE: width x height aren't used for spatial structure mode (will check this)
@@ -323,7 +323,7 @@ TEST_CASE("Spatial structure loaded from files", "[default][spatial-structure]")
   }
 }
 
-TEST_CASE("World uses custom spatial structure", "[default][spatial-structure]") {
+TEST_CASE("World uses custom spatial structure (sgp mode)", "[sgp][spatial-structure]") {
   using world_t = sgpmode::SGPWorld;
   using cpu_state_t = sgpmode::CPUState<world_t>;
   using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
@@ -456,7 +456,7 @@ TEST_CASE("World uses custom spatial structure", "[default][spatial-structure]")
   }
 }
 
-TEST_CASE("Organism in isolated position neither reproduces nor receives offspring", "[default][spatial-structure]") {
+TEST_CASE("Organism in isolated position neither reproduces nor receives offspring (sgp mode)", "[sgp][spatial-structure]") {
   using world_t = sgpmode::SGPWorld;
   using cpu_state_t = sgpmode::CPUState<world_t>;
   using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
