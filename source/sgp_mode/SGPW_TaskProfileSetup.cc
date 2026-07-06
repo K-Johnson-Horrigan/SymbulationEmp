@@ -119,9 +119,7 @@ void SGPWorld::SetupTaskProfileCompatibilityMode() {
       const emp::BitVector& a,
       const emp::BitVector& b
     ) -> bool {
-      std::cout << "ERROR: fun_task_profile_compatibility_check called when tags are used for interaction" << std::endl;
-      std::cout << "Exiting." << std::endl;
-      exit(-1);
+      return true;
     };
   } else {
     std::cout << "Unrecognized INTERACTION_PROFILE_COMPATIBILITY_MODE: " << sgp_config.INTERACTION_PROFILE_COMPATIBILITY_MODE() << std::endl;
