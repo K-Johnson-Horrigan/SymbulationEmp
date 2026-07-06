@@ -382,7 +382,8 @@ public:
    * Purpose: To get a symbiont's tag.
    */
    emp::BitSet<TAG_LENGTH> & GetTag() { return tag; }
-
+  const emp::BitSet<TAG_LENGTH> & GetTag() const { return tag; }
+  
   /**
    * Input: None
    *

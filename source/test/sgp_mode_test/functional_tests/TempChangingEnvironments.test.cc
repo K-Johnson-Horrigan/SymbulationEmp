@@ -21,7 +21,7 @@ using sgp_host_t = sgpmode::SGPHost<hw_spec_t>;
 using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
 using program_t = typename world_t::sgp_prog_t;
 
-TEST_CASE("Hosts start with a rewarded task in a temporally changing environment"){
+TEST_CASE("Hosts start with a rewarded task in a temporally changing environment","[sgp]"){
   // set up configs
   sgpmode::SymConfigSGP config;
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
@@ -76,7 +76,7 @@ TEST_CASE("Hosts start with a rewarded task in a temporally changing environment
   }
 }
 
-TEST_CASE("Symbionts start with a rewarded task in a temporally changing environment"){
+TEST_CASE("Symbionts start with a rewarded task in a temporally changing environment","[sgp]"){
   // set up configs
   sgpmode::SymConfigSGP config;
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");

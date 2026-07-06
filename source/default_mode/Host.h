@@ -483,6 +483,7 @@ public:
    * Purpose: To get a host's tag.
    */
   emp::BitSet<TAG_LENGTH> & GetTag() { return tag; }
+  const emp::BitSet<TAG_LENGTH> & GetTag() const { return tag; }
 
   /**
   * Input: The tag permissiveness value to set for this host
@@ -500,7 +501,7 @@ public:
   *
   * Purpose: To get the tag permissiveness value of this host
   */
-  double GetTagPermissiveness() { return tag_permissiveness; }
+  const double GetTagPermissiveness() const { return tag_permissiveness; }
 
   /**
    * Input: None

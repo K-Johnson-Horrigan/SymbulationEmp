@@ -11,6 +11,7 @@ void SGPWorld::SetupHostSymInteractions() {
   // These are defined in SGPW_TaskProfileSetup
   SetupTaskProfileMode();
   SetupTaskProfileCompatibilityMode();
+  SetupInteractionCompatibilityMode();
   SetupHorizontalTransmissionCompatibilityMode();
 
   SetupFindHostForHorizontalTransmission();
