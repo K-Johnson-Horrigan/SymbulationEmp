@@ -12,7 +12,7 @@
 #include <array>
 #include <string>
 
-TEST_CASE("Test Printing Simple Instructions", "[elias]"){
+TEST_CASE("Test Printing Simple Instructions", "[sgp]"){
     using world_t = sgpmode::SGPWorld;
   using cpu_state_t = sgpmode::CPUState<world_t>;
   using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
@@ -97,7 +97,7 @@ TEST_CASE("Test Printing Simple Instructions", "[elias]"){
   }
 }
 
-TEST_CASE("Test Printing Complex Instructions", "[elias]"){
+TEST_CASE("Test Printing Complex Instructions", "[sgp]"){
     using world_t = sgpmode::SGPWorld;
   using cpu_state_t = sgpmode::CPUState<world_t>;
   using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
