@@ -3,6 +3,7 @@
 #include "hardware/SGPHardwareSpec.h"
 #include "hardware/GenomeLibrary.h"
 
+#include "emp/base/assert_warning.hpp"
 #include "emp/base/vector.hpp"
 
 #include "sgpl/program/Instruction.hpp"
@@ -381,6 +382,18 @@ public:
     program.resize(length - 1);
     AddInst(program, repro_op);
     // Remove any deleted instructions
+    rectify_with_warning(program);
+    return program;
+  }
+
+  program_t ParseJsonString(const std::string& json_str) {
+    program_t program(json_str.c_str());
+    rectify_with_warning(program);
+    return program;
+  }
+
+  program_t LoadProgramFile(const std::filesystem::path& path) {
+    program_t program(path);
     rectify_with_warning(program);
     return program;
   }

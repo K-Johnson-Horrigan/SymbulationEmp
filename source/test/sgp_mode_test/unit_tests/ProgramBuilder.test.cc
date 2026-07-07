@@ -1,3 +1,7 @@
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+
 #include "../../../sgp_mode/SGPWorld.h"
 #include "../../../sgp_mode/SGPWorld.cc"
 #include "../../../sgp_mode/SGPWorldSetup.cc"
@@ -469,6 +473,60 @@ TEST_CASE("CreateNotNandProgram()", "[sgp][sgp-unit]"){
         REQUIRE(program[99].op_code == sgpmode::Library::GetOpCode("Reproduce"));
       }
     }
+  }
+}
+
+TEST_CASE("ParseJsonString()", "[sgp][sgp-unit]"){
+  GIVEN("A program builder and a program serialized to a JSON string"){
+    const size_t program_len = 100;
+    sgpl::OpCodeRectifier<sgpmode::Library> rectifier;
+    sgpmode::ProgramBuilder<hw_spec_t> builder(rectifier);
+
+    program_t original = builder.CreateNandProgram(program_len);
+    std::ostringstream oss;
+    {
+      cereal::JSONOutputArchive archive(oss);
+      archive(original);
+    }
+    const std::string json_str = oss.str();
+
+    WHEN("ParseJsonString is called on the serialized program"){
+      program_t program = builder.ParseJsonString(json_str);
+
+      THEN("The parsed program matches the original program"){
+        REQUIRE(program == original);
+      }
+
+    }
+  }
+}
+
+TEST_CASE("LoadProgramFile()", "[sgp][sgp-unit]"){
+  GIVEN("A program builder and a program written to a JSON file on disk"){
+    const size_t program_len = 100;
+    sgpl::OpCodeRectifier<sgpmode::Library> rectifier;
+    sgpmode::ProgramBuilder<hw_spec_t> builder(rectifier);
+
+    program_t original = builder.CreateNandProgram(program_len);
+
+    const std::filesystem::path path = std::filesystem::temp_directory_path()
+      / "ProgramBuilder_test_LoadProgramFile.json";
+    {
+      std::ofstream os(path);
+      cereal::JSONOutputArchive archive(os);
+      archive(original);
+    }
+
+    WHEN("LoadProgramFile is called on the file path"){
+      program_t program = builder.LoadProgramFile(path);
+
+      THEN("The loaded program matches the original program"){
+        REQUIRE(program == original);
+      }
+
+    }
+
+    std::filesystem::remove(path);
   }
 }
 
