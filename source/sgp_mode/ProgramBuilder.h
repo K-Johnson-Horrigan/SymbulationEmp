@@ -32,6 +32,15 @@ protected:
 
   rectifier_t& rectifier;
 
+  void rectify_with_warning(program_t& program) const {
+    const program_t before{program};
+    program.Rectify(rectifier);
+    emp_assert_warning(
+      before == program,
+      "ProgramBuilder program contained disabled instructions."
+    );
+  }
+
 public:
   ProgramBuilder(
     rectifier_t& opcode_rectifier
@@ -311,7 +320,7 @@ public:
     program.resize(length - 1);
     AddInst(program, repro_op);
     // Remove any deleted instructions
-    program.Rectify(rectifier);
+    rectify_with_warning(program);
     return program;
   }
 
@@ -350,7 +359,7 @@ public:
     program.resize(length - 1);
     AddInst(program, repro_op);
     // Remove any deleted instructions
-    program.Rectify(rectifier);
+    rectify_with_warning(program);
     return program;
   }
 
@@ -372,7 +381,7 @@ public:
     program.resize(length - 1);
     AddInst(program, repro_op);
     // Remove any deleted instructions
-    program.Rectify(rectifier);
+    rectify_with_warning(program);
     return program;
   }
 
