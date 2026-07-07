@@ -738,7 +738,7 @@ public:
   * Purpose: To test for compatibility between sym parent/offspring and host parent/offspring, such as tags
   * */
   virtual bool SuccessfulVT(emp::Ptr<Organism> host_baby, emp::Ptr<Organism> sym_baby) {
-    if (my_config->TAG_MATCHING()) {
+    if (my_config->TAG_MATCHING() && my_config->VT_TAG_MATCH()) {
       double tag_distance = (*my_world->GetTagMetric())(host_baby->GetTag(), sym_baby->GetTag())* TAG_LENGTH;
       double permissiveness_mean = (my_config->HOST_TAG_PERMISSIVENESS_EVOLVES()) ? host_baby->GetTagPermissiveness() : my_config->TAG_PERMISSIVENESS();
       double cutoff = random->GetPoisson(permissiveness_mean * TAG_LENGTH);
