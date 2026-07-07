@@ -1,9 +1,18 @@
 #pragma once
 
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <string>
+
 #include "hardware/SGPHardwareSpec.h"
 #include "hardware/GenomeLibrary.h"
 
+#include "cereal/archives/binary.hpp"
+#include "cereal/archives/json.hpp"
+
 #include "emp/base/assert_warning.hpp"
+#include "emp/base/error.hpp"
 #include "emp/base/vector.hpp"
 
 #include "sgpl/program/Instruction.hpp"
@@ -396,6 +405,31 @@ public:
     program_t program(path);
     rectify_with_warning(program);
     return program;
+  }
+
+  std::string MakeJsonString(const program_t& program) {
+    std::ostringstream oss;
+    {
+      cereal::JSONOutputArchive archive(oss);
+      archive(program);
+    }
+    return oss.str();
+  }
+
+  void SaveProgramFile(
+    const program_t& program, const std::filesystem::path& path
+  ) {
+    if ( path.extension() == ".json" ) {
+      std::ofstream os(path);
+      cereal::JSONOutputArchive archive(os);
+      archive( program );
+    } else if ( path.extension() == ".bin" ) {
+      std::ofstream os(path);
+      cereal::BinaryOutputArchive archive(os);
+      archive( program );
+    } else emp_error(
+      "unknown sgpl::Program file format ", path.extension(), " ", path
+    );
   }
 
 };
