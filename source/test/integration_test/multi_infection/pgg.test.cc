@@ -16,14 +16,6 @@ TEST_CASE("Multi-infection results", "[integration]") {
 	config.PGG(1);
 	config.MUTATION_SIZE(0.05);
 	config.UPDATES(2000);
-	// @AML: These world size parameters weren't taking effect in the original test
-	// (Setup would call SetupHosts / SetupSymbionts using default world size values)
-	// This is also why this integration test ran so slowly. We had a 10k host pop size
-	// with each host having up to 10 symbionts in the final run experiment call.
-	// Moving original width=5, height=5 up caused the test to fail (I think
-	// because the world was so small, the pop was subjected to lots of randomness).
-	// Made the world slightly bigger (but much smaller than default 100x100), and
-	// everything behaves as expected.
 	config.WORLD_WIDTH(10);
 	config.WORLD_HEIGHT(10);
 	world.Setup();
