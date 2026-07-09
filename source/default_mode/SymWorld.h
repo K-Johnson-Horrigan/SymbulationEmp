@@ -10,6 +10,7 @@
 #include "../../Empirical/include/emp/math/Random.hpp"
 #include "../../Empirical/include/emp/matching/MatchBin.hpp"
 
+#include "../spatial_utils.h"
 #include "../Organism.h"
 
 #include <cstdlib>
@@ -885,11 +886,11 @@ public:
       case SPATIAL_STRUCT_MODE::GRID: {
         const size_t grid_width = my_config->WORLD_WIDTH();
         const size_t grid_height = my_config->WORLD_HEIGHT();
-        using dir_t = grid2D_utils::GRID_DIR;
+        using dir_t = spatial_utils::GRID_DIR;
         emp_assert(GetSize() == grid_width * grid_height);
         // emp world uses a 8-neighborhood grid
-        for (dir_t dir : grid2D_utils::grid_directions) {
-          const size_t neighbor_id = grid2D_utils::GetGridNeighbor(
+        for (dir_t dir : spatial_utils::grid_directions) {
+          const size_t neighbor_id = spatial_utils::GetGridNeighbor(
             id,
             dir,
             grid_width,
