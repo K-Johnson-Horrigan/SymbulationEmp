@@ -1,10 +1,16 @@
 #pragma once
-// This file contains the SpatialStructure class that defines and manages
-// spatial structure for the AEcoWorld.
-//
-// The class is designed with the following trade-offs:
-// - Efficient random neighbor selection
-// - Efficient neighbor checking
+
+/*
+  This file contains the SpatialStructure class that defines and manages
+  spatial structure.
+
+  This class was adapted from the SpatialStructure class written for the Ecode
+  lab's chemical ecology model: https://github.com/emilydolson/chemical-ecology/blob/main/include/chemical-ecology/SpatialStructure.hpp
+
+  The class is designed with the following trade-offs:
+  - Efficient random neighbor selection
+  - Efficient neighbor checking
+*/
 
 #include "emp/base/vector.hpp"
 #include "emp/datastructs/vector_utils.hpp"
@@ -21,17 +27,28 @@
 #include <unordered_set>
 
 class SpatialStructure {
-
 protected:
-  // Mapping of source positions ==> destination positions.
-  // Destination IDs are kept in sorted order.
+
+  /**
+   * Purpose: Mapping of source positions ==> destination positions.
+   *          Destination IDs are kept in sorted order.
+   */
   emp::vector< emp::vector<size_t> > ordered_connections;
 
-  // Matrix specifying whether two positions are connected ([from][to]).
+  /**
+   * Purpose: Matrix specifying whether two positions are connected ([from][to]).
+   */
   emp::vector< emp::vector<bool> > connection_matrix;
 
-  // Internal verification that ordered_connections and connection_matrix are
-  // consistent. Used for internal asserts in debug mode.
+  /**
+   * Input: None
+   *
+   * Output: Boolean indicating whether ordered_connections and connection_matrix
+   *         are consistent with one another.
+   *
+   * Purpose: Internal verification that ordered_connections and connection_matrix are
+   *          consistent. Used for internal asserts in debug mode.
+   */
   bool VerifyConnectionConsistency() const {
     const size_t num_positions = connection_matrix.size();
     // Check that ordered_connections has same number of positions as matrix
@@ -60,7 +77,15 @@ protected:
 
 public:
 
-  // Configure spatial structure from mapping of "from" positions to "to" positions
+  /**
+   * Input: Adjacency list indicating connections between vertices in a graph.
+   *        Adjacency list should be given in a [from][to] format.
+   *
+   * Output: None
+   *
+   * Purpose: Configure spatial structure from mapping of "from" positions to
+   *          "to" positions
+   */
   void SetStructure(const emp::vector<emp::vector<size_t>>& in_struct) {
     // Configure ordered connections (copy over and sort connections)
     const size_t num_positions = in_struct.size();
@@ -86,7 +111,16 @@ public:
     emp_assert(VerifyConnectionConsistency());
   }
 
-  // Configure spatial structure from a connection matrix (maps [from][to])
+  //
+  /**
+   * Input: Adjacency matrix indicating connections between vertices in a graph.
+   *        Matrix should be given in a [from][to] format.
+   *
+   * Output: None
+   *
+   * Purpose: Configure spatial structure from a connection matrix
+   *          (maps [from][to])
+   */
   void SetStructure(const emp::vector<emp::vector<bool>>& in_struct) {
     // Configure connection matrix (copy from parameter)
     const size_t num_positions = in_struct.size();
@@ -109,8 +143,14 @@ public:
     emp_assert(VerifyConnectionConsistency());
   }
 
-  // Create a connection between positions, from ==> to
-  // NOTE: This forms a directed connection.
+  /**
+   * Input: Vertex ids to connect
+   *
+   * Output: None
+   *
+   * Purpose: Create a connection between positions, from ==> to. Note that this
+   *          forms a (one-way) directed connection.
+   */
   void Connect(size_t from, size_t to) {
     // Check position validity
     emp_assert(from < GetNumPositions());
@@ -129,7 +169,14 @@ public:
     emp_assert(VerifyConnectionConsistency());
   }
 
-  // Connect vertices a <==> b
+  /**
+   * Input: Vertex ids to connect bidirectionally
+   *
+   * Output: None
+   *
+   * Purpose: Create a connection between positions, a <==> b. Note that this
+   *          connects a --> b and b --> a
+   */
   void ConnectBidirectional(size_t a, size_t b) {
     // Check position validity
     emp_assert(a < GetNumPositions());
@@ -138,7 +185,14 @@ public:
     Connect(b, a);
   }
 
-  // Remove connection between positions, from ==> to
+  /**
+   * Input: Vertex ids to disconnect
+   *
+   * Output: None
+   *
+   * Purpose: Remove connection between positions, from ==> to. Note that this
+   *          is directional. I.e., does not remove any to ==> from connection.
+   */
   void Disconnect(size_t from, size_t to) {
     // Check position validity
     emp_assert(from < GetNumPositions());
@@ -159,6 +213,13 @@ public:
     emp_assert(VerifyConnectionConsistency());
   }
 
+  /**
+   * Input: Vertex ids to disconnect bidirectionally
+   *
+   * Output: None
+   *
+   * Purpose: Remove any connections between positions a and b
+   */
   void DisconnectBidirectional(size_t a, size_t b) {
     // Check position validity
     emp_assert(a < GetNumPositions());
@@ -167,29 +228,59 @@ public:
     Disconnect(b, a);
   }
 
-  // Return whether or not there is a (directed) connection between "from" position
-  // and "to" position.
+  /**
+   * Input: Vertex ids to check if connected
+   *
+   * Output: Boolean indicating whether "from" is connected to "to".
+   *
+   * Purpose: Check whether "from" is connected to "to". Note that this is directional.
+   */
   bool IsConnected(size_t from, size_t to) const {
     return connection_matrix[from][to];
   }
 
-  // Get the total number of positions in the spatial structure
+  /**
+   * Input: None
+   *
+   * Output: Unsigned integer indicating the number of positions in the spatial structure.
+   *
+   * Purpose: Get the total number of positions in the spatial structure
+   */
   size_t GetNumPositions() const {
     return connection_matrix.size();
   }
 
+  /**
+   * Input: None
+   *
+   * Output: Connection matrix as a vector of vector of booleans.
+   *
+   * Purpose: Get the spatial structure in adjacency matrix form.
+   */
   const emp::vector<emp::vector<bool>>& GetConnectionMatrix() const {
     return connection_matrix;
   }
 
-  // Get an ordered list of neighbors for given position
+  /**
+   * Input: Position to get the neighbors for
+   *
+   * Output: const reference to list of neighbors of given position (pos)
+   *
+   * Purpose: Get an ordered list of neighbors for given position
+   */
   const emp::vector<size_t>& GetNeighbors(size_t pos) const {
     emp_assert(pos < ordered_connections.size());
     return ordered_connections[pos];
   }
 
-  // Returns a random neighbor of given position. If no valid neighbors, returns
-  // nullopt.
+  /**
+   * Input: Random number generator and position to get a random neighbor for.
+   *
+   * Output: Random neighbor of given position.
+   *
+   * Purpose: Returns a random neighbor of given position. If no valid neighbors,
+              returns nullopt.
+   */
   std::optional<size_t> GetRandomNeighbor(emp::Random& rnd, size_t pos) const {
     emp_assert(pos < GetNumPositions()) ;
     const auto& neighbors = ordered_connections[pos];
@@ -201,10 +292,17 @@ public:
     return { neighbor };
   }
 
-  // Loads spatial structure from csv file specified by filepath.
-  // File should have "from" and "to" columns (labeled in header).
-  // All other columns are ignored. See source/test/data/spatial-structure-edges.csv
-  // for an example of the expected format.
+  /**
+   * Input: Path to file containing spatial structure to load.
+   *
+   * Output: None
+   *
+   * Purpose: Loads spatial structure from csv file specified by filepath.
+              File should have "from" and "to" columns (labeled in header).
+              All other columns are ignored.
+              See source/test/data/spatial-structure-edges.csv for an example
+              of the expected format.
+   */
   void LoadStructureFromEdgeCSV(const std::string& filepath) {
     emp::File file(filepath);
     // Read header
@@ -263,8 +361,15 @@ public:
     SetStructure(connections);
   }
 
-  // Load spatial structure from matrix file format.
-  // See source/test/data/spatial-structure-matrix.dat for example expected format.
+  /**
+   * Input: Path to file containing spatial structure to load.
+   *
+   * Output: None
+   *
+   * Purpose: Load spatial structure from matrix file format.
+              See source/test/data/spatial-structure-matrix.dat for example
+              expected format.
+   */
   void LoadStructureFromMatrix(const std::string& filepath) {
     emp::File file(filepath);
     file.RemoveEmpty();
@@ -295,7 +400,14 @@ public:
     SetStructure(matrix);
   }
 
-  // Print spatial structure connectivity. Defaults to mapping format.
+  /**
+   * Input: Stream to put output in, boolean indicating whether to print as mapping
+   *        (from => to) or matrix format.
+   *
+   * Output: None
+   *
+   * Purpose: Print spatial structure connectivity. Defaults to mapping format.
+   */
   void Print(std::ostream& os = std::cout, bool as_mapping = true) const {
     if (as_mapping) {
       PrintConnectionMapping(os);
@@ -304,7 +416,13 @@ public:
     }
   }
 
-  // Print spatial structure connectivity as connection matrix.
+  /**
+   * Input: Output stream to print into.
+   *
+   * Output: None
+   *
+   * Purpose: Print spatial structure connectivity as connection matrix.
+   */
   void PrintConnectionMatrix(std::ostream& os = std::cout) const {
     emp_assert(VerifyConnectionConsistency());
     const size_t num_positions = GetNumPositions();
@@ -317,7 +435,13 @@ public:
     }
   }
 
-  // Print mapping of "from" positions to "to" positions
+  /**
+   * Input: Output stream to print into.
+   *
+   * Output: None.
+   *
+   * Purpose: Print mapping of "from" positions to "to" positions
+   */
   void PrintConnectionMapping(std::ostream& os = std::cout) const {
     emp_assert(VerifyConnectionConsistency());
     const size_t num_positions = GetNumPositions();
@@ -335,6 +459,15 @@ public:
 }; // End SpatialStructure class
 
 // -- Simple structure configurations --
+
+/**
+ * Input: Spatial structure object to configure, width and height of the grid to
+ *        create.
+ *
+ * Output: None.
+ *
+ * Purpose: Configure structure object into a width x height toroidal grid.
+ */
 void ConfigureToroidalGrid(SpatialStructure& structure, size_t width, size_t height) {
   emp_assert(width > 0, "Width must be greater than 0");
   emp_assert(height > 0, "Height must be greater than 0");
@@ -367,10 +500,17 @@ void ConfigureToroidalGrid(SpatialStructure& structure, size_t width, size_t hei
   structure.SetStructure(grid_connections);
 }
 
-// Build well-mixed structure of given size
-// NOTE: This it can be expensive to explicitly represent a fully connected
-//        graph. Generally much better to represent as a flat vector and implicitly
-//        assume all nodes are connected to one another.
+
+/**
+ * Input:
+ *
+ * Output:
+ *
+ * Purpose: Build well-mixed structure of given size. Note: It can be expensive
+ *          to explicitly represent a fully connected graph. Generally much better
+ *          to represent as a flat vector and implicitly assume all nodes are
+ *          connected to one another.
+ */
 void ConfigureFullyConnected(SpatialStructure& structure, size_t size) {
   emp_assert(size > 0, "Size must be greater than 0");
 
