@@ -11,7 +11,6 @@ namespace sgpmode {
 // TODO - Make clear that this will process host and free-living symbiont
 //        ProcessOrgsAt?
 void SGPWorld::ProcessOrgsAt(size_t pop_id) {
-  // std::cout << "ProcessOrgsAt " << pop_id << "; " << IsOccupied(pop_id) << std::endl;
   // Process host at this location (if any)
   if (IsOccupied(pop_id)) {
     auto& org = GetOrg(pop_id);;
