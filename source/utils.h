@@ -15,8 +15,14 @@
 
 namespace utils {
 
-// TODO - write test
-// Do any bits match between bits_a and bits_b?
+/**
+ * Input: Two bitsets
+ *
+ * Output: Boolean indicating if any positions in the two input bitsets have
+ *         matching ones
+ *
+ * Purpose: Check whether any positions in the two input bitsets have matching ones
+ */
 template<size_t NUM_BITS>
 bool AnyMatchingOnes(
   const emp::BitSet<NUM_BITS>& bits_a,
@@ -25,6 +31,15 @@ bool AnyMatchingOnes(
   return bits_a.HasOverlap(bits_b);
 }
 
+/**
+ * Input: Two bit vectors
+ *
+ * Output: Boolean indicating if any positions in the two input bit vectors have
+ *         matching ones
+ *
+ * Purpose: Check whether any positions in the two input bit vectors have matching
+ *          ones
+ */
 bool AnyMatchingOnes(
   const emp::BitVector& bits_a,
   const emp::BitVector& bits_b
@@ -32,7 +47,14 @@ bool AnyMatchingOnes(
   return bits_a.HasOverlap(bits_b);
 }
 
-// Return number of matching bits between two bit sets.
+/**
+ * Input: Two bit sets
+ *
+ * Output: Number of positions that have a 1 in that position across both input
+ *         bit sets.
+ *
+ * Purpose: Return number of matching ones between two bit sets.
+ */
 template<size_t NUM_BITS>
 size_t MatchingOnesCount(
   const emp::BitSet<NUM_BITS>& bits_a,
@@ -41,7 +63,14 @@ size_t MatchingOnesCount(
   return bits_a.AND(bits_b).CountOnes();
 }
 
-// Return number of matching bits between two bit sets.
+/**
+ * Input: Two bit vectors
+ *
+ * Output: Number of positions that have a 1 in that position across both input
+ *         bit vectors.
+ *
+ * Purpose: Return number of matching ones between two bit vectors.
+ */
 size_t MatchingOnesCount(
   const emp::BitVector& bits_a,
   const emp::BitVector& bits_b
@@ -50,11 +79,26 @@ size_t MatchingOnesCount(
   return bits_a.AND(bits_b).CountOnes();
 }
 
+/**
+ * Input: Bit vector and new size
+ *
+ * Output: None
+ *
+ * Purpose: Resize the bit vector to a specified size, and set all positions to 0
+ */
 void ResizeClear(emp::BitVector& in, size_t new_size) {
   in.Resize(new_size);
   in.Clear();
 }
 
+/**
+ * Input: Container and new size
+ *
+ * Output: None
+ *
+ * Purpose: Resize the container to a specified size, and set all positions to
+ *          a given fill value.
+ */
 template<typename CONTAINER_T, typename FILL_T>
 void ResizeFill(CONTAINER_T& container, size_t new_size, FILL_T fill_val) {
   container.resize(new_size);
@@ -62,6 +106,15 @@ void ResizeFill(CONTAINER_T& container, size_t new_size, FILL_T fill_val) {
 }
 
 
+/**
+ * Input: unordered map and an item
+ *
+ * Output: None
+ *
+ * Purpose: Helper function for counting occurrences. If item is already in
+ *          the counting map, increment the count. If not, add to map and set count
+ *          to 1.
+ */
 template<typename CONTAINER_T>
 void AddToCountingMap(
   std::unordered_map<CONTAINER_T, size_t>& counting_map,
@@ -79,7 +132,14 @@ namespace internal {
   auto value_selector = [](const auto& pair) { return pair.second; };
 }
 
-// Collect map values into values vector
+/**
+ * Input: unordered map to collect values from and a vector to fill with values
+ *
+ * Output: None
+ *
+ * Purpose: Collect map values into the given values vector. Will overwrite the
+ *          contents of values.
+ */
 template<typename KEY_T, typename VALUE_T>
 void CollectMapValues(
   const std::unordered_map<KEY_T, VALUE_T>& map,
@@ -94,6 +154,14 @@ void CollectMapValues(
     );
 }
 
+/**
+ * Input: Mapping of string to a config options enum, name of config, and config value.
+ *
+ * Output: None
+ *
+ * Purpose: Validate whether given cfg_input is specified in the cfg_mapping.
+ *          If not, print out a helpful message and then exit.
+ */
 template<typename ENUM_CFG_OPTIONS>
 void ValidateConfigMode(
   const std::unordered_map<std::string, ENUM_CFG_OPTIONS>& cfg_mapping,
@@ -111,6 +179,13 @@ void ValidateConfigMode(
   }
 }
 
+/**
+ * Input: Random number generator, start of ordering, end of ordering.
+ *
+ * Output: Vector with randomized ordering: [start:end) in shuffled order.
+ *
+ * Purpose: Generate a shuffled ordering [start:end)
+ */
 emp::vector<size_t> GenerateRandomOrdering(
   emp::Random& random,
   size_t first,
@@ -128,6 +203,13 @@ emp::vector<size_t> GenerateRandomOrdering(
   return positions;
 }
 
+/**
+ * Input: Random number generator, length of ordering.
+ *
+ * Output: Vector with randomized ordering: [0:end) in shuffled order.
+ *
+ * Purpose: Generate a shuffled ordering [0:end)
+ */
 emp::vector<size_t> GenerateRandomOrdering(
   emp::Random& random,
   size_t end
