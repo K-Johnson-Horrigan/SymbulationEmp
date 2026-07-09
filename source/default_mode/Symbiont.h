@@ -420,12 +420,8 @@ public:
    * Purpose: To set a symbiont's interaction value
    */
   void SetIntVal(double _in) {
-    if ( _in > 1 || _in < -1) {
-       throw "Invalid interaction value. Must be between -1 and 1";   // Exception for invalid interaction value
-     }
-     else {
-        interaction_val = _in;
-     }
+    emp_assert(_in > 1 || _in < -1, "Invalid interaction value. Must be between -1 and 1");
+    interaction_val = _in;
   }
 
 
