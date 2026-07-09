@@ -44,7 +44,7 @@ void SetNoMutation(SymConfigBase& cfg) {
   cfg.MUTATION_SIZE(0);
 }
 
-// Wrapper for Symbumlation world classes intended to expose protected
+// Wrapper for Symbulation world classes intended to expose protected
 // functions as public for testing.
 // WARNING: protected functions were likely protected for a reason! Use at your
 //          own risk. protected functions need testing, too ;)
