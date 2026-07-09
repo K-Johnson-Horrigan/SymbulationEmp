@@ -657,9 +657,6 @@ TEST_CASE("Evolvable tag permissiveness", "[default]") {
   }
 }
 
-// NOTE: This test is a little bit frustrating to maintain if we change calls to
-//        random number generator. Tweaking it to be more maintainable, but I think
-//        still test the intended code.
 TEST_CASE("SetupSymbionts with tag matching on", "[default]") {
   using sym_world_t = test_utils::TestingWorldWrapper<SymWorld>;
   GIVEN("a world") {
