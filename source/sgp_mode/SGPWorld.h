@@ -899,13 +899,7 @@ public:
    */
   void Setup() override;
 
-  void SetMutationZero() {
-    SymWorld::SetMutationZero();
-    // Update sgp mutation rate
-    sgp_config.SGP_MUT_PER_BIT_RATE(0.0);
-    // Propagate new mutation rate to mutator.
-    mutator.SetPerBitMutationRate(sgp_config.SGP_MUT_PER_BIT_RATE());
-  }
+  void SetMutationZero();
 
   // Prototypes for reproduction handling methods
   // SymDoBirth is for horizontal transmission and birthing free-living symbionts.
