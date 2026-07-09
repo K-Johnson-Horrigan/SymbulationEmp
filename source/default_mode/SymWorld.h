@@ -27,8 +27,8 @@ namespace taxon_t {
 
 class SymWorld : public emp::World<Organism> {
 public:
-  // takes an organism (to classify), and returns an int (the org's taxon)
   using base_world_t = emp::World<Organism>;
+  // takes an organism (to classify), and returns an int (the org's taxon)
   using fun_calc_info_t = std::function<taxon_t::info_t(Organism &)>;
   using tag_t = emp::BitSet<TAG_LENGTH>;
   using tag_metric_t = emp::BaseMetric<tag_t, tag_t>;
@@ -36,9 +36,6 @@ public:
   using host_systematics_t = emp::Systematics<Organism, taxon_t::info_t, datastruct::HostTaxonData>;
   using sym_systematics_t = emp::Systematics<Organism, taxon_t::info_t, datastruct::SymbiontTaxonData>;
 
-  // AML TODO: UPDATE pop mode tests
-  // AML TODO: +phylogeny mode tests
-  // AML TODO: +tag metric mode tests
   enum class SPATIAL_STRUCT_MODE { WELL_MIXED, GRID, LOAD };
   static const std::unordered_map<std::string, SPATIAL_STRUCT_MODE> spatial_struct_mode_cfg_mapping;
 
@@ -143,7 +140,7 @@ protected:
   bool setup_spatial_structure = false;
 
   /**
-   * Purspose: Stores which spatial structure mode the world is configured as.
+   * Purpose: Stores which spatial structure mode the world is configured as.
    */
   SPATIAL_STRUCT_MODE spatial_struct_mode;
 
@@ -186,7 +183,7 @@ protected:
 
   emp::Signal<void()> on_analyze_population_sig;
 
-  // SetupHosts and SetupSymbionts moved to protected because they assume that
+  // SetupHosts and SetupSymbionts are protected because they assume that
   // SetupSpatialStructure has been called prior to hosts/symbionts getting setup.
   virtual void SetupHosts(long unsigned int* POP_SIZE);
   virtual void SetupSymbionts(long unsigned int* total_syms);
@@ -333,12 +330,15 @@ public:
   }
 
   /**
-   * TODO: explain why overwritting empirical's mixed
+   * Input: Boolean indicating whether world uses synchronous generations or not.
+   *
+   * Output: None.
+   *
+   * Purpose: Overrides Empirical World's SetPopStruct_Mixed function in order to
+   *          prevent a location from being considered its own neighbor.
    */
   void SetPopStruct_Mixed(bool synchronous_gen=false) {
     emp::World<Organism>::SetPopStruct_Mixed(synchronous_gen);
-    // TODO: redefine inject to not grow pop
-
     // For well-mixed, we need to alter the Empirical World neighbor finding to not allow the current location to be returned.
     // H/t to Kai Johnson for suggestion to exclude upper cell and swap it in if needed
     // Neighbors are anywhere in the same population except the pos.
@@ -361,7 +361,14 @@ public:
   }
 
   /**
+   * Input: Boolean indicating whether world is using synchronous generations or not.
    *
+   * Output: None
+   *
+   * Purpose: Configures a custom population structure using the spatial_structure
+   *          object to define neighbors for each position. Note: this function
+   *          assumes that spatial_structure has already been configured. (which
+   *          is done in SetupSpatialStructure_Load())
    */
   void SetPopStruct_Custom(bool synchronous_gen = false) {
     const size_t max_world_size = spatial_structure.GetNumPositions();
@@ -407,7 +414,6 @@ public:
     // NOTE: This is what's happening in other structure modes (copied from World's set structure functions),
     //        but do we actually want to override to use graveyard?
     fun_kill_org = [this]() {
-      // const size_t kill_id = GetRandomCellID();
       const size_t kill_id = GetRandom().GetUInt(spatial_structure.GetNumPositions());
       emp_assert(kill_id < GetSize());
       RemoveOrgAt(kill_id);
@@ -448,9 +454,15 @@ public:
    *
    * Purpose: To get the world's population of organisms.
    */
-  // @AML NOTE: Should this return a copy of a vector or a reference?
   pop_t& GetPop() { return pop; }
 
+  /**
+   * Input: None
+   *
+   * Output: const pop_t reference to the world's population.
+   *
+   * Purpose: To get a const reference to the world's population of organisms.
+   */
   const pop_t& GetPop() const { return pop; }
 
 
@@ -462,14 +474,23 @@ public:
    *
    * Purpose: To get the world's symbiont population.
    */
-  // @AML NOTE: Should this return a copy of a vector or a reference?
   pop_t& GetSymPop() { return sym_pop; }
 
+  /**
+   * Input: None
+   *
+   * Output: const reference to  pop_t that represents the world's symbiont
+   * population.
+   *
+   * Purpose: To get a const reference to the world's symbiont population.
+   */
   const pop_t& GetSymPop() const { return sym_pop; }
 
   /**
    * Input: None
+   *
    * Output: The world's spatial structure mode.
+   *
    * Purpose: Get the world's currently configured spatial structure mode.
    *          Spatial structure mode is configured on setup. It is intentionally
    *          not able to be modified by a setter function.
@@ -478,6 +499,7 @@ public:
 
   /**
    * Input: None
+   *
    * Output: Boolean indicating if the world is configured in well-mixed population
    *         structure mode.
    */
@@ -485,6 +507,7 @@ public:
 
   /**
    * Input: None
+   *
    * Output: Boolean indicating if the world is configured in grid population
    *         structure mode.
    */
@@ -492,6 +515,7 @@ public:
 
   /**
    * Input: None
+   *
    * Output: Boolean indicating if the world is configured in custom population
    *         structure mode.
    */
@@ -499,8 +523,10 @@ public:
 
   /**
    * Input: None
+   *
    * Output: Spatial structure object used to manage spatial connectivity in custom
    *         population structure mode.
+   *
    * Purpose: Get custom population structure. Only relevant when in custom
    *          population structure mode.
    */
@@ -510,12 +536,14 @@ public:
 
   /**
    * Input: None
+   *
    * Output: TAG_METRIC_TYPE indicating current tag metric being used.
    */
   TAG_METRIC_TYPE GetTagMetricType() const { return tag_metric_type; }
 
   /**
    * Input: None
+   *
    * Output: PHYLO_TAXON_TYPE indicating current phylogeny taxon type.
    */
   PHYLO_TAXON_TYPE GetPhylogenyTaxonType() const { return phylo_taxon_type; }
@@ -566,7 +594,6 @@ public:
 
   // AML: A little nicer to work with:
   // const SymConfigBase& GetConfig() const { return *my_config; }
-
 
   /**
    * Input: None
@@ -825,7 +852,6 @@ public:
    *
    * Purpose: To determine the location of a valid occupied neighboring position.
    */
-  // TODO: write updated test for different spatial structure modes
   int GetNeighborHost(size_t id) {
     // Attempt to use GetRandomNeighborPos first, since it's much faster
     for (size_t i = 0; i < 3; i++) {
@@ -895,7 +921,7 @@ public:
 
   /**
    * Input: The pointer to a host that will be added to the world.
-   *        This function assumes that the pop vector has been sized.
+   *        This function assumes that the pop vector has been resized.
    *
    * Output: None
    *
@@ -958,9 +984,9 @@ public:
   emp::Ptr<emp::Taxon<taxon_t::info_t>> GetDominantSymTaxon();
   emp::Ptr<emp::Taxon<taxon_t::info_t>> GetDominantHostTaxon();
   emp::vector<emp::Ptr<emp::Taxon<taxon_t::info_t>>> GetDominantFreeHostedSymTaxon();
-  emp::DataFile& SetupSymIntValFile(const std::string & filename);
-  emp::DataFile& SetupHostIntValFile(const std::string & filename);
-  emp::DataFile& SetupFreeLivingSymFile(const std::string & filename);
+  emp::DataFile& SetupSymIntValFile(const std::string& filename);
+  emp::DataFile& SetupHostIntValFile(const std::string& filename);
+  emp::DataFile& SetupFreeLivingSymFile(const std::string& filename);
   emp::DataFile& SetupReproHistFile(const std::string& filename);
   emp::DataFile& SetupTransmissionFile(const std::string& filename);
   emp::DataFile& SetupTagDistFile(const std::string& filename);
@@ -1001,7 +1027,7 @@ public:
   emp::DataMonitor<double, emp::data::Histogram>& GetWithinHostVarianceDataNode();
 
 
-  // Definitions of setup functions, expanded in WorldSetup.cc
+  // Definitions of setup function, expanded in WorldSetup.cc
   virtual void Setup();
 
   /**
@@ -1157,7 +1183,7 @@ public:
       return sym_pop[location];
     } else {
       // NOTE: Do we want a throw here or emp_error?
-      throw "Attempted to get out of bounds sym.";
+      emp_error("Attempted to get out of bounds sym.");
     }
   }
 
@@ -1215,7 +1241,6 @@ public:
    *
    * Purpose: To set all settings in the MUTATION group to 0 for the no-mutation updates.
   */
-  // TODO: Add override to SGP_MODE!
   void SetMutationZero() {
     for (auto& group : my_config->GetGroupSet()) {
       if (group->GetName() == "MUTATION") {
