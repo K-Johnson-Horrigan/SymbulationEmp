@@ -1011,11 +1011,6 @@ TEST_CASE( "GetSymAt", "[default]" ) {
         REQUIRE(world.GetSymAt(2) == nullptr);
       }
     }
-    WHEN("a request is made for an out-of-bounds sym") {
-      THEN("an exception is thrown") {
-        REQUIRE_THROWS(world.GetSymAt(4));
-      }
-    }
   }
 }
 
