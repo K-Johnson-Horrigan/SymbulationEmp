@@ -475,15 +475,49 @@ public:
    *          not able to be modified by a setter function.
    */
   SPATIAL_STRUCT_MODE GetSpatialStructureMode() const { return spatial_struct_mode; }
+
+  /**
+   * Input: None
+   * Output: Boolean indicating if the world is configured in well-mixed population
+   *         structure mode.
+   */
   bool IsWellMixedPopStruct() { return spatial_struct_mode == SPATIAL_STRUCT_MODE::WELL_MIXED; }
+
+  /**
+   * Input: None
+   * Output: Boolean indicating if the world is configured in grid population
+   *         structure mode.
+   */
   bool IsGridPopStruct() { return spatial_struct_mode == SPATIAL_STRUCT_MODE::GRID; }
+
+  /**
+   * Input: None
+   * Output: Boolean indicating if the world is configured in custom population
+   *         structure mode.
+   */
   bool IsCustomPopStruct() { return spatial_struct_mode == SPATIAL_STRUCT_MODE::LOAD; }
 
+  /**
+   * Input: None
+   * Output: Spatial structure object used to manage spatial connectivity in custom
+   *         population structure mode.
+   * Purpose: Get custom population structure. Only relevant when in custom
+   *          population structure mode.
+   */
   const SpatialStructure& GetCustomPopStructure() const {
     return spatial_structure;
   }
 
+  /**
+   * Input: None
+   * Output: TAG_METRIC_TYPE indicating current tag metric being used.
+   */
   TAG_METRIC_TYPE GetTagMetricType() const { return tag_metric_type; }
+
+  /**
+   * Input: None
+   * Output: PHYLO_TAXON_TYPE indicating current phylogeny taxon type.
+   */
   PHYLO_TAXON_TYPE GetPhylogenyTaxonType() const { return phylo_taxon_type; }
 
   /**
