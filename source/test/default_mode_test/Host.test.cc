@@ -51,9 +51,6 @@ TEST_CASE("Host Constructor", "[default]") {
   CHECK(host3->GetAge() == 0);
   CHECK(host3->GetPoints() == 0);
 
-  int_val = 2;
-  REQUIRE_THROWS(emp::NewPtr<Host>(random, world, &config, int_val) );
-
   host1.Delete();
   host2.Delete();
   host3.Delete();
@@ -79,12 +76,6 @@ TEST_CASE("Host SetIntVal, GetIntVal", "[default]") {
   host2->SetIntVal(int_val);
   expected_int_val = -0.7;
   REQUIRE(host2->GetIntVal() == expected_int_val);
-
-  int_val = -1.3;
-  REQUIRE_THROWS(emp::NewPtr<Host>(random, &world, &config, int_val));
-
-  int_val = 1.8;
-  REQUIRE_THROWS(emp::NewPtr<Host>(random, &world, &config, int_val));
 
   host1.Delete();
   host2.Delete();

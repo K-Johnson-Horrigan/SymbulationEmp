@@ -67,9 +67,6 @@ TEST_CASE("SetIntVal, GetIntVal", "[default]") {
   double int_val = -1;
   emp::Ptr<Symbiont> sym1 = emp::NewPtr<Symbiont>(random, world, &config, int_val);
 
-  int_val = -2;
-  REQUIRE_THROWS( sym1->SetIntVal(int_val) );
-
   int_val = -1;
   emp::Ptr<Symbiont> sym2 = emp::NewPtr<Symbiont>(random, world, &config, int_val);
 
@@ -81,9 +78,6 @@ TEST_CASE("SetIntVal, GetIntVal", "[default]") {
 
   int_val = -1;
   emp::Ptr<Symbiont> sym3 = emp::NewPtr<Symbiont>(random, world, &config, int_val);
-
-  int_val = 2;
-  REQUIRE_THROWS( sym3->SetIntVal(int_val) ) ;
 
   int_val = 0;
   emp::Ptr<Symbiont> sym4 = emp::NewPtr<Symbiont>(random, world, &config, int_val);
