@@ -671,7 +671,6 @@ TEST_CASE("SetupSymbionts with tag matching on", "[default]") {
       config.TAG_PERMISSIVENESS(0.0);
       world.SetTagMetric(emp::NewPtr<emp::HammingMetric<TAG_LENGTH>>());
       world.SetupSpatialStructure();
-      // Setup hosts with one prob = 0
       config.HOST_STARTING_TAGS_ONE_PROB(0.5);
       world.SetupHosts(&world_size);
       world.SetupSymbionts(&world_size);
