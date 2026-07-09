@@ -384,9 +384,9 @@ public:
   /**
    * Input: None
    *
-   * Output: const reference to the host's tag.
+   * Output: const reference to the symbiont's tag.
    *
-   * Purpose: To get a host's tag.
+   * Purpose: To get a symbiont's tag.
    */
   const emp::BitSet<TAG_LENGTH>& GetTag() const { return tag; }
 
