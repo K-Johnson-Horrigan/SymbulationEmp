@@ -1182,8 +1182,8 @@ public:
     if (location >= 0 && location < sym_pop.size()) {
       return sym_pop[location];
     } else {
-      // NOTE: Do we want a throw here or emp_error?
       emp_error("Attempted to get out of bounds sym.");
+      return nullptr;
     }
   }
 
