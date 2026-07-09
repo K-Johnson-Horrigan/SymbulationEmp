@@ -439,7 +439,7 @@ public:
    * Purpose: To set a host's interaction value.
    */
   void SetIntVal(double _in) {
-    emp_assert(_in > 1 || _in < -1, "Invalid interaction value. Must be between -1 and 1");
+    emp_assert(_in <= 1 && _in >= -1, "Invalid interaction value. Must be between -1 and 1");
     interaction_val = _in;
   }
 
