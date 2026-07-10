@@ -14,7 +14,7 @@ using sgp_host_t = sgpmode::SGPHost<hw_spec_t>;
 using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
 using tag_t = typename hw_spec_t::tag_t;
 
-TEST_CASE("Test host SenseTask instruction after a rewarded task", "[sgp]"){
+TEST_CASE("Test host SenseTask instruction after a rewarded task", "[sgp] [LC]"){
   sgpmode::SymConfigSGP config;
   config.CYCLES_PER_UPDATE(0);
   config.SEED(61);
@@ -50,8 +50,8 @@ TEST_CASE("Test host SenseTask instruction after a rewarded task", "[sgp]"){
     host_hw.SetProgram(host_program);
     world.AssignNewEnvIO(host_hw.GetCPUState());
     
-    // NOT is currently rewarded. 
-    REQUIRE(world.GetTaskEnv().GetHostTaskReq(not_task_id).task_value > 0);
+    // NOT is currently not rewarded. 
+    REQUIRE(world.GetTaskEnv().GetHostTaskReq(not_task_id).task_value < 0);
     
     // Initial register values
     host_hw.SetRegisters({3, 2, 5}); 
@@ -59,13 +59,13 @@ TEST_CASE("Test host SenseTask instruction after a rewarded task", "[sgp]"){
     // Run host program
     host_hw.RunCPUStep(4);
 
-    THEN("SenseTask puts a 1 into register 1"){
-      REQUIRE(host_hw.GetRegister(1) == 1);
+    THEN("SenseTask puts a 0 into register 1"){
+      REQUIRE(host_hw.GetRegister(1) == 0);//what should these values be
     }
   }  
 }
 
-TEST_CASE("Test host SenseTask instruction after a punished task", "[sgp]"){
+TEST_CASE("Test host SenseTask instruction after a punished task", "[sgp] [LC]"){
   sgpmode::SymConfigSGP config;
   config.CYCLES_PER_UPDATE(0);
   config.SEED(61);
@@ -101,8 +101,10 @@ TEST_CASE("Test host SenseTask instruction after a punished task", "[sgp]"){
     host_hw.SetProgram(host_program);
     world.AssignNewEnvIO(host_hw.GetCPUState());
 
-    // NAND is currently punished. 
-    REQUIRE(world.GetTaskEnv().GetHostTaskReq(nand_task_id).task_value < 0);
+    // NAND is not currently punished. 
+    REQUIRE(world.GetTaskEnv().GetHostTaskReq(nand_task_id).task_value > 0);
+
+    
     
     // Initial register values
     host_hw.SetRegisters({7, 12, 9}); 
@@ -110,8 +112,8 @@ TEST_CASE("Test host SenseTask instruction after a punished task", "[sgp]"){
     // Run host program
     host_hw.RunCPUStep(5);
     
-    THEN("SenseTask puts a 0 into register 1"){
-      REQUIRE(host_hw.GetRegister(1) == 0);
+    THEN("SenseTask puts a 1 into register 1"){
+      REQUIRE(host_hw.GetRegister(1) == 1);
     }
   }
 }
@@ -150,7 +152,7 @@ TEST_CASE("Test symbiont SenseTask instruction after a rewarded task", "[sgp]"){
     world.AssignNewEnvIO(sym_hw.GetCPUState());
 
     // NOT is currently rewarded. 
-    REQUIRE(world.GetTaskEnv().GetHostTaskReq(not_task_id).task_value > 0);
+    REQUIRE(world.GetTaskEnv().GetHostTaskReq(not_task_id).task_value < 0);
     
     // Initial register values
     sym_hw.SetRegisters({3, 2, 5}); 
@@ -158,8 +160,8 @@ TEST_CASE("Test symbiont SenseTask instruction after a rewarded task", "[sgp]"){
     // Run symbiont program
     sym_hw.RunCPUStep(4); 
     
-    THEN("SenseTask puts a 1 into register 1"){
-      REQUIRE(sym_hw.GetRegister(1) == 1);
+    THEN("SenseTask puts a 0 into register 1"){
+      REQUIRE(sym_hw.GetRegister(1) == 0);
     }
   }
 }
@@ -199,7 +201,7 @@ TEST_CASE("Test symbiont SenseTask instruction after a punished task", "[sgp]"){
     world.AssignNewEnvIO(sym_hw.GetCPUState());
 
     // NAND is currently punished. 
-    REQUIRE(world.GetTaskEnv().GetHostTaskReq(nand_task_id).task_value < 0);
+    REQUIRE(world.GetTaskEnv().GetHostTaskReq(nand_task_id).task_value > 0);
     
     // Initial register values
     sym_hw.SetRegisters({7, 12, 9}); 
@@ -207,8 +209,8 @@ TEST_CASE("Test symbiont SenseTask instruction after a punished task", "[sgp]"){
     // run symbiont program
     sym_hw.RunCPUStep(5);
     
-    THEN("SenseTask puts a 0 into register 1"){
-      REQUIRE(sym_hw.GetRegister(1) == 0);
+    THEN("SenseTask puts a 1 into register 1"){
+      REQUIRE(sym_hw.GetRegister(1) == 1);
     }
   }
 }

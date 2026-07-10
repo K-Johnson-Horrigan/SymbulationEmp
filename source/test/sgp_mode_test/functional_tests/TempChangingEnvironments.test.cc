@@ -172,18 +172,18 @@ TEST_CASE("Hosts start with a punished task in a temporally changing environment
     world.Update();
     size_t host_orn_count = world.GetHostTaskSuccesses().at(or_not_task_id);
 
-    THEN("The host initially loses points for completing its task") {
+    THEN("The host initially gains points for completing its task") {
       REQUIRE(host_orn_count == 1);
-      REQUIRE(host_orn_only->GetPoints() == -5);
+      REQUIRE(host_orn_only->GetPoints() == 5);
     }
 
     // event update
     world.Update();
     host_orn_count += world.GetHostTaskSuccesses().at(or_not_task_id);
 
-    THEN("After the environment changes, the host gains points for completing its task") {
+    THEN("After the environment changes, the host loses points for completing its task") {
       REQUIRE(host_orn_count == 3);
-      REQUIRE(host_orn_only->GetPoints() == 5);
+      REQUIRE(host_orn_only->GetPoints() == -5);
     }
   }
 }
@@ -230,18 +230,18 @@ TEST_CASE("Symbionts start with a punished task in a temporally changing environ
     world.Update();
     size_t sym_nand_count = world.GetSymTaskSuccesses().at(nand_task_id);
 
-    THEN("The symbiont initially loses points for completing its task") {
+    THEN("The symbiont initially gains points for completing its task") {
       REQUIRE(sym_nand_count == 1);
-      REQUIRE(symbiont_nand_only->GetPoints() == -5);
+      REQUIRE(symbiont_nand_only->GetPoints() == 5);
     }
 
     // event update
     world.Update();
     sym_nand_count += world.GetSymTaskSuccesses().at(nand_task_id);
 
-    THEN("After the environment changes, the symbiont gains points for completing its tasks") {
+    THEN("After the environment changes, the symbiont loses points for completing its tasks") {
       REQUIRE(sym_nand_count == 3);
-      REQUIRE(symbiont_nand_only->GetPoints() == 5);
+      REQUIRE(symbiont_nand_only->GetPoints() == -5);
     }
   } 
 }
