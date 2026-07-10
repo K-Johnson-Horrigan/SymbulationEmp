@@ -14,7 +14,7 @@ using sgp_host_t = sgpmode::SGPHost<hw_spec_t>;
 using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
 using tag_t = typename hw_spec_t::tag_t;
 
-TEST_CASE("Test host SenseTask instruction after a rewarded task", "[sgp] [LC]"){
+TEST_CASE("Test host SenseTask instruction after a rewarded task", "[sgp]"){
   sgpmode::SymConfigSGP config;
   config.CYCLES_PER_UPDATE(0);
   config.SEED(61);
@@ -65,7 +65,7 @@ TEST_CASE("Test host SenseTask instruction after a rewarded task", "[sgp] [LC]")
   }  
 }
 
-TEST_CASE("Test host SenseTask instruction after a punished task", "[sgp] [LC]"){
+TEST_CASE("Test host SenseTask instruction after a punished task", "[sgp]"){
   sgpmode::SymConfigSGP config;
   config.CYCLES_PER_UPDATE(0);
   config.SEED(61);
