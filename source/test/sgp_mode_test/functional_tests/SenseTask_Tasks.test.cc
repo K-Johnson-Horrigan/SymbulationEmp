@@ -60,7 +60,7 @@ TEST_CASE("Test host SenseTask instruction after a rewarded task", "[sgp]"){
     host_hw.RunCPUStep(4);
 
     THEN("SenseTask puts a 0 into register 1"){
-      REQUIRE(host_hw.GetRegister(1) == 0);//what should these values be
+      REQUIRE(host_hw.GetRegister(1) == 0);
     }
   }  
 }
