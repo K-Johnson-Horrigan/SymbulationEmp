@@ -213,7 +213,7 @@ void SGPWorld::SetupFindHostForHorizontalTransmission() {
         );
         if (compatible) {
           return std::optional<emp::WorldPosition>{candidate_pos};
-        } 
+        }
       }
     }
     return std::nullopt;
