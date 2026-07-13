@@ -27,9 +27,9 @@ TEST_CASE("SGP Tag Matching for organism interaction compatibility", "[sgp]"){
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
   config.FILE_PATH("TempChangingEnv_test_output");
   config.SEED(89);
-  config.POP_SIZE(0);
-  config.GRID_X(2);
-  config.GRID_Y(2);
+  config.INIT_POP_SIZE(0);
+  config.WORLD_WIDTH(2);
+  config.WORLD_HEIGHT(2);
   config.CYCLES_PER_UPDATE(4);
   config.TAG_MATCHING(1);
   config.INTERACTION_PROFILE_COMPATIBILITY_MODE("tag-probabilistic-match");
