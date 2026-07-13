@@ -42,6 +42,14 @@ protected:
 
   rectifier_t& rectifier;
 
+  /**
+   * Input: A program to rectify.
+   *
+   * Output: None
+   *
+   * Purpose: Removes disabled instructions from a program, warning if any
+   * were actually removed.
+   */
   void rectify_with_warning(program_t& program) const {
     const program_t before{program};
     program.Rectify(rectifier);
@@ -395,18 +403,44 @@ public:
     return program;
   }
 
+  /**
+   * Input: A JSON-serialized program string.
+   *
+   * Output: The deserialized program object.
+   *
+   * Purpose: Loads a human-readable program representation from a string.
+   *
+   * Note: Warns if the program contains disabled instructions.
+   */
   program_t ParseJsonString(const std::string& json_str) {
     program_t program(json_str.c_str());
     rectify_with_warning(program);
     return program;
   }
 
+  /**
+   * Input: Path to a program file with a ".json" or ".bin" extension.
+   *
+   * Output: The deserialized program object.
+   *
+   * Purpose: Loads a program from a JSON or binary file, depending on the
+   * path's file extension.
+   *
+   * Note: Warns if the program contains disabled instructions.
+   */
   program_t LoadProgramFile(const std::filesystem::path& path) {
     program_t program(path);
     rectify_with_warning(program);
     return program;
   }
 
+  /**
+   * Input: A program object to serialize.
+   *
+   * Output: A JSON string representing the program.
+   *
+   * Purpose: Converts a program object to human-readable format.
+   */
   std::string MakeJsonString(const program_t& program) {
     std::ostringstream oss;
     {
@@ -416,6 +450,15 @@ public:
     return oss.str();
   }
 
+  /**
+   * Input: A program to serialize, and a destination path with a ".json" or
+   * ".bin" extension.
+   *
+   * Output: None
+   *
+   * Purpose: Saves a program to a file, choosing JSON or binary serialization
+   * based on the file extension.
+   */
   void SaveProgramFile(
     const program_t& program, const std::filesystem::path& path
   ) {
