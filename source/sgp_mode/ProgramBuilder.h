@@ -50,7 +50,7 @@ protected:
    * Purpose: Removes disabled instructions from a program, warning if any
    * were actually removed.
    */
-  void rectify_with_warning(program_t& program) const {
+  void RectifyWithWarning(program_t& program) const {
     const program_t before{program};
     program.Rectify(rectifier);
     emp_assert_warning(
@@ -338,7 +338,7 @@ public:
     program.resize(length - 1);
     AddInst(program, repro_op);
     // Remove any deleted instructions
-    rectify_with_warning(program);
+    RectifyWithWarning(program);
     return program;
   }
 
@@ -377,7 +377,7 @@ public:
     program.resize(length - 1);
     AddInst(program, repro_op);
     // Remove any deleted instructions
-    rectify_with_warning(program);
+    RectifyWithWarning(program);
     return program;
   }
 
@@ -399,7 +399,7 @@ public:
     program.resize(length - 1);
     AddInst(program, repro_op);
     // Remove any deleted instructions
-    rectify_with_warning(program);
+    RectifyWithWarning(program);
     return program;
   }
 
@@ -414,7 +414,7 @@ public:
    */
   program_t ParseJsonString(const std::string& json_str) {
     program_t program(json_str.c_str());
-    rectify_with_warning(program);
+    RectifyWithWarning(program);
     return program;
   }
 
@@ -430,7 +430,7 @@ public:
    */
   program_t LoadProgramFile(const std::filesystem::path& path) {
     program_t program(path);
-    rectify_with_warning(program);
+    RectifyWithWarning(program);
     return program;
   }
 
