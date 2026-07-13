@@ -636,8 +636,7 @@ public:
    *
    * Output: The deserialized program object.
    *
-   * Purpose: Loads a program from a JSON or binary file, depending on the
-   * path's file extension.
+   * Purpose: Loads a program from a JSON or binary file, depending on the path's file extension.
    *
    * Note: Warns if the program contains disabled instructions.
    */
@@ -664,13 +663,12 @@ public:
   }
 
   /**
-   * Input: A program to serialize, and a destination path with a ".json" or
-   * ".bin" extension.
+   * Input: A program to serialize, and a destination path with a ".json" or ".bin" extension.
    *
    * Output: None
    *
-   * Purpose: Saves a program to a file, choosing JSON or binary serialization
-   * based on the file extension.
+   * Purpose: Saves a program to a file, choosing JSON or binary serialization based on the file
+   * extension.
    */
   void SaveProgramFile(
     const program_t& program, const std::filesystem::path& path
