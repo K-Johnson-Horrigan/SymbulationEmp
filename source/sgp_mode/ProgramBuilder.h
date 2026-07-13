@@ -43,7 +43,7 @@ protected:
   rectifier_t& rectifier;
 
   /**
-   * Input: A program to rectify.
+   * Input: A program object to be rectified inplace.
    *
    * Output: None
    *
@@ -60,6 +60,13 @@ protected:
   }
 
 public:
+  /**
+   * Input: A sgp opcode rectifier object, which must outlive this builder.
+   *
+   * Output: None
+   *
+   * Purpose: Constructs a ProgramBuilder, storing the rectifier by reference.
+   */
   ProgramBuilder(
     rectifier_t& opcode_rectifier
   ) : rectifier(opcode_rectifier)
@@ -68,10 +75,25 @@ public:
   // TODO - finish drafting
 
   // TODO - add functions for switching "instruction modes"
+  /**
+   * Input: A tag.
+   *
+   * Output: None
+   *
+   * Purpose: Configures the tag to be assigned to the global anchor that marks where execution
+   * begins.
+   */
   void SetStartTag(const tag_t& tag) {
     start_tag = tag;
   }
 
+  /**
+   * Input: None
+   *
+   * Output: The tag used for the global anchor.
+   *
+   * Purpose: Accessor function.
+   */
   const tag_t& GetStartTag() const {
     return start_tag;
   }
@@ -97,6 +119,14 @@ public:
     nand_op = opcode;
   }
 
+  /**
+   * Input: Program to extend, instruction name, up to three register arguments, and an optional
+   * tag.
+   *
+   * Output: None
+   *
+   * Purpose: Appends an instruction, looking its opcode up by name.
+   */
   void AddInst(
     program_t& program,
     const std::string& op_name,
@@ -115,6 +145,13 @@ public:
     );
   }
 
+  /**
+   * Input: Program to extend, opcode, up to three register arguments, and an optional tag.
+   *
+   * Output: None
+   *
+   * Purpose: Appends an instruction using directly-specified opcode.
+   */
   void AddInst(
     program_t& program,
     uint8_t opcode,
@@ -134,6 +171,13 @@ public:
     program.emplace_back(inst);
   }
 
+  /**
+   * Input: Program being built, instruction name, and a tag.
+   *
+   * Output: None
+   *
+   * Purpose: Appends a tagged instruction, looking its opcode up by name.
+   */
   void AddInst(
     program_t& program,
     const std::string& op_name,
@@ -142,6 +186,13 @@ public:
     AddInst(program, op_name, 0, 0, 0, tag);
   }
 
+  /**
+   * Input: Program being built, opcode, and a tag.
+   *
+   * Output: None
+   *
+   * Purpose: Appends a tagged instruction, using directly-specified opcode.
+   */
   void AddInst(
     program_t& program,
     uint8_t opcode,
@@ -150,6 +201,14 @@ public:
     AddInst(program, opcode, 0, 0, 0, tag);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Appends the global anchor instruction with start tag, that marks where execution
+   * begins.
+   */
   void AddStartAnchor(program_t& program) {
     AddInst(
       program,
@@ -158,22 +217,50 @@ public:
     );
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate NOT, without I/O.
+   */
   void AddTask_Not(program_t& program) {
     // nand r0, r0, r0
     AddInst(program, nand_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the NOT task, including I/O.
+   */
   void AddTask_NotIO(program_t& program) {
     AddInst(program, io_op);
     AddTask_Not(program);
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate NAND, without I/O.
+   */
   void AddTask_Nand(program_t& program) {
     // nand r0, r1, r0
     AddInst(program, nand_op, 0, 1, 0);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the NAND task, including I/O.
+   */
   void AddTask_NandIO(program_t& program) {
     AddInst(program, io_op);
     AddInst(program, io_op, 1);
@@ -181,6 +268,13 @@ public:
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate AND, without I/O.
+   */
   void AddTask_And(
     program_t& program
   ) {
@@ -191,6 +285,13 @@ public:
     AddInst(program, nand_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the AND task, including I/O.
+   */
   void AddTask_AndIO(
     program_t& program
   ) {
@@ -200,6 +301,13 @@ public:
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate OR-NOT, without I/O.
+   */
   void AddTask_OrNot(program_t& program) {
     // (~a) nand b
     // nand r0, r0, r0
@@ -210,6 +318,13 @@ public:
 
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the OR-NOT task, including I/O.
+   */
   void AddTask_OrNotIO(program_t& program) {
     AddInst(program, io_op);
     AddInst(program, io_op, 1);
@@ -217,6 +332,13 @@ public:
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate OR, without I/O.
+   */
   void AddTask_Or(program_t& program) {
     // (~a) nand (~b)
     // nand r0, r0, r0
@@ -227,6 +349,13 @@ public:
     AddInst(program, nand_op, 0, 1, 0);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the OR task, including I/O.
+   */
   void AddTask_OrIO(program_t& program) {
     AddInst(program, io_op);
     AddInst(program, io_op, 1);
@@ -234,6 +363,13 @@ public:
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate AND-NOT, without I/O.
+   */
   void AddTask_AndNot(program_t& program) {
     // ~(a nand (~b))
     // nand r1, r1, r1
@@ -244,6 +380,13 @@ public:
     AddInst(program, nand_op, 0, 0, 0);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the AND-NOT task, including I/O.
+   */
   void AddTask_AndNotIO(program_t& program) {
     AddInst(program, io_op);
     AddInst(program, io_op, 1);
@@ -251,6 +394,13 @@ public:
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate NOR, without I/O.
+   */
   void AddTask_Nor(program_t& program) {
     // ~((~a) nand (~b))
     // nand r0, r0, r0
@@ -263,6 +413,13 @@ public:
     AddInst(program, nand_op, 0, 0, 0);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the NOR task, including I/O.
+   */
   void AddTask_NorIO(program_t& program) {
     AddInst(program, io_op);
     AddInst(program, io_op, 1);
@@ -270,6 +427,13 @@ public:
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate XOR, without I/O.
+   */
   void AddTask_Xor(program_t& program) {
     // (a & ~b) | (~a & b) --> (a nand ~b) nand (~a nand b)
     // nand r3, r1, r1
@@ -288,6 +452,13 @@ public:
 
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the XOR task, including I/O.
+   */
   void AddTask_XorIO(program_t& program) {
     AddInst(program, io_op);
     AddInst(program, io_op, 1);
@@ -295,6 +466,13 @@ public:
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to calculate equals, without I/O.
+   */
   void AddTask_Equ(program_t& program) {
     // ~(a ^ b)
     //
@@ -316,6 +494,13 @@ public:
     AddInst(program, nand_op, 0, 0, 0);
   }
 
+  /**
+   * Input: Program being built.
+   *
+   * Output: None
+   *
+   * Purpose: Extends a program to complete the EQU task, including I/O.
+   */
   void AddTask_EquIO(program_t& program) {
     AddInst(program, io_op);
     AddInst(program, io_op, 1);
@@ -323,6 +508,13 @@ public:
     AddInst(program, io_op);
   }
 
+  /**
+   * Input: Desired program length.
+   *
+   * Output: The constructed program, padded to length with no-ops.
+   *
+   * Purpose: Builds a program that can reproduce and perform the NOT task.
+   */
   program_t CreateNotProgram(size_t length) {
     program_t program; // Create empty program
     // Add start anchor
@@ -342,6 +534,13 @@ public:
     return program;
   }
 
+  /**
+   * Input: Desired program length.
+   *
+   * Output: The constructed program, padded to length with no-ops.
+   *
+   * Purpose: Builds a program that can reproduce but performs no tasks.
+   */
   program_t CreateReproProgram(size_t length) {
     program_t program;
     // Add start anchor
@@ -358,6 +557,13 @@ public:
     return program;
   }
 
+  /**
+   * Input: Desired program length.
+   *
+   * Output: The constructed program, padded to length with no-ops.
+   *
+   * Purpose: Builds a program that can perform the NOT and NAND tasks and reproduce.
+   */
   program_t CreateNotNandProgram(size_t length) {
     program_t program; // Create empty program
     // Add start anchor
@@ -381,6 +587,13 @@ public:
     return program;
   }
 
+  /**
+   * Input: Desired program length.
+   *
+   * Output: The constructed program, padded to length with no-ops.
+   *
+   * Purpose: Builds a program that can performs the NAND task and reproduce.
+   */
   program_t CreateNandProgram(size_t length) {
     program_t program; // Create empty program
     // Add start anchor
