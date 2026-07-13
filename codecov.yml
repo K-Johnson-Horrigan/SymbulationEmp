@@ -1,10 +1,11 @@
 ignore:
-  - "source/catch/**/*"
+  - "**/source/catch/**"
+  - "**/source/json/**"
   - "stats_scripts/**/*"
   - "web/**/*"
   - "source/Organism.h"
   - "source/*.test.cc"
   - "Empirical/**/*"
   - "coverage_source/**/*"
-  - "source/test/**/*"
+  - "**/source/test/**"
   - "signalgp-lite/**/*"
