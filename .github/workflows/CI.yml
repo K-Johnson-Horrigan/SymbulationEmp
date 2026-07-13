@@ -32,6 +32,8 @@ jobs:
         
       - name: Upload coverage
         uses: codecov/codecov-action@v5
+        with:
+          exclude: source/catch,source/json,source/test
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
