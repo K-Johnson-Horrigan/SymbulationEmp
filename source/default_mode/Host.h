@@ -501,6 +501,7 @@ public:
   *
   * Purpose: To get the tag permissiveness value of this host
   */
+  double GetTagPermissiveness() { return tag_permissiveness; }
   const double GetTagPermissiveness() const { return tag_permissiveness; }
 
   /**
