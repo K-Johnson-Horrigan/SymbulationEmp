@@ -46,10 +46,12 @@ namespace sgpmode::inst {
     }                                                                          \
     static size_t prevalence() { return 1; }                                   \
     static std::string name() { return #InstName; }                            \
+    /* Metadata for instruction instance, left empty (needed by JSON write). */\
     template<typename Spec>                                                    \
     static auto descriptors(const sgpl::Instruction<Spec>&) {                  \
       return std::map<std::string, std::string>{};                             \
     }                                                                          \
+    /* Metadata for instruction instance, left empty (needed by JSON write). */\
     template<typename Spec>                                                    \
     static auto categories(const sgpl::Instruction<Spec>&) {                   \
       return std::set<std::string>{};                                          \
