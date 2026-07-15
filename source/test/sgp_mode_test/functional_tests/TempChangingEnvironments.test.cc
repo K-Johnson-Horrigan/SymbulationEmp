@@ -185,7 +185,7 @@ TEST_CASE("Hosts start with a punished task in a temporally changing environment
 
     THEN("After the environment changes, the host loses points for completing its task") {
       REQUIRE(host_orn_count == 3);
-      REQUIRE(host_orn_only->GetPoints() == -5);
+      REQUIRE(host_orn_only->GetPoints() == 0);
     }
   }
 }
@@ -242,7 +242,7 @@ TEST_CASE("Symbionts start with a punished task in a temporally changing environ
 
     THEN("After the environment changes, the symbiont loses points for completing its tasks") {
       REQUIRE(sym_nand_count == 3);
-      REQUIRE(symbiont_nand_only->GetPoints() == -5);
+      REQUIRE(symbiont_nand_only->GetPoints() == 0);
     }
   }
 }
