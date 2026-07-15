@@ -26,7 +26,7 @@ using sgp_host_t = sgpmode::SGPHost<hw_spec_t>;
 using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
 using program_t = typename world_t::sgp_prog_t;
 
-TEST_CASE("Hosts start with a rewarded task in a temporally changing environment"){
+TEST_CASE("Hosts start with a poisoned task in a temporally changing environment","[sgp]"){
   // set up configs
   sgpmode::SymConfigSGP config;
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
@@ -64,23 +64,23 @@ TEST_CASE("Hosts start with a rewarded task in a temporally changing environment
     world.Update();
     size_t host_not_count = world.GetHostTaskSuccesses().at(not_task_id);
 
-    THEN("The host initially gains points for completing its task") {
+    THEN("The host initially gains loses for completing its task") {
       REQUIRE(host_not_count == 1);
-      REQUIRE(host_not_only->GetPoints() == 5);
+      REQUIRE(host_not_only->GetPoints() == 0);
     }
 
     // event update
     world.Update();
     host_not_count += world.GetHostTaskSuccesses().at(not_task_id);
 
-    THEN("After the environment changes, the host loses points for completing its task") {
+    THEN("After the environment changes, the host gains points for completing its task") {
       REQUIRE(host_not_count == 2);
-      REQUIRE(host_not_only->GetPoints() == 0);
+      REQUIRE(host_not_only->GetPoints() == 5);
     }
   }
 }
 
-TEST_CASE("Symbionts start with a rewarded task in a temporally changing environment"){
+TEST_CASE("Symbionts start with a poisoned task in a temporally changing environment", "[sgp]"){
   // set up configs
   sgpmode::SymConfigSGP config;
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
@@ -120,23 +120,23 @@ TEST_CASE("Symbionts start with a rewarded task in a temporally changing environ
     world.Update();
     size_t sym_not_count = world.GetSymTaskSuccesses().at(not_task_id);
 
-    THEN("The symbiont initially gains points for completing its task") {
+    THEN("The symbiont initially loses points for completing its task") {
       REQUIRE(sym_not_count == 1);
-      REQUIRE(symbiont_not_only->GetPoints() == 5);
+      REQUIRE(symbiont_not_only->GetPoints() == 0);
     }
 
     // event update
     world.Update();
     sym_not_count += world.GetSymTaskSuccesses().at(not_task_id);
 
-    THEN("After the environment changes, the symbiont loses points for completing its task") {
+    THEN("After the environment changes, the symbiont gains points for completing its task") {
       REQUIRE(sym_not_count == 2);
-      REQUIRE(symbiont_not_only->GetPoints() == 0);
+      REQUIRE(symbiont_not_only->GetPoints() == 5);
     }
   }
 }
 
-TEST_CASE("Hosts start with a punished task in a temporally changing environment", "[sgp]") {
+TEST_CASE("Hosts start with a rewarded task in a temporally changing environment", "[sgp]") {
   // set up configs
   sgpmode::SymConfigSGP config;
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
@@ -191,7 +191,7 @@ TEST_CASE("Hosts start with a punished task in a temporally changing environment
 }
 
 
-TEST_CASE("Symbionts start with a punished task in a temporally changing environment", "[sgp]") {
+TEST_CASE("Symbionts start with a rewarded task in a temporally changing environment", "[sgp]") {
   // set up configs
   sgpmode::SymConfigSGP config;
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
