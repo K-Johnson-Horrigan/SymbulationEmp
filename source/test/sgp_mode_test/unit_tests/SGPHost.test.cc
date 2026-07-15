@@ -252,3 +252,23 @@ TEST_CASE("ProcessOutputBuffer", "[sgp][sgp-unit]"){
         }
     }
 }
+
+TEST_CASE("debt", "[sgp][sgp-unit] [LC]"){
+    GIVEN("A zero point value"){
+        emp::Random random(31);
+        sgpmode::SymConfigSGP config;
+        config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+        world_t world(random, &config);
+        auto& prog_builder = world.GetProgramBuilder();
+        emp::Ptr<sgp_host_t> host = emp::NewPtr<sgp_host_t>(&random, &world, &config, prog_builder.CreateNotProgram(100));
+
+        WHEN("points are added to make total points negative"){
+        //call function that should reset points
+        host->AddPoints(-100);
+        
+            THEN("point value should be set to zero"){
+                REQUIRE(host->GetPoints() == 0);
+            }
+        }
+    }
+}
