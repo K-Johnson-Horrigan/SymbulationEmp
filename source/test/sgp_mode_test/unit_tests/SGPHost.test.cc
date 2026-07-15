@@ -295,9 +295,7 @@ TEST_CASE("debt", "[sgp][sgp-unit]"){
         emp::Ptr<sgp_host_t> host = emp::NewPtr<sgp_host_t>(&random, &world, &config, prog_builder.CreateNotProgram(100));
 
         WHEN("points are added to make total points negative"){
-        //call function that should reset points
-        host->AddPoints(-100);
-        
+          host->AddPoints(-100);
             THEN("point value should be set to zero"){
                 REQUIRE(host->GetPoints() == 0);
             }
