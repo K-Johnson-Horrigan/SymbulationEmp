@@ -130,7 +130,6 @@ INST(Reproduce, {
   state.MarkReproAttempt();
 });
 
-// NOTE - what is the intended difference between SharedIO and PrivateIO?
 INST(IO, {
   // (1) Add output to output buffer
   state.GetOutputBuffer().emplace_back(a);
