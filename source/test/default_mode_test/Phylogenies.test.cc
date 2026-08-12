@@ -202,6 +202,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ) {
 
       // add a hosted sym to the host
       emp::Ptr<Organism> hosted_sym = symbiont->Reproduce();
+      world.AddSymToSystematic(hosted_sym, symbiont->GetTaxon());
       host->AddSymbiont(hosted_sym);
 
       // check that free living organisms have properly been added to the world
@@ -221,6 +222,7 @@ TEST_CASE( "Symbiont Phylogeny", "[default]" ) {
 
     for(size_t i = 1; i < num_syms; i++) {
       syms[i] = syms[i-1]->Reproduce();
+      world.AddSymToSystematic(syms[i], syms[i - 1]->GetTaxon());
     }
 
     THEN("Their lineages are tracked") {
@@ -412,6 +414,7 @@ TEST_CASE("Tag-based Phylogeny", "[default]") {
       WHEN("The child mutates its tag") {
         config.TAG_MUTATION_SIZE(0.5);
         emp::Ptr<Organism> child_symbiont = parent_symbiont->Reproduce();
+        world.AddSymToSystematic(child_symbiont, parent_symbiont->GetTaxon());
         REQUIRE(tag_metric.calculate(child_symbiont->GetTag(), parent_symbiont->GetTag()) > 0);
         child_symbiont->Process(fake_pos);
 
@@ -430,6 +433,7 @@ TEST_CASE("Tag-based Phylogeny", "[default]") {
       WHEN("The child does not mutate its tag") {
         config.TAG_MUTATION_SIZE(0);
         emp::Ptr<Organism> child_symbiont = parent_symbiont->Reproduce();
+        world.AddSymToSystematic(child_symbiont, parent_symbiont->GetTaxon());
         REQUIRE(child_symbiont->GetIntVal() != parent_symbiont->GetIntVal());
         REQUIRE(tag_metric.calculate(child_symbiont->GetTag(), parent_symbiont->GetTag()) == 0);
 
@@ -585,7 +589,8 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     world.AddOrgAt(symbiont_1, symbiont_1_pos);
     world.Update(); // update 1
 
-    emp::Ptr<Organism> symbiont_2 = symbiont_1->Reproduce(); // symbionts are added to systematic on Reproduce()
+    emp::Ptr<Organism> symbiont_2 = symbiont_1->Reproduce(); 
+    world.AddSymToSystematic(symbiont_2, symbiont_1->GetTaxon());
     emp::WorldPosition symbiont_2_pos = world.SymDoBirth(symbiont_2, symbiont_1_pos);
 
     REQUIRE(world.GetNumOrgs() == 2);
@@ -609,7 +614,8 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     THEN("Symbiont taxon destruction times are tracked") {
       world.Update(); // update 2
       // birth and overwriting death happen during update 2
-      emp::Ptr<Organism> symbiont_3 = symbiont_2->Reproduce(); // symbionts are added to systematic on Reproduce()
+      emp::Ptr<Organism> symbiont_3 = symbiont_2->Reproduce(); 
+      world.AddSymToSystematic(symbiont_3, symbiont_2->GetTaxon());
       world.AddOrgAt(symbiont_3, symbiont_1_pos, symbiont_2_pos);
       world.CleanupGraveyard(); // call Delete() for symbiont 1, which was overwritten in the preceding AddOrgAt call
                                 // destruction time is calculated based on the destructor call for the last org in the taxon
@@ -649,10 +655,11 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     host_1->AddSymbiont(symbiont_1);
 
     THEN("Origination times are tracked") {
+      REQUIRE(symbiont_1_taxon != nullptr);
       REQUIRE(symbiont_1_taxon->GetOriginationTime() == 0);
       REQUIRE(symbiont_1_taxon->GetDestructionTime() == std::numeric_limits<double>::infinity());
     }
-
+    
     world.Update(); // update 1
     emp::Ptr<Organism> host_2 = host_1->Reproduce();
     emp::WorldPosition host_2_pos = world.DoBirth(host_2, host_1_pos);
@@ -661,7 +668,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     config.MUTATION_RATE(0);
     emp::Ptr<Organism> symbiont_2 = host_2->GetSymbionts().at(0);
     emp::Ptr< taxon_t::base_taxon_t> symbiont_2_taxon = symbiont_2->GetTaxon();
-
+   
     WHEN("A symbiont is vertically transmitted") {
       THEN("It is placed into a new taxon") {
         REQUIRE(symbiont_2_taxon->GetData().GetIntVal() != symbiont_1_taxon->GetData().GetIntVal());
@@ -682,7 +689,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
     symbiont_1->IndependentReproduction(emp::WorldPosition(1, host_1_pos.GetIndex()));
     emp::Ptr<Organism> symbiont_3 = host_3->GetSymbionts().at(0);
     emp::Ptr< taxon_t::base_taxon_t> symbiont_3_taxon = symbiont_3->GetTaxon();
-
+    
     WHEN("A symbiont is horizontally transmitted") {
       REQUIRE(world.GetNumOrgs() == 3);
       REQUIRE(host_3->HasSym());
@@ -715,6 +722,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
 
     config.OUSTING(1);
     emp::Ptr<Organism> symbiont_4 = symbiont_3->Reproduce(); // reproduce happens "during" update 4
+    world.AddSymToSystematic(symbiont_4, symbiont_3->GetTaxon());
     host_3->AddSymbiont(symbiont_4); // cleanup of graveyard happens after update increment in Update(), so dest. time is 5
     emp::Ptr< taxon_t::base_taxon_t> symbiont_4_taxon = symbiont_4->GetTaxon();
     world.Update(); // update 5
@@ -1011,11 +1019,13 @@ TEST_CASE("Unpruned phylogenies", "[default]") {
   REQUIRE(host_grandparent->HasSym());
 
   emp::Ptr<Organism> sym_parent = sym_grandparent->Reproduce();
+  world.AddSymToSystematic(sym_parent, sym_grandparent->GetTaxon());
   host_parent->AddSymbiont(sym_parent);
   REQUIRE(host_parent->HasSym());
   REQUIRE(host_parent->GetSymbionts().at(0) == sym_parent);
 
   emp::Ptr<Organism> sym = sym_parent->Reproduce();
+  world.AddSymToSystematic(sym, sym_parent->GetTaxon());
   host->AddSymbiont(sym);
   REQUIRE(host->HasSym());
 

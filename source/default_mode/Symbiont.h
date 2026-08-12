@@ -837,13 +837,30 @@ public:
     if(sym_baby_pos.IsValid()) {
       data_node_successes_horiztrans.AddDatum(GetIntVal());
       
-      // only add successful children to phylogeny
-      if (my_config->PHYLOGENY() == 1) {
+      if (my_config->PHYLOGENY()) {
+        // add successful new symbiont to the systematic
+        emp::Ptr<Organism> sym_baby;
+        emp::Ptr<Organism> sym_baby_host;
+        if (sym_baby_pos.GetIndex() == 0) { // free living
+          sym_baby = my_world->GetSymAt(sym_baby_pos.GetPopID());
+        } else { // hosted
+          sym_baby_host = my_world->GetOrgPtr(sym_baby_pos.GetPopID());
+          emp_assert(sym_baby_host->HasSym() && sym_baby_host->GetSymbionts().size() >= (sym_baby_pos.GetIndex() - 1));
+          sym_baby = sym_baby_host->GetSymbionts().at(sym_baby_pos.GetIndex() - 1);
+        }
         my_world->AddSymToSystematic(sym_baby, my_taxon);
-        //baby's taxon will be set in AddSymToSystematic
+
+        // track relevant systematic data
+        if (sym_baby_pos.GetIndex() != 0){
+          if (my_world->GetPhylogenyTaxonType() == SymWorld::PHYLO_TAXON_TYPE::INDIVIDUAL) {
+            sym_baby->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().DetermineHostSwitch(sym_baby_host->GetTaxon(), GetHost()->GetTaxon());
+          }
+          if (my_config->TRACK_PHYLOGENY_INTERACTIONS()) {
+            sym_baby_host->GetTaxon().Cast<taxon_t::host_taxon_t>()->GetData().AddInteraction(sym_baby->GetTaxon());
+          }
+        }
       }
     }
-
   }
 
   /**
@@ -858,9 +875,7 @@ public:
       emp::Ptr<Organism> sym_baby = Reproduce();
       if (my_config->TAG_MATCHING() || my_config->FREE_HT_FAILURE()) sym_baby->SetPoints(0);
       emp::WorldPosition new_pos = my_world->SymDoBirth(sym_baby, location);
-
       AfterIndependentReproduction(new_pos);
-
     }
   }
 };

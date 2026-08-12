@@ -1125,14 +1125,6 @@ public:
         const int new_index = pop[new_host_pos]->AddSymbiont(sym_baby);
 
         if (new_index > 0) { // sym successfully infected
-          if (my_config->PHYLOGENY()) {
-            if (phylo_taxon_type == PHYLO_TAXON_TYPE::INDIVIDUAL) {
-              sym_baby->GetTaxon().Cast<taxon_t::sym_taxon_t>()->GetData().DetermineHostSwitch(pop[new_host_pos]->GetTaxon(), sym_parent->GetHost()->GetTaxon());
-            }
-            if (my_config->TRACK_PHYLOGENY_INTERACTIONS()) {
-              pop[new_host_pos]->GetTaxon().Cast<taxon_t::host_taxon_t>()->GetData().AddInteraction(sym_baby->GetTaxon());
-            }
-          }
           if (my_config->FREE_HT_FAILURE() || my_config->TAG_MATCHING()) {
             // if tag mismatch or free failure is on, don't subtract points until we think the infection is successful
             sym_parent->SetPoints(0);
