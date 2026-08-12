@@ -197,7 +197,7 @@ public:
    * Purpose: To destruct the symbiont and remove the symbiont from the systematic.
    */
   ~Symbiont() {
-    if(my_config->PHYLOGENY() == 1) {
+    if(my_config->PHYLOGENY() == 1 && my_taxon) {
       my_world->GetSymSys()->RemoveOrg(my_taxon.Cast<taxon_t::sym_taxon_t>());
       if (my_config->STORE_EXTINCT() && my_taxon->GetOriginationTime() == my_taxon->GetDestructionTime() && my_taxon->GetTotalOffspring() == 0) {
         my_world->GetSymSys()->outside_taxa.erase(my_taxon.Cast<taxon_t::sym_taxon_t>());
@@ -697,10 +697,6 @@ public:
     emp::Ptr<Organism> sym_baby = MakeNew();
     sym_baby->Mutate();
     sym_baby->SetReproCount(reproductions + 1);
-    if(my_config->PHYLOGENY() == 1) {
-      my_world->AddSymToSystematic(sym_baby, my_taxon);
-      //baby's taxon will be set in AddSymToSystematic
-    }
 
     if (my_config->TAG_MATCHING() && my_host) {
       // do not xor to get 1 where bits are matching
@@ -779,6 +775,12 @@ public:
 
         emp::DataMonitor<double, emp::data::Histogram>& data_node_successes_verttrans = my_world->GetVerticalTransmissionSuccessCount();
         data_node_successes_verttrans.AddDatum(GetIntVal());
+
+        if (my_config->PHYLOGENY() == 1) {
+          // only add successful children to phylogeny
+          my_world->AddSymToSystematic(sym_baby, my_taxon);
+          //baby's taxon will be set in AddSymToSystematic
+        }
       }
     }
     return success ? std::optional<emp::Ptr<Organism>>{sym_baby} : std::nullopt;
@@ -834,6 +836,12 @@ public:
     emp::DataMonitor<double, emp::data::Histogram>& data_node_successes_horiztrans = my_world->GetHorizontalTransmissionSuccessCount();
     if(sym_baby_pos.IsValid()) {
       data_node_successes_horiztrans.AddDatum(GetIntVal());
+      
+      // only add successful children to phylogeny
+      if (my_config->PHYLOGENY() == 1) {
+        my_world->AddSymToSystematic(sym_baby, my_taxon);
+        //baby's taxon will be set in AddSymToSystematic
+      }
     }
 
   }
