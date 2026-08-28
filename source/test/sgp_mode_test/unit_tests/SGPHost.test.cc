@@ -342,4 +342,5 @@ TEST_CASE("CPUState and SGPHost always have the same location","[sgp]"){
     host->GetHardware().GetCPUState().SetLocation(emp::WorldPosition(3, 4));
     REQUIRE(host->GetHardware().GetCPUState().GetLocation().GetIndex() == host->GetLocation().GetIndex());
   }
+  host.Delete();
 }

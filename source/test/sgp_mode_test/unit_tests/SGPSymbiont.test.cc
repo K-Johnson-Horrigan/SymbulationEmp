@@ -199,4 +199,5 @@ TEST_CASE("CPUState and SGPSymbiont always have the same location","[sgp]"){
       REQUIRE(sym->GetHardware().GetCPUState().GetLocation().GetIndex() == sym->GetLocation().GetIndex());
     }
   }
+  sym.Delete();
 }

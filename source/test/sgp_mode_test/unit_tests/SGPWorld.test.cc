@@ -553,7 +553,6 @@ TEST_CASE("SGP Horizontal SymDoBirth", "[sgp][sgp-unit]") {
           REQUIRE(target_host->GetSymbionts().at(0) == symbiont_offspring);
           REQUIRE(world.GetGraveyard().size() == 1);
         }
-        world.CleanupGraveyard();
       }
 
       WHEN("The incoming symbiont has a worse match") {
@@ -565,5 +564,6 @@ TEST_CASE("SGP Horizontal SymDoBirth", "[sgp][sgp-unit]") {
         }
       }
     }
+    world.CleanupGraveyard();
   }
 }
