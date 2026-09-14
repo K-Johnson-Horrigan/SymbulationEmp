@@ -3,25 +3,45 @@
 #define SYM_ANIMATE_H
 
 #include <iostream>
-#include "default_mode/SymWorld.h"
-#include "default_mode/DataNodes.h"
-#include "ConfigSetup.h"
+#include <optional>
+#include <string>
+#include "uitsl/fetch/autoinstall.hpp"
+#include "../source/default_mode/SymWorld.h"
+#include "../source/default_mode/DataNodes.h"
+#include "../source/ConfigSetup.h"
 //#include "SymJS.h"
-#include "default_mode/Symbiont.h"
-#include "default_mode/Host.h"
+#include "../source/default_mode/Symbiont.h"
+#include "../source/default_mode/Host.h"
+#include "emp/base/errors.hpp"
 #include "emp/web/Document.hpp"
 #include "emp/web/Canvas.hpp"
 #include "emp/web/web.hpp"
 #include "emp/config/ArgManager.hpp"
 #include "emp/prefab/ConfigPanel.hpp"
 #include "emp/web/UrlParams.hpp"
-#include "default_mode/WorldSetup.cc"
-
+#include "../source/default_mode/WorldSetup.cc"
 
 namespace UI = emp::web;
 SymConfigBase config; // load the default configuration
 
-
+/// Configure accepted URL query params: config keys and autoinstall...
+/// e.g., symbulation.html?autoinstall=foo.com/file.json&VERTICAL_TRANSMISSION=0.9
+emp::ArgManager::spec_map_t arg_specs = [](){
+  auto specs = emp::ArgManager::make_builtin_specs(&config);
+  specs["autoinstall"] = emp::ArgSpec(
+    1, // one value expected
+    "URL of a file to download into the virtual filesystem at startup",
+    {}, // no aliases
+    [](const emp::optional<emp::vector<std::string>>& urls) {
+      if (!urls) return;
+      for (const std::string& url : *urls) {
+        std::cout << "autoinstalled " << url << " as "
+                  << uitsl::autoinstall(url) << std::endl;
+      }
+    }
+  );
+  return specs;
+}();
 
 class SymAnimate : public UI::Animate {
 private:
@@ -35,8 +55,9 @@ private:
 
   const int RECT_WIDTH = 10;
 
-  emp::Random random{config.SEED()};
-  SymWorld world{random, &config};
+  emp::Random random;
+  // optional allows emplacement once config is parsed
+  std::optional<SymWorld> world;
 
 
   emp::vector<emp::Ptr<Organism>> p;
@@ -48,21 +69,22 @@ private:
 public:
 
   /**
-   * 
+   *
    * The contructor for SymAnimate
-   * 
+   *
    */
   SymAnimate() : animation("emp_animate"), settings("emp_settings"), explanation("emp_explanation"), learnmore("emp_learnmore"), buttons("emp_buttons") {
 
-    config.GRID_X(50);
-    config.GRID_Y(50);
+    config.WORLD_WIDTH(50);
+    config.WORLD_HEIGHT(50);
     config.UPDATES(30000);
-    emp::prefab::ConfigPanel config_panel(config);
+
+    emp::prefab::ConfigPanel config_panel(config, true);
     //Exclude all the settings that control
     //things that don't show up in the GUI correctly
     config_panel.ExcludeSetting("SYM_LIMIT");
     config_panel.ExcludeSetting("DATA_INT");
-    config_panel.ExcludeSetting("POP_SIZE");
+    config_panel.ExcludeSetting("INIT_POP_SIZE");
     config_panel.ExcludeSetting("FILE_PATH");
     config_panel.ExcludeSetting("FILE_NAME");
     config_panel.ExcludeSetting("COMPETITION_MODE");
@@ -75,7 +97,9 @@ public:
     config_panel.ExcludeGroup("LYSIS");
     config_panel.ExcludeGroup("DTH");
     config_panel.ExcludeGroup("PGG");
-    config_panel.ExcludeGroup("ECTOSYMBIOSIS");
+    config_panel.ExcludeGroup("ECTOSYMBIOSIS_GROUP");
+    config_panel.ExcludeGroup("TAG_MATCHING_GROUP");
+    config_panel.ExcludeGroup("PHYLOGENY_GROUP");
 
     config_panel.SetRange("HOST_INT", "-2", "1");
     config_panel.SetRange("SYM_INT", "-2", "1");
@@ -96,17 +120,21 @@ public:
     buttons.SetCSS("max-width", "600px");
 
 
-    initializeWorld();
     emp::prefab::Card config_panel_ex("INIT_CLOSED");
     settings << config_panel_ex;
     config_panel_ex.AddHeaderContent("<h3>Settings</h3>");
 
     // apply configuration query params and config files to config
-    auto specs = emp::ArgManager::make_builtin_specs(&config);
-    emp::ArgManager am(emp::web::GetUrlParams(), specs);
+    emp::ArgManager am(emp::web::GetUrlParams(), arg_specs);
     // cfg.Read("config.cfg");
     am.UseCallbacks();
-    if (am.HasUnused()) std::exit(EXIT_FAILURE);
+    if (am.HasUnused()) {
+      emp::NotifyWarning("Unrecognized URL query parameters, ignored.");
+    }
+
+    random = emp::Random{config.SEED()};
+    world.emplace(random, &config);
+    initializeWorld();
 
     // setup configuration panel
     //config_panel.Setup();
@@ -132,14 +160,14 @@ public:
     buttons.Button("toggle").OnMouseOut([this](){ auto but = buttons.Button("toggle"); but.SetCSS("background-color", "#D3D3D3"); });
 
     // ----------------------- Add a reset button to reset the animation/world -----------------------
-    /* Note: Must first run world.Reset(), because Inject checks for valid position.
+    /* Note: Must first run world->Reset(), because Inject checks for valid position.
       If a position is occupied, new org is deleted and your world isn't reset.
       Also, canvas must be redrawn to let users see that it is reset */
     buttons.AddButton([this](){
-      world.Reset();
+      world->Reset();
       buttons.Text("update").Redraw();
       initializeWorld();
-      p = world.GetPop();
+      p = world->GetPop();
 
       if (GetActive()) { // If animation is running, stop animation and adjust button label
         ToggleActive();
@@ -148,8 +176,8 @@ public:
       but.SetLabel("Start");
 
       // redraw petri dish
-      mycanvas.SetWidth(RECT_WIDTH*config.GRID_X());
-      mycanvas.SetHeight(RECT_WIDTH*config.GRID_Y());
+      mycanvas.SetWidth(RECT_WIDTH*config.WORLD_WIDTH());
+      mycanvas.SetHeight(RECT_WIDTH*config.WORLD_HEIGHT());
       drawPetriDish(mycanvas);
       ToggleActive();//turn on quick to update the grid if the size changed
       ToggleActive();//turn off again
@@ -160,13 +188,13 @@ public:
 
     // ----------------------- Keep track of number of updates -----------------------
     buttons << "<br>";
-    buttons << UI::Text("update") << "Update = " << UI::Live( [this](){ return world.GetUpdate(); } ) << "  ";
+    buttons << UI::Text("update") << "Update = " << UI::Live( [this](){ return world->GetUpdate(); } ) << "  ";
     buttons << UI::Text("mut") << "Mutualistic = " << UI::Live( [this](){ return num_mutualistic; } ) << "  ";
     buttons << UI::Text("par") << " Parasitic = " << UI::Live( [this](){ return num_parasitic; } );
     buttons << "<br>";
 
     // Add a canvas for petri dish and draw the initial petri dish
-    mycanvas = animation.AddCanvas(RECT_WIDTH*config.GRID_X(), RECT_WIDTH*config.GRID_Y(), "can");
+    mycanvas = animation.AddCanvas(RECT_WIDTH*config.WORLD_WIDTH(), RECT_WIDTH*config.WORLD_HEIGHT(), "can");
     targets.push_back(mycanvas);
     drawPetriDish(mycanvas);
     animation << "<br>";
@@ -178,29 +206,29 @@ public:
 
   /**
    * Input: None
-   * 
+   *
    * Output: None
-   * 
-   * Purpose: To initialize the world based upon the config setting given 
+   *
+   * Purpose: To initialize the world based upon the config setting given
    */
   void initializeWorld(){
      // Reset the seed and the random machine of world to ensure consistent result (??)
     random.ResetSeed(config.SEED());
-    world.SetRandom(random);
+    world->SetRandom(random);
 
-    world.Setup();
+    world->Setup();
 
-    p = world.GetPop();
+    p = world->GetPop();
 
   }
 
 
   /**
-   * Input: The string representing the button identification. 
-   * 
+   * Input: The string representing the button identification.
+   *
    * Output: None
-   * 
-   * Purpose: To add style to the buttons displayed. 
+   *
+   * Purpose: To add style to the buttons displayed.
    */
   void setButtonStyle(std::string but_id){
     auto but = buttons.Button(but_id);
@@ -211,11 +239,11 @@ public:
 
 
   /**
-   * Input: The canvas being used. 
-   * 
+   * Input: The canvas being used.
+   *
    * Output: None
-   * 
-   * Purpose: To draw the petri dish of basteria and phage. 
+   *
+   * Purpose: To draw the petri dish of basteria and phage.
    */
   // now draw a virtual petri dish with coordinate offset from the left frame
   void drawPetriDish(UI::Canvas & can){
@@ -223,8 +251,8 @@ public:
         num_mutualistic = 0;
         num_parasitic = 0;
         //bool temp_passed = true;
-        for (int x = 0; x < config.GRID_X(); x++){
-            for (int y = 0; y < config.GRID_Y(); y++){
+        for (int x = 0; x < config.WORLD_WIDTH(); x++){
+            for (int y = 0; y < config.WORLD_HEIGHT(); y++){
                 emp::vector<emp::Ptr<Organism>>& syms = p[i]->GetSymbionts(); // retrieve all syms for this host (assume only 1 sym for each host)
                 // color setting for host and symbiont
 
@@ -254,13 +282,13 @@ public:
 
 
   /**
-   * Input: The double representing symbiont or host's interaction value 
-   * 
-   * Output: The string representing the hex value for the color of the organism. 
-   * 
+   * Input: The double representing symbiont or host's interaction value
+   *
+   * Output: The string representing the hex value for the color of the organism.
+   *
    * Purpose: To determine the color that an organism should be, given its
-   * interaction value. 
-   */  
+   * interaction value.
+   */
   std::string matchColor(double intVal){
     if ((-1.0 <= intVal) && (intVal < -0.9)) return "#EFFDF0";
     else if ((-0.9 <= intVal) && (intVal < -0.8)) return "#D4FFDD";
@@ -287,23 +315,23 @@ public:
 
   /**
    * Input: None
-   * 
+   *
    * Output: None
-   * 
-   * Purpose: To update the frame displayed of the current 
-   * world state. 
+   *
+   * Purpose: To update the frame displayed of the current
+   * world state.
    */
   void DoFrame() {
 
-    if (world.GetUpdate() == config.UPDATES() && GetActive()) {
+    if (world->GetUpdate() == config.UPDATES() && GetActive()) {
         ToggleActive();
     } else {
       mycanvas = animation.Canvas("can"); // get canvas by id
       mycanvas.Clear();
 
       // Update world and draw the new petri dish
-      world.Update();
-      p = world.GetPop();
+      world->Update();
+      p = world->GetPop();
       drawPetriDish(mycanvas);
       buttons.Text("update").Redraw();
       buttons.Text("mut").Redraw();

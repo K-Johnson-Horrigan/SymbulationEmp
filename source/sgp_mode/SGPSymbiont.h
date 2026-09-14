@@ -10,6 +10,10 @@
 
 namespace sgpmode {
 
+/**
+* The SignalGP version of the base symbiont
+* @tparam HW_SPEC_T: Contains the internal hardware of the organism, used as a specifier to allow easy swapping of hardware
+*/
 template<typename HW_SPEC_T>
 class SGPSymbiont : public Symbiont {
 public:
@@ -19,6 +23,7 @@ public:
   using hw_t = SGPHardware<hw_spec_t>;
   using program_t = typename hw_t::program_t;
   using host_t = SGPHost<HW_SPEC_T>;
+  using nutrient_sym_mode_t = typename org_info::NutrientSymbiontType;
 
 protected:
   // SignalGP hardware
@@ -44,7 +49,7 @@ protected:
    * object as my_config from superclass, but with the correct subtype.
    *
    */
-  // emp::Ptr<SymConfigSGP> sgp_config = NULL;
+   emp::Ptr<SymConfigSGP> sgp_config = NULL;
 public:
   /**
    * Constructs a new SGPSymbiont as an ancestor organism, with either a random
@@ -60,9 +65,10 @@ public:
   ) :
     Symbiont(_random, _world, _config, _intval, _points),
     hardware(_world, this),
-    my_world(_world)
+    my_world(_world),
+    sgp_config(_config)
   {
-    // sgp_config = _config;
+    
   }
 
   /**
@@ -78,10 +84,9 @@ public:
   ) :
     Symbiont(_random, _world, _config, _intval, _points),
     hardware(_world, this, genome),
-    my_world(_world)
-  {
-    // sgp_config = _config;
-  }
+    my_world(_world),
+    sgp_config(_config)
+  {}
 
   SGPSymbiont(const SGPSymbiont& symbiont) :
     Symbiont(symbiont),
@@ -151,7 +156,7 @@ public:
    *
    * Purpose: To set the count of reproductions in this lineage.
    */
-  void SetReproCount(size_t _in) { reproductions = _in; }
+  void LineageLength(size_t _in) { reproductions = _in; }
 
   /**
    * Input: None.
@@ -184,18 +189,26 @@ public:
    * Purpose: To set a symbiont's host
    */
   void SetHost(emp::Ptr<Organism> host) {
-    emp_assert(host.DynamicCast<host_t>(), "SGPSymbiont must have an SGPHost host");
+    emp_assert(host.DynamicCast<host_t>() || host == nullptr, "SGPSymbiont must have an SGPHost host or no host at all");
     Symbiont::SetHost(host);
     // TODO - add has host flag? (rather condition on boolean than pointer)
 
   }
 
-  void AddPoints(double _in) {
-    points += _in;
-  }
-
   void DecPoints(double amt) {
     points -= amt;
+
+    if (points < 0){
+      points = 0;
+    }
+  }
+
+  void AddPoints(double amt) {
+    points += amt;
+    
+    if (points < 0){
+      points = 0;
+    }
   }
 
   /**
@@ -212,7 +225,7 @@ public:
     if (GetDead()) {
       return;
     }
-
+    
     GetHardware().GetCPUState().SetLocation(pos);
     if(my_host) my_world->TriggerBeforeEndoSymProcessSig(pos, *this, my_host); //Note: this is different than before_endosym_host_process_sig
     // Cash in cycles for this update
@@ -231,7 +244,7 @@ public:
     }
 
     if(my_host) my_world->TriggerAfterEndosymCPUExecSig(pos, *this, my_host);
-    
+
     // Age the organism
     GrowOlder();
     if(my_host) my_world->TriggerAfterEndosymProcessSig(pos, *this, my_host);
@@ -239,16 +252,16 @@ public:
 
   /**
   * Input: emp::Ptr<Organism> to host offspring, emp::Ptr<Organism> to symbiont offspring
-  * 
+  *
   * Output: boolean, whether or not sym/sym offspring meets requirements to successfully vertically transmit
-  * 
+  *
   * Purpose: Overwritten to add functor call for task profiles
   * Originally, to test for compatibility between sym parent/offspring and host parent/offspring, such as tags
   * */
   //TODO: AEV: add test for tags and sgp together
   bool SuccessfulVT(emp::Ptr<Organism> host_baby, emp::Ptr<Organism> sym_baby) {
     bool super_result = Symbiont::SuccessfulVT(host_baby, sym_baby);
-    bool world_reqs = my_world->CheckVertTransCompatibility(*this, host_baby, my_host); 
+    bool world_reqs = my_world->CheckVertTransCompatibility(*this, host_baby, my_host);
     return super_result && world_reqs;
   }
 
@@ -278,7 +291,7 @@ public:
 
     const bool success = (bool)sym_offspring;
 
-    
+
 
     // Trigger after transmission signal.
     my_world->TriggerAfterSymVertTransmissionSig(
@@ -295,13 +308,12 @@ public:
 
   /*
   * Input: sym_pos, world position
-  * 
+  *
   * Output: None
-  * 
+  *
   * Purpose: Start the process for independent reproduction, generally through horizontal transmission, by marking in progress repo and removing points, also handles free-living symbiont reproduction.
   */
   void AttemptIndependentReproduction(emp::WorldPosition sym_pos) {
-
     // NOTE - could make this a configurable functor if we want different success/failure
     //        conditions on attempt
     // NOTE - Do we want to be using the horizontal transmission cost here?
@@ -327,6 +339,70 @@ public:
     }
   }
 
+/**
+   * Input: None.
+   *
+   * Output: None.
+   *
+   * Purpose: Reward for any solved tasks in the output buffer and update data tracking appropriately.
+   */
+void ProcessOutputBuffer() {
+  auto& cpu_state = GetHardware().GetCPUState();
+  const size_t env_task_id = cpu_state.GetTaskEnvID();
+  auto& task_env = my_world->GetTaskEnv();
+  const auto& task_io = task_env.GetIOBank().GetIO(env_task_id);
+  auto& output_buffer = cpu_state.GetOutputBuffer();
+  for (uint32_t val : output_buffer) {
+    // Check for valid output
+    if (task_io.IsValidOutput(val)) {
+
+      // Get all task ids associated with this output value
+      const emp::vector<size_t>& task_ids = task_io.GetTaskIDs(val);
+
+      // Give credit for completed tasks
+      for (size_t task_id : task_ids) {
+        // Is this a valid sym task?
+        if (!task_env.IsSymTask(task_id)) continue;
+        
+        //check first task credit
+        const bool not_first_task = 
+          my_world->GetConfig().SYM_ONLY_FIRST_TASK_CREDIT() && 
+          cpu_state.GetFirstTaskPerformed().Any() && 
+          !cpu_state.GetFirstTaskPerformed().Get(task_id);
+        if (not_first_task) continue;
+
+        // Has this organism already gotten credit with this output on this task?
+        if (cpu_state.OutputCredited(task_id, val)) continue;
+
+        // Check task requirements
+        auto& task_req_info = task_env.GetSymTaskReq(task_id);
+        if (!my_world->CanPerformTask(cpu_state, task_req_info)) {
+          continue;
+        }
+
+        // Manage CPU state after completing a task:
+        cpu_state.MarkTaskPerformed(task_id);
+        cpu_state.CreditOutputValue(task_id, val);
+        if (cpu_state.GetOutputsCredited(task_id).size() >= task_io.GetNumTaskOutputs(task_id)) {
+          cpu_state.ResetCreditedOutputs(task_id);
+        }
+
+        // Calc Value
+        double new_points = task_req_info.fun_calc_task_val(
+          task_env,
+          task_req_info,
+          GetPoints()
+        );
+        double task_points = new_points - GetPoints();
+
+        //World handles point movement between hosts and symbionts
+        my_world->ApplySymPoints(*this, task_points, task_id);
+        my_world->GetSymTaskSuccesses()[task_id] += 1;
+      }
+    }
+  }
+  output_buffer.clear();
+}
 
   /**
    * Input: None
@@ -338,7 +414,7 @@ public:
   emp::Ptr<Organism> Reproduce() {
     // NOTE - should be able to static cast here
     emp::Ptr<SGPSymbiont> sym_offspring = static_cast<SGPSymbiont*>(Symbiont::Reproduce().Raw());
-    sym_offspring->SetReproCount(reproductions + 1); //repro count is lineage length, so increment by 1 from parent
+    sym_offspring->LineageLength(reproductions + 1); //repro count is lineage length, so increment by 1 from parent
     auto& offspring_hw = sym_offspring->GetHardware();
     auto& offspring_cpu_state = offspring_hw.GetCPUState();
     auto& cpu_state = hardware.GetCPUState();
@@ -433,7 +509,7 @@ public:
     //        to deviate from what happens in the base class mutate functions
     Symbiont::Mutate();
     // Apply SGP-specific mutations (managed by world)
-    my_world->SymDoMutation(*this);
+    my_world->GetMutator().MutateProgram(GetProgram());
     // Reset host's hardware
     hardware.Reset(); // NOTE - this function was previously just Initializing state,
                       // which didn't reset the cpu. I think we want to reset the CPU here also?

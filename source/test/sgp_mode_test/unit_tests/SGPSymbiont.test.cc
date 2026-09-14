@@ -1,10 +1,15 @@
-#include "../../../sgp_mode/SGPHost.h"
+#include "../../test_utils.h"
+#include "../../../default_mode/SymWorld.h"
+#include "../../../default_mode/WorldSetup.cc"
+#include "../../../default_mode/DataNodes.h"
 #include "../../../sgp_mode/SGPWorld.h"
-#include "../../../sgp_mode/SGPWorldSetup.cc"
-//#include "../../../sgp_mode/SGPDataNodes.h"
-#include "../../../sgp_mode/hardware/SGPHardware.h"
 #include "../../../sgp_mode/SGPWorld.cc"
+#include "../../../sgp_mode/SGPWorldSetup.cc"
+#include "../../../sgp_mode/SGPWorldData.cc"
+#include "../../../sgp_mode/SGPW_InteractionMechanismSetup.cc"
+#include "../../../sgp_mode/SGPW_TaskProfileSetup.cc"
 #include "../../../sgp_mode/ProgramBuilder.h"
+
 using world_t = sgpmode::SGPWorld;
 using cpu_state_t = sgpmode::CPUState<world_t>;
 using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
@@ -16,32 +21,34 @@ using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
  * This file is dedicated to unit tests for SGPSymbiont
  */
 
- TEST_CASE("Symbiont == operator", "[sgp][sgp-unit]"){
-  GIVEN("A symbiont"){
+TEST_CASE("Symbiont == operator", "[sgp][sgp-unit]") {
+  GIVEN("A symbiont") {
     emp::Random random(31);
     sgpmode::SymConfigSGP config;
     config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+    test_utils::SetWellMixed(config, 4, 0);
+    config.TASK_IO_BANK_SIZE(10);
     world_t world(random, &config);
     auto& prog_builder = world.GetProgramBuilder();
-    
+
     emp::Ptr<sgp_sym_t> sym_parent = emp::NewPtr<sgp_sym_t>(&random, &world, &config, prog_builder.CreateNotProgram(100));
-    WHEN("2 symbionts that are clones of the original symbiont"){
+    WHEN("2 symbionts that are clones of the original symbiont") {
         emp::Ptr<sgp_sym_t> clone1 = emp::NewPtr<sgp_sym_t>(*sym_parent);
         emp::Ptr<sgp_sym_t> clone2 = emp::NewPtr<sgp_sym_t>(*sym_parent);
-        
-        THEN("symbiont is equal to first clone"){
+
+        THEN("symbiont is equal to first clone") {
           REQUIRE(*sym_parent == *clone1);
         }
-        THEN("The first clone is equal to the second clone"){
+        THEN("The first clone is equal to the second clone") {
           REQUIRE(*clone1 == *clone2);
         }
         clone1.Delete();
         clone2.Delete();
     }
-    
-    WHEN("A symbiont that is different to the original is created"){
+
+    WHEN("A symbiont that is different to the original is created") {
       emp::Ptr<sgp_sym_t> different = emp::NewPtr<sgp_sym_t>(&random, &world, &config, prog_builder.CreateNotProgram(99)); // For comparing
-      THEN("The original symbiont is not equal to the different host"){
+      THEN("The original symbiont is not equal to the different host") {
         REQUIRE_FALSE(*sym_parent == *different);
       }
       different.Delete();
@@ -50,18 +57,20 @@ using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
   }
 }
 
-TEST_CASE("Symbiont > & < operator","[sgp][sgp-unit]"){
-  GIVEN("Two different symbionts"){
+TEST_CASE("Symbiont > & < operator","[sgp][sgp-unit]") {
+  GIVEN("Two different symbionts") {
     emp::Random random(31);
     sgpmode::SymConfigSGP config;
     config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+    test_utils::SetWellMixed(config, 4, 0);
+    config.TASK_IO_BANK_SIZE(10);
     world_t world(random, &config);
     auto& prog_builder = world.GetProgramBuilder();
 
     emp::Ptr<sgp_sym_t> sym_parent = emp::NewPtr<sgp_sym_t>(&random, &world, &config, prog_builder.CreateNotProgram(100));
     emp::Ptr<sgp_sym_t> different = emp::NewPtr<sgp_sym_t>(&random, &world, &config, prog_builder.CreateNotProgram(99)); // For comparing
-    WHEN("The two symbionts are compared"){
-      THEN("One symbiont is less then the other symbiont"){
+    WHEN("The two symbionts are compared") {
+      THEN("One symbiont is less then the other symbiont") {
         // Can't assert true/false without knowing bitcode ordering,
         // assert that bitcode ordering is well-defined
         bool lt = *sym_parent < *different || *different < *sym_parent;
@@ -79,6 +88,8 @@ TEST_CASE("Symbiont Process", "[sgp][sgp-unit]") {
     sgpmode::SymConfigSGP config;
     config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
     config.CYCLES_PER_UPDATE(3);
+    test_utils::SetWellMixed(config, 4, 0);
+    config.TASK_IO_BANK_SIZE(10);
     world_t world(random, &config);
     world.Setup();
     auto& prog_builder = world.GetProgramBuilder();
@@ -99,25 +110,93 @@ TEST_CASE("Symbiont Process", "[sgp][sgp-unit]") {
       }
     }
   }
-  
 }
 
 // TEST_CASE("SGPSymbiont destructor cleans up shared pointers and in-progress reproduction", "[sgp][sgp-unit]") {
-//   GIVEN("A symbiont"){
+//   GIVEN("A symbiont") {
 //     emp::Random random(31);
 //     SymConfigSGP config;
 //     SGPWorld world(random, &config, LogicTasks);
 //     emp::Ptr<SGPSymbiont> sym = emp::NewPtr<SGPSymbiont>(&random, &world, &config, CreateNotProgram(100));
 //     sym->SetLocation(emp::WorldPosition(1, 2));
 //     sym->GetCPU().state.in_progress_repro = 3;
-//     world.to_reproduce.resize(5); 
+//     world.to_reproduce.resize(5);
 
 //     WHEN("The symbiont is destroyed") {
-//       sym.Delete(); 
-      
+//       sym.Delete();
+
 //       THEN("Reproduction queue is invalidated after the symbiont is destroyed") {
 //         REQUIRE(world.to_reproduce[3] == nullptr);
 //       }
 //     }
 //   }
 // }
+
+TEST_CASE("ProcessOutputBuffer Symbiont", "[sgp][sgp-unit]") {
+  using world_t = sgpmode::SGPWorld;
+  using cpu_state_t = sgpmode::CPUState<world_t>;
+  using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
+  using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
+  GIVEN("A symbiont with valid values in its input and output buffers") {
+    emp::Random random(31);
+
+    sgpmode::SymConfigSGP config;
+
+    config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/echo-task-env.json");
+    config.TASK_IO_BANK_SIZE(10);
+    test_utils::SetWellMixed(config, 1, 0);
+    world_t world(random, &config);
+    world.Setup();
+    auto& prog_builder = world.GetProgramBuilder();
+    emp::Ptr<sgp_sym_t> sym = emp::NewPtr<sgp_sym_t>(&random, &world, &config, prog_builder.CreateNotProgram(100));
+    world.AddOrgAt(sym, 0);
+
+    // save two of the inputs
+    emp::vector<uint32_t> inputs;
+    for (int i = 0; i < 2; i++) {
+      inputs.push_back(sym->GetHardware().GetCPUState().GetInputBuffer().read());
+    }
+    inputs.push_back(0); // add some incorrect output to make sure they aren't getting points for those
+    inputs.push_back(1);
+    sym->GetHardware().GetCPUState().SetOutputs(inputs); // set output buffer to inputs with with some extra incorrect outputs
+    WHEN("ProcessOutputBuffer is called") {
+      sym->ProcessOutputBuffer();
+      THEN("The output buffer is cleared and symbiont received 10 points for correctly echoing 2 inputs") {
+        REQUIRE(sym->GetHardware().GetCPUState().GetOutputBuffer().empty());
+        REQUIRE(sym->GetPoints() == 10);
+      }
+    }
+  }
+}
+TEST_CASE("CPUState and SGPSymbiont always have the same location","[sgp]"){
+  using world_t = sgpmode::SGPWorld;
+  using cpu_state_t = sgpmode::CPUState<world_t>;
+  using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
+  using sgp_host_t = sgpmode::SGPHost<hw_spec_t>;
+  using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
+
+  emp::Random random(31);
+  sgpmode::SymConfigSGP config;
+  world_t world(random, &config);
+  auto& prog_builder = world.GetProgramBuilder();
+  emp::Ptr<sgp_sym_t> sym = emp::NewPtr<sgp_sym_t>(&random, &world, &config, prog_builder.CreateReproProgram(100));
+  
+  WHEN("Initialized"){
+    THEN("Symbiont and CPUState return the same location"){
+      REQUIRE(sym->GetHardware().GetCPUState().GetLocation().GetIndex() == sym->GetLocation().GetIndex());
+    }
+  }
+
+  WHEN("Symbiont has location set"){
+    sym->SetLocation(emp::WorldPosition(1, 2));
+    THEN("Symbiont and CPUState return the same location"){
+      REQUIRE(sym->GetHardware().GetCPUState().GetLocation().GetIndex() == sym->GetLocation().GetIndex());
+    }
+  }
+  WHEN("CPUState has location set"){
+    sym->GetHardware().GetCPUState().SetLocation(emp::WorldPosition(3, 4));
+    THEN("Symbiont and CPUState return the same location"){
+      REQUIRE(sym->GetHardware().GetCPUState().GetLocation().GetIndex() == sym->GetLocation().GetIndex());
+    }
+  }
+}
