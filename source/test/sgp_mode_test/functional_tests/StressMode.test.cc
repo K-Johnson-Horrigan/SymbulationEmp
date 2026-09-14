@@ -133,6 +133,7 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
   config.EVENTS_CFG_PATH("source/test/sgp_mode_test/no-events.json");
   config.TASK_PROFILE_COMPATIBILITY_MODE("task-any-match");
+  config.INTERACTION_COMPATIBILITY_MODE("task-match");
   config.TASK_PROFILE_MODE("self-all");
   config.CYCLES_PER_UPDATE(4);
   config.ENABLE_STRESS(1);

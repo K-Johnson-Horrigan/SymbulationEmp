@@ -298,6 +298,7 @@ TEST_CASE("SGPSymbiont Horizontal Transmission", "[sgp][sgp-functional]"){
   config.SYM_HORIZ_TRANS_RES(0);
   config.VERTICAL_TRANSMISSION(0);
   config.TASK_PROFILE_COMPATIBILITY_MODE("task-any-match");
+  config.INTERACTION_COMPATIBILITY_MODE("task-match");
   config.HORIZONTAL_TRANSMISSION_COMPATIBILITY_MODE("task-profile-compatible");
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
   config.EVENTS_CFG_PATH("source/test/sgp_mode_test/no-events.json");

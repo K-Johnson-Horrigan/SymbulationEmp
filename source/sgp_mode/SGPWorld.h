@@ -76,10 +76,22 @@ public:
     sgp_sym_t&
   )>;
 
+  // Determines whether two organisms are "compatible" with one another.
+  using fun_interaction_compatibility_t = std::function<bool(
+    sgp_host_t&,
+    sgp_sym_t&
+  )>;
+
   // Determines whether two task profiles are "compatible" with one another.
   using fun_task_profile_compatibility_t = std::function<bool(
-    const emp::BitVector&,
-    const emp::BitVector&
+    sgp_host_t&,
+    sgp_sym_t&
+  )>;
+
+  // Determines whether two tags are "compatible" with one another.
+  using fun_tag_compatibility_t = std::function<bool(
+    sgp_host_t&,
+    sgp_sym_t&
   )>;
 
   using fun_get_host_task_profile_t = std::function<const emp::BitVector&(const sgp_host_t&)>;
@@ -292,11 +304,19 @@ protected:
   // Contains config information (from outside sgp_config) to include in configuration snapshot
   emp::vector<ConfigSnapshotEntry> config_snapshot_entries;
 
-  // Function to check compatibility between host and symbiont
-  // - Used to check eligibility for vertical / horizontal transmission, etc.
+  // Function to check horizontal transmission compatibility between host and symbiont
   fun_horizontal_transmission_compatibility_check_t fun_horizontal_transmission_compatibility_check;
 
+  // Function to check interaction compatibility between host and symbiont
+  fun_interaction_compatibility_t fun_interaction_compatibility_check;
+
+  // Function to check determine task compatibility between host and symbiont
+  // - Defines what task profile are "close enough"
   fun_task_profile_compatibility_t fun_task_profile_compatibility_check;
+
+  // Function to check determine tag compatibility between host and symbiont
+  // - Defines what tags are "close enough"
+  fun_tag_compatibility_t fun_tag_compatibility_check;
 
   // Configurable function that accesses task profile to be used for hosts.
   // - E.g., do we want to use parent tasks, current tasks, etc.
@@ -399,6 +419,8 @@ protected:
   void OverrideSymRewardsNutrient();
   void SetupTaskProfileMode();
   void SetupTaskProfileCompatibilityMode();
+  void SetupTagCompatibilityMode();
+  void SetupInteractionCompatibilityMode();
   void SetupHorizontalTransmissionCompatibilityMode();
   void SetupFindHostForHorizontalTransmission();
   void SetupHostSymInteractions();
@@ -742,15 +764,13 @@ public:
   ) {
     return fun_get_host_task_profile(host);
   }
-
-  bool TaskProfileCompatibilityCheck(
-    const emp::BitVector& host_task_profile,
-    const emp::BitVector& sym_task_profile
+  
+  bool InteractionCompatibilityCheck(
+    sgp_host_t& host,
+    sgp_sym_t& sym
   ) {
-    return fun_task_profile_compatibility_check(host_task_profile, sym_task_profile);
+    return fun_interaction_compatibility_check(host, sym);
   }
-
-
 
   bool CheckVertTransCompatibility(
     sgp_sym_t& sym,
