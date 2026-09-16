@@ -24,6 +24,7 @@ TEST_CASE("Stress event", "[sgp]") {
   config.SYM_VERT_TRANS_RES(1000);
   config.SEED(61);
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+  config.EVENTS_CFG_PATH("source/test/sgp_mode_test/no-events.json");
   config.FILE_PATH("SGPStressMode_test_output");
   test_utils::SetWellMixed(config, 100, 100);
   config.TASK_IO_BANK_SIZE(10);
@@ -130,6 +131,7 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
   config.HOST_REPRO_RES(20);
   config.BASE_DEATH_CHANCE(0);
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+  config.EVENTS_CFG_PATH("source/test/sgp_mode_test/no-events.json");
   config.TASK_PROFILE_COMPATIBILITY_MODE("task-any-match");
   config.TASK_PROFILE_MODE("self-all");
   config.CYCLES_PER_UPDATE(4);
@@ -138,8 +140,8 @@ TEST_CASE("Stress hosts evolve", "[sgp][sgp-functional]") {
   emp::Random random(config.SEED());
   world_t world(random, &config);
 
-  size_t no_mut_NAND_rate = 40000;
-  size_t run_updates = 1500;
+  size_t no_mut_NAND_rate = 65000;
+  size_t run_updates = 2000;
 
   WHEN("Mutation size is 0") {
     config.SGP_MUT_PER_BIT_RATE(0);

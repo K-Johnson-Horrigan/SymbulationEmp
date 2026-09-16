@@ -30,7 +30,6 @@ TEST_CASE("Mutate", "[sgp]") {
   config.TASK_IO_BANK_SIZE(10);
   config.SGP_MUT_PER_BIT_RATE(1.0);
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
-
   world_t world(random, &config);
   world.Setup();
 
@@ -66,7 +65,6 @@ TEST_CASE("No Mutate", "[sgp]") {
   config.TASK_IO_BANK_SIZE(10);
   config.SGP_MUT_PER_BIT_RATE(0.0);
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
-
   world_t world(random, &config);
   world.Setup();
 
@@ -217,7 +215,7 @@ TEST_CASE("MakeNew returns identical host", "[sgp][sgp-unit]") {
   }
 }
 
-TEST_CASE("SetReproCount & GetReproCount","[sgp][sgp-unit]") {
+TEST_CASE("LineageLength & GetReproCount","[sgp][sgp-unit]") {
   using world_t = sgpmode::SGPWorld;
   using cpu_state_t = sgpmode::CPUState<world_t>;
   using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
@@ -240,7 +238,7 @@ TEST_CASE("SetReproCount & GetReproCount","[sgp][sgp-unit]") {
         REQUIRE(host->GetReproCount() == 0);
       }
       WHEN("The host's repro count is increased by 1") {
-        host->SetReproCount(1);
+        host->LineageLength(1);
         THEN("Repro count of the host is 1") {
           REQUIRE(host->GetReproCount() == 1);
         }
@@ -249,7 +247,7 @@ TEST_CASE("SetReproCount & GetReproCount","[sgp][sgp-unit]") {
   }
 }
 
-TEST_CASE("ProcessOutputBuffer", "[sgp][sgp-unit]") {
+TEST_CASE("ProcessOutputBuffer Host", "[sgp][sgp-unit]") {
   using world_t = sgpmode::SGPWorld;
   using cpu_state_t = sgpmode::CPUState<world_t>;
   using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
@@ -284,29 +282,64 @@ TEST_CASE("ProcessOutputBuffer", "[sgp][sgp-unit]") {
   }
 }
 
-
-TEST_CASE("Check that hosts and syms can't have negative points", "[sgp][sgp-unit]"){
+TEST_CASE("Check that hosts and syms can't have negative points", "[sgp][sgp-unit]") {
   using world_t = sgpmode::SGPWorld;
   using cpu_state_t = sgpmode::CPUState<world_t>;
   using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
   using sgp_host_t = sgpmode::SGPHost<hw_spec_t>;
   using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
-  GIVEN("A host and sym starting with zero points"){
-      emp::Random random(31);
-      sgpmode::SymConfigSGP config;
-      config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
-      world_t world(random, &config);
-      auto& prog_builder = world.GetProgramBuilder();
-      emp::Ptr<sgp_host_t> host = emp::NewPtr<sgp_host_t>(&random, &world, &config, prog_builder.CreateReproProgram(100));
-      emp::Ptr<sgp_sym_t> sym = emp::NewPtr<sgp_sym_t>(&random, &world, &config, prog_builder.CreateNotProgram(100));
 
-      WHEN("points are added to make total points negative"){
-        sym->AddPoints(-100);
-        host->AddPoints(-100);
-          THEN("point value should be set to zero"){
-              REQUIRE(host->GetPoints() == 0);
-              REQUIRE(sym->GetPoints() == 0);
+  GIVEN("A host and sym starting with zero points") {
+    emp::Random random(31);
+    sgpmode::SymConfigSGP config;
+    config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+    test_utils::SetWellMixed(config, 1, 0);
+    world_t world(random, &config);
+    world.Setup();
+
+    auto& prog_builder = world.GetProgramBuilder();
+    emp::Ptr<sgp_host_t> host = emp::NewPtr<sgp_host_t>(&random, &world, &config, prog_builder.CreateReproProgram(100));
+    emp::Ptr<sgp_sym_t> sym = emp::NewPtr<sgp_sym_t>(&random, &world, &config, prog_builder.CreateNotProgram(100));
+
+    WHEN("points are added to make total points negative") {
+      sym->AddPoints(-100);
+      host->AddPoints(-100);
+      THEN("point value should be set to zero") {
+        REQUIRE(host->GetPoints() == 0);
+        REQUIRE(sym->GetPoints() == 0);
       }
     }
+    host.Delete();
+    sym.Delete();
+  }
+}
+
+TEST_CASE("CPUState and SGPHost always have the same location","[sgp]"){
+  using world_t = sgpmode::SGPWorld;
+  using cpu_state_t = sgpmode::CPUState<world_t>;
+  using hw_spec_t = sgpmode::SGPHardwareSpec<sgpmode::Library, cpu_state_t, world_t>;
+  using sgp_host_t = sgpmode::SGPHost<hw_spec_t>;
+  using sgp_sym_t = sgpmode::SGPSymbiont<hw_spec_t>;
+
+  emp::Random random(31);
+  sgpmode::SymConfigSGP config;
+  world_t world(random, &config);
+  auto& prog_builder = world.GetProgramBuilder();
+  emp::Ptr<sgp_host_t> host = emp::NewPtr<sgp_host_t>(&random, &world, &config, prog_builder.CreateReproProgram(100));
+  
+  WHEN("Initialized"){
+    THEN("Host and CPUState return the same location"){
+      REQUIRE(host->GetHardware().GetCPUState().GetLocation().GetIndex() == host->GetLocation().GetIndex());
+    }
+  }
+  WHEN("Host has location set"){
+    host->SetLocation(emp::WorldPosition(1, 2));
+    THEN("Symbiont and CPUState return the same location"){
+      REQUIRE(host->GetHardware().GetCPUState().GetLocation().GetIndex() == host->GetLocation().GetIndex());
+    }
+  }
+  WHEN("CPUState has location set"){
+    host->GetHardware().GetCPUState().SetLocation(emp::WorldPosition(3, 4));
+    REQUIRE(host->GetHardware().GetCPUState().GetLocation().GetIndex() == host->GetLocation().GetIndex());
   }
 }

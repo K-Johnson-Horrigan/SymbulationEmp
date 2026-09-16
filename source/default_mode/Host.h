@@ -274,23 +274,23 @@ public:
 
 
   /**
-   * Input: Set the reproduction counter
+   * Input: Set the lineage length
    *
    * Output: None
    *
-   * Purpose: To set the count of reproductions in this lineage.
+   * Purpose: To set the number of reproductions along the length of this lineage.
    */
-  void SetReproCount(size_t _in) { reproductions = _in; }
+  void SetLineageLength(size_t _in) { reproductions = _in; }
 
 
   /**
    * Input: None.
    *
-   * Output: The reproduction count
+   * Output: The lineage length
    *
-   * Purpose: To get the count of reproductions in this lineage.
+   * Purpose: To get the number of reproductions along the length of this lineage.
    */
-  size_t GetReproCount() const { return reproductions; }
+  size_t GetLineageLength() const { return reproductions; }
 
 
   /**
@@ -475,7 +475,7 @@ public:
    *
    * Purpose: To set the organism's world position
    */
-  virtual void SetLocation(emp::WorldPosition _in) { location = _in; }
+  virtual void SetLocation(emp::WorldPosition _in) {location = _in;}
 
 
   /**
@@ -652,7 +652,7 @@ public:
    */
   emp::Ptr<Organism> RemoveSymbiont(int index) {
     int num_syms = syms.size();
-    if (index < 1 || index > num_syms) {
+    if(index < 1 || index > num_syms) {
       return nullptr;
     } else {
       emp::Ptr<Organism> to_remove = syms[index-1];
@@ -767,8 +767,8 @@ public:
     emp::Ptr<Organism> host_baby = MakeNew();
 
     host_baby->Mutate();
-    host_baby->SetReproCount(reproductions + 1);
-    SetPoints(0);
+    AddPoints(-1 * my_config->HOST_REPRO_RES());
+    host_baby->SetLineageLength(reproductions + 1);
 
     if (my_config->TAG_MATCHING() && HasSym()) {
       // do not xor to get 1 where bits are matching
@@ -784,6 +784,7 @@ public:
       host_baby->SetTowardsPartnerCount(child_towards.CountOnes() + towards_partner_count);
       host_baby->SetFromPartnerCount(child_from.CountOnes() + from_partner_count);
     }
+
 
     return host_baby;
   }
@@ -802,7 +803,7 @@ public:
     double mutation_rate = my_config->HOST_MUTATION_RATE();
     if (mutation_rate == -1) mutation_rate = my_config->MUTATION_RATE();
 
-    if (random->GetDouble(0.0, 1.0) <= mutation_rate) {
+    if(random->GetDouble(0.0, 1.0) <= mutation_rate){
       interaction_val += random->GetNormal(0.0, mutation_size);
       if (interaction_val < -1) interaction_val = -1;
       else if (interaction_val > 1) interaction_val = 1;

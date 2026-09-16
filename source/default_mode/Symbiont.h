@@ -218,23 +218,23 @@ public:
     }
 
   /**
-   * Input: Set the reproduction counter
+   * Input: Set the lineage length
    *
    * Output: None
    *
-   * Purpose: To set the count of reproductions in this lineage.
+   * Purpose: To set the number of reproductions along the length of this lineage.
    */
-  void SetReproCount(size_t _in) { reproductions = _in; }
+  void SetLineageLength(size_t _in) { reproductions = _in; }
 
 
   /**
    * Input: None.
    *
-   * Output: The reproduction count
+   * Output: The lineage length
    *
-   * Purpose: To get the count of reproductions in this lineage.
+   * Purpose: To get the number of reproductions along the length of this lineage.
    */
-  size_t GetReproCount() const { return reproductions; }
+  size_t GetLineageLength() const { return reproductions; }
 
   /**
    * Input: Set the flips towards a partner counter
@@ -451,7 +451,7 @@ public:
    *
    * Purpose: To set the organism's world position
    */
-  void SetLocation(emp::WorldPosition _in) { location = _in; }
+  void SetLocation(emp::WorldPosition _in) {location = _in;}
 
   /**
    * Input: None
@@ -625,11 +625,11 @@ public:
 
       if(int_val >= 0) {
 	      double spent = resources * int_val;
-        this->AddPoints(resources - spent);
+        AddPoints(resources - spent);
       }
       else {
         double attack = -1.0 * int_val * resources;
-        this->AddPoints(resources - attack);
+        AddPoints(resources - attack);
       }
     }
   }
@@ -781,6 +781,8 @@ public:
           my_world->AddSymToSystematic(sym_baby, my_taxon);
           //baby's taxon will be set in AddSymToSystematic
         }
+        emp::DataMonitor<size_t>& data_node_sym_repro_rate = my_world->GetSymReproCountDataNode();
+        data_node_sym_repro_rate.AddDatum(1);
       }
     }
     return success ? std::optional<emp::Ptr<Organism>>{sym_baby} : std::nullopt;
@@ -822,9 +824,13 @@ public:
         //points = points - my_config->SYM_HORIZ_TRANS_RES();
 
 
-        if(!my_config->TAG_MATCHING() && !my_config->FREE_HT_FAILURE()) SetPoints(0);
-        // removing the above for tag matching--sym parent points are
-        // now set to 0 in symdobirth
+        if(!my_config->TAG_MATCHING() && !my_config->FREE_HT_FAILURE()) {
+          if (my_config->FREE_LIVING_SYMS() && my_host == nullptr && my_config->FREE_SYM_REPRO_RES() > -1) {
+            this->AddPoints(-1 * my_config->FREE_SYM_REPRO_RES());
+          } else {
+            this->AddPoints(-1 * my_config->SYM_HORIZ_TRANS_RES());
+          }
+        }
         return true;
       }
     }
@@ -836,6 +842,9 @@ public:
     emp::DataMonitor<double, emp::data::Histogram>& data_node_successes_horiztrans = my_world->GetHorizontalTransmissionSuccessCount();
     if(sym_baby_pos.IsValid()) {
       data_node_successes_horiztrans.AddDatum(GetIntVal());
+      emp::DataMonitor<size_t>& data_node_sym_repro_rate = my_world->GetSymReproCountDataNode();
+      data_node_sym_repro_rate.AddDatum(1);
+
       
       if (my_config->PHYLOGENY()) {
         // add successful new symbiont to the systematic
@@ -874,8 +883,10 @@ public:
     if (AttemptIndependentReproduction(location)) {
       emp::Ptr<Organism> sym_baby = Reproduce();
       if (my_config->TAG_MATCHING() || my_config->FREE_HT_FAILURE()) sym_baby->SetPoints(0);
-      emp::WorldPosition new_pos = my_world->SymDoBirth(sym_baby, location);
+      emp::WorldPosition new_pos = my_world->SymDoBirth(sym_baby, this, location);
+
       AfterIndependentReproduction(new_pos);
+      
     }
   }
 };

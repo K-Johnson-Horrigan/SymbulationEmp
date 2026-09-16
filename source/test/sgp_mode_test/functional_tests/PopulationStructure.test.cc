@@ -38,6 +38,7 @@ TEST_CASE( "Spatial structure grid mode (sgp mode)", "[sgp][spatial-structure]" 
     config.WORLD_HEIGHT(height);
     config.TASK_IO_BANK_SIZE(1);
     config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+    config.EVENTS_CFG_PATH("source/test/sgp_mode_test/no-events.json");
     config.FREE_LIVING_SYMS(1);
     config.MOVE_FREE_SYMS(1);
     config.SYM_HORIZ_TRANS_RES(0);
@@ -277,6 +278,7 @@ TEST_CASE("Spatial structure loaded from files (sgp mode)", "[sgp][spatial-struc
   config.SYM_HORIZ_TRANS_RES(0);
   config.TASK_IO_BANK_SIZE(1);
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+  config.EVENTS_CFG_PATH("source/test/sgp_mode_test/no-events.json");
   size_t sym_limit = 10;
   config.SYM_LIMIT(sym_limit);
   config.INIT_POP_SIZE(0);
@@ -344,6 +346,7 @@ TEST_CASE("World uses custom spatial structure (sgp mode)", "[sgp][spatial-struc
   config.SYM_LIMIT(sym_limit);
   config.TASK_IO_BANK_SIZE(1);
   config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+  config.EVENTS_CFG_PATH("source/test/sgp_mode_test/no-events.json");
   config.SPATIAL_STRUCT_MODE("load");
   config.SPATIAL_STRUCT_LOAD_MODE("edges");
   config.SPATIAL_STRUCT_CFG_PATH("source/test/data/chain-edges.csv");
@@ -424,7 +427,7 @@ TEST_CASE("World uses custom spatial structure (sgp mode)", "[sgp][spatial-struc
         size_t neighbor_sym_count = 0;
         for (size_t sym_count = 0; sym_count < sym_limit; sym_count++) {
           emp::Ptr<Organism> sym_offspring = sym_parent->Reproduce();
-          world.SymDoBirth(sym_offspring, sym_parent->GetLocation());
+          world.SymDoBirth(sym_offspring, sym_parent, sym_parent->GetLocation());
           ++neighbor_sym_count;
           REQUIRE(neighboring_host->GetSymbionts().size() == neighbor_sym_count);
           REQUIRE(!distant_host->HasSym());
@@ -476,6 +479,7 @@ TEST_CASE("Organism in isolated position neither reproduces nor receives offspri
     config.START_MOI(0);
     config.TASK_IO_BANK_SIZE(1);
     config.TASK_ENV_CFG_PATH("source/test/sgp_mode_test/hardware-test-env.json");
+    config.EVENTS_CFG_PATH("source/test/sgp_mode_test/no-events.json");
     world_t world(random, &config);
     world.Setup();
 
