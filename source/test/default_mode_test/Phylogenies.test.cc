@@ -591,7 +591,7 @@ TEST_CASE("Individual-level phylogenies", "[default]") {
 
     emp::Ptr<Organism> symbiont_2 = symbiont_1->Reproduce(); 
     world.AddSymToSystematic(symbiont_2, symbiont_1->GetTaxon());
-    emp::WorldPosition symbiont_2_pos = world.SymDoBirth(symbiont_2, symbiont_1_pos); //might need to pass symbiont_1 as 2nd param
+    emp::WorldPosition symbiont_2_pos = world.SymDoBirth(symbiont_2, symbiont_1, symbiont_1_pos); 
 
     REQUIRE(world.GetNumOrgs() == 2);
     REQUIRE(symbiont_2_pos.GetPopID() != symbiont_1_pos.GetPopID());

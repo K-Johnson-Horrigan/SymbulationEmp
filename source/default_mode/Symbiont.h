@@ -696,7 +696,7 @@ public:
   emp::Ptr<Organism> Reproduce() {
     emp::Ptr<Organism> sym_baby = MakeNew();
     sym_baby->Mutate();
-    sym_baby->SetReproCount(reproductions + 1);
+    sym_baby->SetLineageLength(reproductions + 1);
 
     if (my_config->TAG_MATCHING() && my_host) {
       // do not xor to get 1 where bits are matching
