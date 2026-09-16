@@ -950,10 +950,6 @@ public:
    */
   void InjectSymbiont(emp::Ptr<Organism> new_sym) {
     size_t new_loc;
-    if (my_config->PHYLOGENY()) {
-      // NOTE: Is it intended to add to phylogeny even when inject fails?
-      AddSymToSystematic(new_sym);
-    }
     if (!my_config->FREE_LIVING_SYMS()) {
       new_loc = GetRandomOrgID();
       // If the position is acceptable, add the sym to the host in that position
@@ -963,9 +959,12 @@ public:
           if (my_config->TAG_MATCHING()) {
             new_sym->SetTag(pop[new_loc]->GetTag());
           }
-          if (my_config->PHYLOGENY() && my_config->TRACK_PHYLOGENY_INTERACTIONS()) {
-            datastruct::HostTaxonData* d = static_cast<datastruct::HostTaxonData*>(&pop[new_loc]->GetTaxon()->GetData());
-            d->AddInteraction(new_sym->GetTaxon());
+          if (my_config->PHYLOGENY()) {
+            AddSymToSystematic(new_sym);
+            if (my_config->TRACK_PHYLOGENY_INTERACTIONS()) {
+              datastruct::HostTaxonData* d = static_cast<datastruct::HostTaxonData*>(&pop[new_loc]->GetTaxon()->GetData());
+              d->AddInteraction(new_sym->GetTaxon());
+            }
           }
         }
       } else {
@@ -976,6 +975,9 @@ public:
       // if the position is within bounds, add the sym to it
       if (new_loc < sym_pop.size()) {
         AddOrgAt(new_sym, emp::WorldPosition(0, new_loc));
+        if (my_config->PHYLOGENY()) {
+          AddSymToSystematic(new_sym);
+        }
       } else {
         new_sym.Delete();
       }
