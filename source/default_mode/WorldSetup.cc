@@ -244,6 +244,12 @@ void SymWorld::SetupPhylogenyTracking() {
       [](const taxon_t::sym_taxon_t& t) { return std::to_string(t.GetData().GetHostSwitch()); },
       "lineage_host_switch_count"
     );
+    if (my_config->STORE_EXTINCT()) {
+      sym_sys->AddSnapshotFun(
+        [](const taxon_t::sym_taxon_t& t) { return std::to_string(t.GetData().GetPartnerID()); },
+        "partner_id"
+      );
+    }
   }
 
   // NOTE: Could move the if statement out of experiment runtime by adjusting the functor based on config
@@ -257,6 +263,7 @@ void SymWorld::SetupPhylogenyTracking() {
     }
   );
   */
+
   if (GetPhylogenyTaxonType() == PHYLO_TAXON_TYPE::INDIVIDUAL) {
     on_placement_sig.AddAction(
       [this](emp::WorldPosition pos) {
@@ -265,15 +272,7 @@ void SymWorld::SetupPhylogenyTracking() {
         org_ptr->GetTaxon()->GetData().RecordIntVal(GetOrgPtr(pos.GetIndex())->GetIntVal());
       }
     );
-  } else {
-    on_placement_sig.AddAction(
-      [this](emp::WorldPosition pos) {
-        GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<taxon_t::base_taxon_t>());
-      }
-    );
-  }
 
-  if (phylo_taxon_type == PHYLO_TAXON_TYPE::INDIVIDUAL) {
     std::function<void(emp::Ptr<taxon_t::sym_taxon_t >, Organism&)> inherit_parental_data =
       [&](emp::Ptr<taxon_t::sym_taxon_t > taxon, Organism& org) {
         if (taxon->GetParent()) {
@@ -284,6 +283,20 @@ void SymWorld::SetupPhylogenyTracking() {
         taxon->GetData().RecordIntVal(org.GetIntVal());
       };
     sym_sys->OnNew(inherit_parental_data);
+
+    if (my_config->STORE_EXTINCT()) {
+      std::function<void(emp::Ptr<taxon_t::sym_taxon_t >, Organism&)> track_partner_id =
+        [&](emp::Ptr<taxon_t::sym_taxon_t > taxon, Organism& org) {
+          taxon->GetData().SetPartnerID(org.GetHost()->GetTaxon()->GetID());
+        };
+      sym_sys->OnNew(track_partner_id);
+    }
+  } else {
+    on_placement_sig.AddAction(
+      [this](emp::WorldPosition pos) {
+        GetOrgPtr(pos.GetIndex())->SetTaxon(host_sys->GetTaxonAt(pos).Cast<taxon_t::base_taxon_t>());
+      }
+    );
   }
 
   if (my_config->STORE_EXTINCT()) {
