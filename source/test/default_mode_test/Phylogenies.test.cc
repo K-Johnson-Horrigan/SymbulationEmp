@@ -1019,14 +1019,14 @@ TEST_CASE("Unpruned phylogenies", "[default]") {
   REQUIRE(host_grandparent->HasSym());
 
   emp::Ptr<Organism> sym_parent = sym_grandparent->Reproduce();
-  world.AddSymToSystematic(sym_parent, sym_grandparent->GetTaxon());
   host_parent->AddSymbiont(sym_parent);
+  world.AddSymToSystematic(sym_parent, sym_grandparent->GetTaxon());
   REQUIRE(host_parent->HasSym());
   REQUIRE(host_parent->GetSymbionts().at(0) == sym_parent);
 
   emp::Ptr<Organism> sym = sym_parent->Reproduce();
-  world.AddSymToSystematic(sym, sym_parent->GetTaxon());
   host->AddSymbiont(sym);
+  world.AddSymToSystematic(sym, sym_parent->GetTaxon());
   REQUIRE(host->HasSym());
 
   // all organisms should be in their own taxon; all taxa should be active

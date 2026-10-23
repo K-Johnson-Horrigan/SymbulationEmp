@@ -33,7 +33,10 @@ namespace datastruct {
   };
 
   struct SymbiontTaxonData : TaxonDataBase {
+    // taxon ID of host partner; 0 if no host
     size_t partner_id;
+
+    // accumulated count of host switches accomplished by the lineage
     size_t lineage_host_switch_count;
 
     void DetermineHostSwitch(emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>> host, emp::Ptr<emp::Taxon<taxon_info_t, datastruct::TaxonDataBase>>  host_of_parent) {
