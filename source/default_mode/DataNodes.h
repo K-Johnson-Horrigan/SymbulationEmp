@@ -319,8 +319,10 @@ void SymWorld::SetupSpatialDataFile(const std::string& filename) {
  * the host systematic information
  */
 void SymWorld::WritePhylogenyFile(const std::string & filename) {
-  sym_sys->Snapshot("SymSnapshot_"+filename);
-  host_sys->Snapshot("HostSnapshot_"+filename);
+  std::filesystem::path output_dir = my_config->FILE_PATH();
+   
+  sym_sys->Snapshot((output_dir / ("SymSnapshot_"+filename)).string());
+  host_sys->Snapshot((output_dir / ("HostSnapshot_"+filename)).string());
 
   if (my_config->TRACK_PHYLOGENY_INTERACTIONS()) {
     emp::File interaction_file;
@@ -369,7 +371,7 @@ void SymWorld::WritePhylogenyFile(const std::string & filename) {
       }
     }
 
-    interaction_file.Write("InteractionSnapshot_" + filename);
+    interaction_file.Write((output_dir / ("InteractionSnapshot_"+filename)).string());
   }
   if (my_config->WRITE_CURRENT_INTERACTION_COUNTS()) {
     emp::File cur_interaction_file;
@@ -401,7 +403,7 @@ void SymWorld::WritePhylogenyFile(const std::string & filename) {
       }
     }
 
-    cur_interaction_file.Write("CurrentInteractionsSnapshot_" + filename);
+    cur_interaction_file.Write((output_dir / ("CurrentInteractionsSnapshot_"+filename)).string());
   }
 
 }
