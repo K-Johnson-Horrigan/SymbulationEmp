@@ -1,0 +1,9 @@
+{
+  "events": [
+    {
+      "event_type": "nonmatching_stress_event",
+      "target_host_count": 7,
+      "timing": "1:5:3"
+    }
+  ]
+}
