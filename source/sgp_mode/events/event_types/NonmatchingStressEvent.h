@@ -39,7 +39,7 @@ public:
     
     // Get event parameters out of json
 
-    // --- Set the task value ---
+    // --- Set the maximum number of hosts to allow ---
     event->target_host_count = sym_json::GetVal<size_t>(event_json, "target_host_count");
 
     // --- Set the timing ---
@@ -49,7 +49,7 @@ public:
   }
 
 protected:
-  // The maximum number of hosts we want to leave alive after this 
+  // The maximum number of hosts we want to leave alive after this event
   size_t target_host_count; 
 
 public:
