@@ -49,6 +49,7 @@
 
 #include "../test/sgp_mode_test/functional_tests/TaskValueEvent.test.cc"
 #include "../test/sgp_mode_test/functional_tests/HealthMode.test.cc"
+#include "../test/sgp_mode_test/functional_tests/NonmatchingStressEvent.test.cc"
 #include "../test/sgp_mode_test/functional_tests/SGPHost_SGPSymbiont_Tasks.test.cc"
 #include "../test/sgp_mode_test/functional_tests/SGPWorldData_SGPWorld.test.cc"
 #include "../test/sgp_mode_test/functional_tests/ProgramBuilder.test.cc"

@@ -2,6 +2,7 @@
 
 #include "event_types/Event.h"
 #include "event_types/TaskValueEvent.h"
+#include "event_types/NonmatchingStressEvent.h"
 #include "EventTypeDefinition.h"
 
 #include "emp/base/vector.hpp"
@@ -116,6 +117,7 @@ public:
    */
   void AddDefaultEventTypes() {
     AddEventType<TaskValueEvent>();
+    AddEventType<NonmatchingStressEvent>();
   }
 
   /**
